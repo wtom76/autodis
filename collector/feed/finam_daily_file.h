@@ -26,12 +26,12 @@ namespace collector::feed
 
 		struct row
 		{
-			int date_{0};
-			double open_{0.};
-			double high_{0.};
-			double low_{0.};
-			double close_{0.};
-			double vol_{0.};
+			int		date_{0};
+			double	open_{0.};
+			double	high_{0.};
+			double	low_{0.};
+			double	close_{0.};
+			double	vol_{0.};
 		};
 
 		bool				header_parsed_{false};

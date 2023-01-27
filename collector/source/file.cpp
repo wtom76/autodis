@@ -16,14 +16,15 @@ void collector::source::file::fetch(sink &dest)
 	std::vector<char> buffer(buf_size_);
 	dest.start();
 	std::ptrdiff_t size_buffered{0};
-	while (f_)
+	while (f_.good())
 	{
 		const std::ptrdiff_t size_available{static_cast<std::ptrdiff_t>(buffer.size()) - size_buffered};
 		if (size_available <= 0)
 		{
 			throw std::runtime_error{"can't parse buffer of size "s + std::to_string(buf_size_)};
 		}
-		const std::ptrdiff_t size_read{f_.readsome(buffer.data() + size_buffered, size_available)};
+		f_.read(buffer.data() + size_buffered, size_available);
+		const std::ptrdiff_t size_read{f_.gcount()};
 		if (size_read <= 0)
 		{
 			throw std::runtime_error{"parse stale"s};

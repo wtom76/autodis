@@ -19,6 +19,7 @@ message(STATUS)
 project(autodis VERSION 0.1.0)
 
 add_subdirectory(collector)
+add_subdirectory(keeper)
 
 add_executable(autodis
 	main.cpp
@@ -33,3 +34,9 @@ target_precompile_headers(autodis
 	PUBLIC
 		pch.h
 )
+
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(autodis PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(autodis PRIVATE nlohmann_json::nlohmann_json)

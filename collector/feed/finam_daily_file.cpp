@@ -124,6 +124,10 @@ size_t collector::feed::finam_daily_file::read(const std::span<char> chunk)
 
 	while (next_i != chunk.end())
 	{
+		while (next_i != chunk.end() && *next_i == '\n')
+		{
+			++next_i;
+		}
 		const auto line_e{std::find(next_i, chunk.end(), '\n')};
 		if (line_e == chunk.end())
 		{
@@ -131,6 +135,7 @@ size_t collector::feed::finam_daily_file::read(const std::span<char> chunk)
 		}
 		std::stringstream s{{next_i, line_e}, std::ios_base::in};
 		row_buffer_.emplace_back(_read_row(s));
+		next_i = line_e;
 	}
 	return std::distance(chunk.begin(), next_i);
 }
@@ -141,12 +146,12 @@ void collector::feed::finam_daily_file::finish(const std::span<char> chunk)
 	assert(header_parsed_);
 
 	auto next_i{chunk.begin()};
-	while (next_i != chunk.end())
+	if (next_i != chunk.end())
 	{
 		const auto line_e{chunk.end()};
 		if (line_e == chunk.end())
 		{
-			break;
+			return;
 		}
 		std::stringstream s{{next_i, line_e}, std::ios_base::in};
 		row_buffer_.emplace_back(_read_row(s));

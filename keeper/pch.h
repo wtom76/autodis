@@ -8,4 +8,7 @@
 #include <cstdlib>
 #include <filesystem>
 
+#include <pqxx/pqxx>
+#include <nlohmann/json.hpp>
+
 using namespace std::literals;

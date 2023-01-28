@@ -15,6 +15,6 @@ namespace collector::source
 	public:
 		file(const std::filesystem::path& path);
 
-		void fetch(sink& dest) override;
+		void fetch_to(sink& dest) override;
 	};
 }

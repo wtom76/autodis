@@ -9,7 +9,7 @@ keeper::metadata::metadata(const config& cfg)
 }
 
 //---------------------------------------------------------------------------------------------------------
-keeper::metadata::data_info keeper::metadata::load_data_info(long long id)
+keeper::metadata::data_info keeper::metadata::load_series_info(long long id)
 {
 	pqxx::work t{con_};
 	const pqxx::result r{t.exec_params(
@@ -32,4 +32,31 @@ keeper::metadata::data_info keeper::metadata::load_data_info(long long id)
 			rec[1].as<std::string>(),
 			rec[2].as<std::string>()
 		};
+}
+
+//---------------------------------------------------------------------------------------------------------
+std::vector<keeper::metadata::data_info> keeper::metadata::load_all_series_info()
+{
+	pqxx::work t{con_};
+	const pqxx::result r{t.exec_params(
+		"select dr.id, dr.table_name, dr.field_name, fr.uri feed_uri "
+		"from metadata.data_registry dr "
+		"inner join metadata.feed_registry fr on dr.feed_id = fr.id")
+	};
+	std::vector<keeper::metadata::data_info> result;
+	if (r.empty())
+	{
+		return result;
+	}
+	result.reserve(r.size());
+	for (const pqxx::row& rec : r)
+	{
+		result.emplace_back(
+			rec[0].as<long long>(),
+			rec[1].as<std::string>(),
+			rec[2].as<std::string>(),
+			rec[3].as<std::string>()
+		);
+	}
+	return result;
 }

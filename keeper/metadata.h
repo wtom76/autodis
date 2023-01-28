@@ -23,6 +23,7 @@ namespace keeper
 
 	public:
 		metadata(const config& cfg);
-		data_info load_data_info(long long id);
+		data_info load_series_info(long long id);
+		std::vector<data_info> load_all_series_info();
 	};
 }

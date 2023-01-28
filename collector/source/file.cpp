@@ -11,7 +11,7 @@ collector::source::file::file(const std::filesystem::path& path)
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::source::file::fetch(sink &dest)
+void collector::source::file::fetch_to(sink &dest)
 {
 	std::vector<char> buffer(buf_size_);
 	dest.start();

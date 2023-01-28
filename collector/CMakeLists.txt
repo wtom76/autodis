@@ -11,6 +11,7 @@ add_executable(collector
 target_include_directories(collector
 	PUBLIC
 		"./"
+		"../"
 )
 
 target_compile_features(collector
@@ -19,6 +20,8 @@ target_compile_features(collector
 )
 
 target_precompile_headers(collector PUBLIC pch.h)
+
+target_link_libraries(collector PRIVATE ${CMAKE_BINARY_DIR}/keeper/libkeeper.a)
 
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(collector PRIVATE libpqxx::pqxx)

@@ -1,0 +1,3 @@
+{
+	"db_connection": "postgresql://ml_role:ml_user@87.242.105.145:5432/ml"
+}

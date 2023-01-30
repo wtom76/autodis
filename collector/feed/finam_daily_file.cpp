@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "pch.h"
 #include "finam_daily_file.h"
 
 namespace collector::feed
@@ -13,8 +13,8 @@ namespace collector::feed
 		}
 	}
 }
-// <TICKER>;<PER>;<DATE>;<TIME>;<OPEN>;<HIGH>;<LOW>;<CLOSE>;<VOL>
 //---------------------------------------------------------------------------------------------------------
+// <TICKER>;<PER>;<DATE>;<TIME>;<OPEN>;<HIGH>;<LOW>;<CLOSE>;<VOL>
 std::span<char>::iterator collector::feed::finam_daily_file::_parse_header(const std::span<char> chunk)
 {
 	const auto line_e{std::find(chunk.begin(), chunk.end(), '\n')};

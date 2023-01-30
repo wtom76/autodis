@@ -19,8 +19,13 @@ target_compile_features(collector
         cxx_std_23
 )
 
-target_precompile_headers(collector PUBLIC pch.h)
+target_precompile_headers(collector
+	PUBLIC pch.h
+	PUBLIC feed/pch.h
+	PUBLIC source/pch.h
+)
 
+target_link_libraries(collector PRIVATE ${CMAKE_BINARY_DIR}/shared/libshared.a)
 target_link_libraries(collector PRIVATE ${CMAKE_BINARY_DIR}/keeper/libkeeper.a)
 
 find_package(libpqxx CONFIG REQUIRED)

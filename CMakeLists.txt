@@ -18,6 +18,7 @@ message(STATUS)
 
 project(autodis VERSION 0.1.0)
 
+add_subdirectory(shared)
 add_subdirectory(keeper)
 add_subdirectory(collector)
 

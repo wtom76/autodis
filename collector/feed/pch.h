@@ -13,6 +13,4 @@
 #include <cstring>
 #include <cassert>
 
-#include <iostream> // temp for test
-
 using namespace std::literals;

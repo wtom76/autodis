@@ -25,6 +25,3 @@ target_link_libraries(keeper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(keeper PRIVATE nlohmann_json::nlohmann_json)
-
-get_target_property(include_dir keeper INCLUDE_DIRECTORIES)
-message("INCLUDE_DIRECTORIES: ${include_dir}")

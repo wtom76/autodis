@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sink.h"
+#include "feed.h"
 
 namespace collector::source
 {
@@ -11,6 +11,6 @@ namespace collector::source
 	class base
 	{
 	public:
-		virtual void fetch_to(sink& dest) = 0;
+		virtual void fetch_to(feed& dest) = 0;
 	};
 }

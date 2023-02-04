@@ -7,14 +7,13 @@ collector::source::file::file(const std::filesystem::path& path)
 {
 	if (!f_)
 	{
-		throw std::runtime_error{"can't open "s + path.native()};
+		throw std::runtime_error{"can't open "s + path.native() + ". "s + std::strerror(errno)};
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::source::file::fetch_to(sink &dest)
+void collector::source::file::fetch_to(feed& dest)
 {
 	std::vector<char> buffer(buf_size_);
-	dest.start();
 	std::ptrdiff_t size_buffered{0};
 	while (f_.good())
 	{

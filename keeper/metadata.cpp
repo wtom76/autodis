@@ -13,9 +13,10 @@ keeper::metadata::data_info keeper::metadata::load_series_info(long long id)
 {
 	pqxx::work t{con_};
 	const pqxx::result r{t.exec_params(
-		"select dr.table_name, dr.field_name, fr.uri feed_uri "
+		"select dr.uri, fr.uri, sr.uri "
 		"from metadata.data_registry dr "
 		"inner join metadata.feed_registry fr on dr.feed_id = fr.id "
+		"inner join metadata.source_registry sr on dr.source_id = sr.id "
 		"where dr.id = $1",
 		id)
 	};
@@ -39,9 +40,10 @@ std::vector<keeper::metadata::data_info> keeper::metadata::load_all_series_info(
 {
 	pqxx::work t{con_};
 	const pqxx::result r{t.exec_params(
-		"select dr.id, dr.table_name, dr.field_name, fr.uri feed_uri "
+		"select dr.id, dr.uri, fr.uri, sr.uri "
 		"from metadata.data_registry dr "
-		"inner join metadata.feed_registry fr on dr.feed_id = fr.id")
+		"inner join metadata.feed_registry fr on dr.feed_id = fr.id "
+		"inner join metadata.source_registry sr on dr.source_id = sr.id")
 	};
 	std::vector<keeper::metadata::data_info> result;
 	if (r.empty())

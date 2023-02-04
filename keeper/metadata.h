@@ -13,9 +13,9 @@ namespace keeper
 		struct data_info
 		{
 			long long	id_{0};
-			std::string	table_name_;
-			std::string	field_name_;
+			std::string	data_uri_;
 			std::string	feed_uri_;
+			std::string	source_uri_;
 		};
 
 	private:

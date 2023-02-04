@@ -3,6 +3,7 @@
 #include <span>
 #include <vector>
 #include <string>
+#include <memory>
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
@@ -16,3 +17,5 @@
 #include <iostream> // temp for test
 
 using namespace std::literals;
+
+#include "../shared/shared.h"

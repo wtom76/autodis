@@ -1,6 +1,8 @@
 #pragma once
 
+#include <limits>
 #include <span>
+#include <array>
 #include <vector>
 #include <string>
 #include <stdexcept>

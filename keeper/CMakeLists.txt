@@ -5,6 +5,7 @@ project(keeper VERSION 0.1.0)
 add_library(keeper STATIC
 	config.cpp
 	metadata.cpp
+	data.cpp
 )
 
 target_include_directories(keeper PUBLIC

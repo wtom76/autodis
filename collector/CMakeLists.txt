@@ -4,7 +4,8 @@ project(collector VERSION 0.1.0)
 
 add_executable(collector
 	source/file.cpp
-	feed/finam_daily_file.cpp
+	feed/finam_daily_csv.cpp
+	factory.cpp
 	main.cpp
 )
 

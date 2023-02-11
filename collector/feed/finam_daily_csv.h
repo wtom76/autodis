@@ -12,8 +12,6 @@ namespace collector::feed
 		: public source::feed
 	{
 	private:
-		static constexpr char			separator_{';'};
-
 		static constexpr std::ptrdiff_t row_idx_null_{-1};
 		static constexpr std::ptrdiff_t row_idx_date_{std::numeric_limits<std::ptrdiff_t>::max()};
 		static constexpr std::ptrdiff_t row_idx_open_{0};
@@ -32,14 +30,17 @@ namespace collector::feed
 			std::array<double, 5>	ohlcv_{0.};	// open, high, low, clode, vol
 		};
 
-		bool				header_parsed_{false};
-		field_map_t			field_map_;
+		char			separator_{0};
+		bool			header_parsed_{false};
+		field_map_t		field_map_;
 
 		std::unique_ptr<keeper::data>	dest_;
-		std::ptrdiff_t		field_idx_to_store_{row_idx_null_}; // index in row::ohlvcv_ to store to dest
+		std::ptrdiff_t	field_idx_to_store_; // index in row::ohlvcv_ to store to dest
 
 	private:
-		std::span<char>::iterator _parse_header(const std::span<char> chunk);
+		static std::ptrdiff_t _field_index(std::string const& name) noexcept;
+		static char _determine_separator(auto header_begin, auto header_end) noexcept;
+		std::span<char>::iterator _parse_header(std::span<char> const chunk);
 		void _read_row(std::stringstream& s, row& dest);
 		void _send(row const& r);
 		

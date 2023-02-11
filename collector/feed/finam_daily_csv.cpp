@@ -4,7 +4,7 @@
 namespace collector::feed
 {
 	template <typename field>
-	void read_field(const std::string& str, field& dest)
+	void read_field(std::string const& str, field& dest)
 	{
 		const std::from_chars_result res{std::from_chars(str.data(), str.data() + str.size(), dest)};
 		if (res.ec != std::errc{})
@@ -14,32 +14,46 @@ namespace collector::feed
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-collector::feed::finam_daily_csv::finam_daily_csv(std::string const& field_name)
+std::ptrdiff_t collector::feed::finam_daily_csv::_field_index(std::string const& name) noexcept
 {
-	static const std::array<std::pair<std::string, std::ptrdiff_t>, 5> field_name_idx
+	static const std::array<std::string, 5> field_name_idx
 	{
-		std::make_pair("open"s, row_idx_open_),
-		std::make_pair("high"s, row_idx_high_),
-		std::make_pair("low"s, row_idx_low_),
-		std::make_pair("close"s, row_idx_close_),
-		std::make_pair("vol"s, row_idx_vol_)
+		"open"s,
+		"high"s,
+		"low"s,
+		"close"s,
+		"vol"s
 	};
+	std::ptrdiff_t idx{0};
 	for (auto const& fni : field_name_idx)
 	{
-		if (fni.first == field_name)
+		if (fni == name)
 		{
-			field_idx_to_store_ = fni.second;
-			break;
+			return idx;
 		}
+		++idx;
 	}
+	return row_idx_null_;
+}
+//---------------------------------------------------------------------------------------------------------
+collector::feed::finam_daily_csv::finam_daily_csv(std::string const& field_name)
+	: field_idx_to_store_{_field_index(field_name)}
+{
 	if (field_idx_to_store_ == row_idx_null_)
 	{
-		throw std::runtime_error("unknown field_name: \""s + field_name + '\"');
+		throw std::runtime_error("requested field is unknown: \""s + field_name + '\"');
 	}
 }
 //---------------------------------------------------------------------------------------------------------
+char collector::feed::finam_daily_csv::_determine_separator(auto header_begin, auto header_end) noexcept
+{
+	static const std::string sepr{";,"s};
+	const auto iter{std::find_first_of(header_begin, header_end, sepr.cbegin(), sepr.cend())};
+	return iter == header_end ? '\0' : *iter;
+}
+//---------------------------------------------------------------------------------------------------------
 // <TICKER>;<PER>;<DATE>;<TIME>;<OPEN>;<HIGH>;<LOW>;<CLOSE>;<VOL>
-std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(const std::span<char> chunk)
+std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(std::span<char> const chunk)
 {
 	const auto line_e{std::find(chunk.begin(), chunk.end(), '\n')};
 	if (line_e == chunk.end())
@@ -51,6 +65,12 @@ std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(const 
 	{
 		--header_e;
 	}
+	if (!(separator_ = _determine_separator(chunk.begin(), header_e)))
+	{
+		throw std::runtime_error("failed to determine field separator"s);
+	}
+
+	bool requested_field_found{false};
 	std::stringstream s{{chunk.begin(), header_e}, std::ios_base::in};
 	std::string field;
 	while (std::getline(s, field, separator_))
@@ -83,6 +103,14 @@ std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(const 
 		{
 			field_map_.emplace_back(row_idx_null_);
 		}
+		if (field_map_.back() == field_idx_to_store_)
+		{
+			requested_field_found = true;
+		}
+	}
+	if (!requested_field_found)
+	{
+		throw std::runtime_error("requested field is not found in file"s);
 	}
 	return line_e;
 }

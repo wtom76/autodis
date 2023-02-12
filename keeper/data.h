@@ -21,7 +21,7 @@ namespace keeper
 		void _commit_buf();
 
 	public:
-		data(const config &cfg, data_uri const& dest_uri);
+		data(config const& cfg, data_uri const& dest_uri);
 
 		void add(std::pair<long long, double> idx_val);
 		void finish();

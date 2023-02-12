@@ -15,7 +15,7 @@ int test()
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::metadata metadata{keeper_cfg};
-	const auto series_info{metadata.load_all_series_info()};
+	const auto series_info{metadata.load()};
 	for (auto const& info : series_info)
 	{
 		auto feed{collector::factory::feed(info.feed_uri_)};

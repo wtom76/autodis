@@ -3,7 +3,7 @@
 #include "config.h"
 
 //---------------------------------------------------------------------------------------------------------
-keeper::data::data(const config& cfg, data_uri const& dest_uri)
+keeper::data::data(config const& cfg, data_uri const& dest_uri)
 	: con_{cfg.db_connection_}
 {
 	con_.prepare("store"s,

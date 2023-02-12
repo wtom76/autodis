@@ -10,7 +10,7 @@ namespace keeper
 	class metadata
 	{
 	public:
-		struct data_info
+		struct series_info
 		{
 			long long	id_{0};
 			std::string	data_uri_;
@@ -23,7 +23,6 @@ namespace keeper
 
 	public:
 		metadata(const config& cfg);
-		data_info load_series_info(long long id);
-		std::vector<data_info> load_all_series_info();
+		std::vector<series_info> load();
 	};
 }

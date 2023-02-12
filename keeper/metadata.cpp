@@ -7,36 +7,8 @@ keeper::metadata::metadata(const config& cfg)
 	: con_{cfg.db_connection_}
 {
 }
-
 //---------------------------------------------------------------------------------------------------------
-keeper::metadata::data_info keeper::metadata::load_series_info(long long id)
-{
-	pqxx::work t{con_};
-	const pqxx::result r{t.exec_params(
-		"select dr.uri, fr.uri, sr.uri "
-		"from metadata.data_registry dr "
-		"inner join metadata.feed_registry fr on dr.feed_id = fr.id "
-		"inner join metadata.source_registry sr on dr.source_id = sr.id "
-		"where dr.id = $1",
-		id)
-	};
-
-	if (r.empty())
-	{
-		return {};
-	}
-	const pqxx::row& rec{r[0]};
-	return
-		{
-			id,
-			rec[0].as<std::string>(),
-			rec[1].as<std::string>(),
-			rec[2].as<std::string>()
-		};
-}
-
-//---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::data_info> keeper::metadata::load_all_series_info()
+std::vector<keeper::metadata::series_info> keeper::metadata::load()
 {
 	pqxx::work t{con_};
 	const pqxx::result r{t.exec_params(
@@ -45,7 +17,7 @@ std::vector<keeper::metadata::data_info> keeper::metadata::load_all_series_info(
 		"inner join metadata.feed_registry fr on dr.feed_id = fr.id "
 		"inner join metadata.source_registry sr on dr.source_id = sr.id")
 	};
-	std::vector<keeper::metadata::data_info> result;
+	std::vector<keeper::metadata::series_info> result;
 	if (r.empty())
 	{
 		return result;

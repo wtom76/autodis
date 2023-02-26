@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shared/shared.hpp>
+
 namespace collector
 {
 	class source_uri

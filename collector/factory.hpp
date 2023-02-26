@@ -1,6 +1,6 @@
 #pragma once
-#include "source/feed.h"
-#include "source/base.h"
+#include "source/feed.hpp"
+#include "source/base.hpp"
 #include "feed_uri.hpp"
 #include "source_uri.hpp"
 

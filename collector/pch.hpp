@@ -18,4 +18,4 @@
 
 using namespace std::literals;
 
-#include "../shared/shared.h"
+#include <shared/shared.hpp>

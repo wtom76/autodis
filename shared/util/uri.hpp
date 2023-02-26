@@ -1,5 +1,9 @@
 #pragma once
 
+#include <initializer_list>
+#include <string>
+#include <vector>
+
 namespace shared::util
 {
 	//---------------------------------------------------------------------------------------------------------

@@ -1,5 +1,12 @@
-#include "pch.h"
-#include "file.h"
+#include "pch.hpp"
+
+#include <cstddef>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "file.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 collector::source::file::file(const std::filesystem::path& path)

@@ -1,7 +1,14 @@
 #pragma once
 
-#include <keeper/keeper.h>
-#include "../source/base.h"
+#include <array>
+#include <cstddef>
+#include <memory>
+#include <vector>
+#include <span>
+#include <sstream>
+
+#include <keeper/keeper.hpp>
+#include <collector/source/base.hpp>
 
 namespace collector::feed
 {

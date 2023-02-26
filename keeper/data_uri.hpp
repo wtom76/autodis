@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shared/util/uri.hpp>
+
 namespace keeper
 {
 	class data_uri

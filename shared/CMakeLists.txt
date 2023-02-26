@@ -2,19 +2,25 @@ cmake_minimum_required(VERSION 3.22.0)
 
 project(shared VERSION 0.1.0)
 
+add_subdirectory(util)
+
 add_library(shared STATIC
-	util/uri.cpp
+	shared.cpp
 )
 
-target_include_directories(shared PUBLIC
+target_link_libraries(shared PRIVATE util)
+
+target_include_directories(shared PRIVATE
 	"./"
+	${CMAKE_SOURCE_DIR}
 )
 
-target_compile_features(shared PUBLIC
+target_compile_features(shared PRIVATE
 	cxx_std_23
 )
 
 target_precompile_headers(shared
-	PUBLIC pch.h
-	PUBLIC util/pch.h
+	PRIVATE pch.hpp
+	PRIVATE util/pch.hpp
+	PRIVATE data/pch.hpp
 )

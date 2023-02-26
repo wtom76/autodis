@@ -1,7 +1,7 @@
-#include "pch.h"
-#include "factory.h"
-#include "feed/finam_daily_csv.h"
-#include "source/file.h"
+#include "pch.hpp"
+#include "factory.hpp"
+#include "feed/finam_daily_csv.hpp"
+#include "source/file.hpp"
 
 //----------------------------------------------------------------------------------------------------------
 std::unique_ptr<collector::source::base> collector::factory::_create_file(std::string file_name)

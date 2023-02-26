@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "finam_daily_csv.h"
+#include "pch.hpp"
+#include "finam_daily_csv.hpp"
 
 namespace collector::feed
 {

@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "uri.h"
+#include "pch.hpp"
+#include "uri.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 void shared::util::uri::_parse(std::string src, std::vector<std::string>& dest)

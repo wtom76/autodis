@@ -1,6 +1,6 @@
 #pragma once
 
-#include "feed.h"
+#include "feed.hpp"
 
 namespace collector::source
 {

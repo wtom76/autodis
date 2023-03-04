@@ -28,15 +28,18 @@ add_executable(autodis
 	main.cpp
 )
 
-target_compile_features(autodis
-    PUBLIC
-        cxx_std_23
-)
+target_compile_features(autodis PRIVATE cxx_std_23)
 
-target_precompile_headers(autodis
-	PUBLIC
-		pch.h
-)
+if(MSVC)
+	target_compile_options(autodis PRIVATE /W4 /WX)
+else()
+	target_compile_options(autodis PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
+target_precompile_headers(autodis PUBLIC pch.h)
+
+target_link_libraries(autodis PRIVATE shared)
+target_link_libraries(autodis PRIVATE keeper)
 
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(autodis PRIVATE spdlog::spdlog spdlog::spdlog_header_only)

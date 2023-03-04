@@ -117,7 +117,7 @@ std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(std::s
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::finam_daily_csv::_read_row(std::stringstream& s, row& dest)
 {
-	std::ptrdiff_t idx{0};
+	std::size_t idx{0};
 	std::string field;
 	while (std::getline(s, field, separator_) && idx < field_map_.size())
 	{
@@ -141,7 +141,7 @@ void collector::feed::finam_daily_csv::_send(row const& r)
 	dest_->add(std::make_pair(r.date_, r.ohlcv_[field_idx_to_store_]));
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::finam_daily_csv::start(std::unique_ptr<keeper::data> dest)
+void collector::feed::finam_daily_csv::start(std::unique_ptr<keeper::data_write> dest)
 {
 	dest_ = std::move(dest);
 }

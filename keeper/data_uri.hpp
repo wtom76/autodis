@@ -1,6 +1,5 @@
 #pragma once
-
-#include <shared/util/uri.hpp>
+#include "common.hpp"
 
 namespace keeper
 {

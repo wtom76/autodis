@@ -41,7 +41,7 @@ namespace collector::feed
 		bool			header_parsed_{false};
 		field_map_t		field_map_;
 
-		std::unique_ptr<keeper::data>	dest_;
+		std::unique_ptr<keeper::data_write>	dest_;
 		std::ptrdiff_t	field_idx_to_store_; // index in row::ohlvcv_ to store to dest
 
 	private:
@@ -56,7 +56,7 @@ namespace collector::feed
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------
-		void start(std::unique_ptr<keeper::data> dest) override;
+		void start(std::unique_ptr<keeper::data_write> dest) override;
 		size_t read(const std::span<char> chunk) override;
 		void finish(const std::span<char> chunk) override;
 		//---------------------------------------------------------------------------------------------------------

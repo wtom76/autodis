@@ -12,10 +12,13 @@ target_include_directories(collector PRIVATE
 	${CMAKE_SOURCE_DIR}
 )
 
-target_compile_features(collector
-	PRIVATE
-        cxx_std_23
-)
+target_compile_features(collector PRIVATE cxx_std_23)
+
+if(MSVC)
+	target_compile_options(collector PRIVATE /W4 /WX)
+else()
+	target_compile_options(collector PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
 target_precompile_headers(collector
 	PRIVATE pch.hpp

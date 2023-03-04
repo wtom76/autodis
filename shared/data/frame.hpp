@@ -5,6 +5,7 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <cassert>
 
 using std::size_t;
 using std::ptrdiff_t;
@@ -34,7 +35,7 @@ namespace shared::data
 
 	// methods
 	public:
-		size_t row_count() const noexcept { return index_.size();  }
+		size_t row_count() const noexcept { return index_.size(); }
 		size_t col_count() const noexcept { return data_.size(); }
 
 		index_t& index() noexcept { return index_; }
@@ -46,18 +47,22 @@ namespace shared::data
 		series_t& series(name_t const& name);
 		const series_t& series(name_t const& name) const;
 
-		series_t& series(ptrdiff_t idx);
-		const series_t& series(ptrdiff_t idx) const;
+		series_t& series(std::size_t idx);
+		const series_t& series(std::size_t idx) const;
 
 		const names_t& names() const noexcept { return series_names_; }
 
+		void clear();
+		void reserve(std::size_t size);
 		void reset(index_t&& index_series, const names_t& series_names, value_t initial_value);
 		
-		series_t* create_series(name_t const& name, value_t initial_value);
+		series_t* create_series(name_t const& name, value_t initial_value = {});
 
-		/// appends other to this if indexes are equal, throws runtime_error otherwise
+		/// appends series from other if indexes are equal, throws runtime_error otherwise
 		template <class other_frame>
-		void append_equal(other_frame&& other);
+		void append_series(other_frame&& other);
+
+		void append_row();
 	};
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
@@ -76,14 +81,30 @@ namespace shared::data
 		return const_cast<frame*>(this)->series(name);
 	}
 	//-----------------------------------------------------------------------------------------------------
-	inline typename frame::series_t& frame::series(ptrdiff_t idx)
+	inline typename frame::series_t& frame::series(std::size_t idx)
 	{
 		return data_[idx];
 	}
 	//-----------------------------------------------------------------------------------------------------
-	inline const typename frame::series_t& frame::series(ptrdiff_t idx) const
+	inline const typename frame::series_t& frame::series(std::size_t idx) const
 	{
 		return const_cast<frame*>(this)->series(idx);
+	}
+	//-----------------------------------------------------------------------------------------------------
+	inline void frame::clear()
+	{
+		index_.clear();
+		data_.clear();
+		series_names_.clear();
+	}
+	//-----------------------------------------------------------------------------------------------------
+	inline void frame::reserve(std::size_t size)
+	{
+		index_.reserve(size);
+		for (series_t& col : data_)
+		{
+			col.reserve(size);
+		}
 	}
 	//-----------------------------------------------------------------------------------------------------
 	inline void frame::reset(index_t&& index_series, const names_t& series_names, value_t initial_value)
@@ -111,7 +132,7 @@ namespace shared::data
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class other_frame>
-	inline void frame::append_equal(other_frame&& other)
+	inline void frame::append_series(other_frame&& other)
 	{
 		if (!std::equal(index_.cbegin(), index_.cend(),
 			other.index_.cbegin(), other.index_.cend()))

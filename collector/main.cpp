@@ -20,13 +20,13 @@ int test()
 	{
 		auto feed{collector::factory::feed(info.feed_uri_)};
 		auto src{collector::factory::source(info.source_uri_)};
-		feed->start(std::make_unique<keeper::data>(keeper_cfg, info.data_uri_));
+		feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.data_uri_));
 		src->fetch_to(*feed);
 	}
 	return 0;
 }
 
-int main(int argc, char* argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try
 	{

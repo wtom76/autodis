@@ -13,9 +13,13 @@ target_compile_features(source PRIVATE
 	cxx_std_23
 )
 
-target_precompile_headers(source
-	PRIVATE pch.hpp
-)
+if(MSVC)
+	target_compile_options(source PRIVATE /W4 /WX)
+else()
+	target_compile_options(source PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
+target_precompile_headers(source PRIVATE pch.hpp)
 
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(source PRIVATE libpqxx::pqxx)

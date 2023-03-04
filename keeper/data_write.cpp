@@ -1,9 +1,9 @@
 #include "pch.hpp"
-#include "data.hpp"
+#include "data_write.hpp"
 #include "config.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-keeper::data::data(config const& cfg, data_uri const& dest_uri)
+keeper::data_write::data_write(config const& cfg, data_uri const& dest_uri)
 	: con_{cfg.db_connection_}
 {
 	con_.prepare("store"s,
@@ -11,7 +11,7 @@ keeper::data::data(config const& cfg, data_uri const& dest_uri)
 		"\") values ($1, $2) on conflict (idx) do update set \""s + dest_uri.field_name() + "\" = excluded.\""s + dest_uri.field_name() + '\"');
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::data::add(std::pair<long long, double> idx_val)
+void keeper::data_write::add(std::pair<long long, double> idx_val)
 {
 	constexpr std::size_t batch_size{1024};
 
@@ -23,7 +23,7 @@ void keeper::data::add(std::pair<long long, double> idx_val)
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::data::finish()
+void keeper::data_write::finish()
 {
 	if (data_.size() > 0)
 	{
@@ -31,7 +31,7 @@ void keeper::data::finish()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::data::_commit_buf()
+void keeper::data_write::_commit_buf()
 {
 	pqxx::work t{con_};
 	for (auto pr : data_)

@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.22.0)
 add_library(keeper STATIC
 	config.cpp
 	metadata.cpp
-	data.cpp
+	data_write.cpp
+	data_read.cpp
 )
 
 target_include_directories(keeper PRIVATE
@@ -11,9 +12,13 @@ target_include_directories(keeper PRIVATE
 	${CMAKE_SOURCE_DIR}
 )
 
-target_compile_features(keeper PRIVATE
-	cxx_std_23
-)
+target_compile_features(keeper PRIVATE cxx_std_23)
+
+if(MSVC)
+	target_compile_options(keeper PRIVATE /W4 /WX)
+else()
+	target_compile_options(keeper PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
 target_precompile_headers(keeper PRIVATE pch.hpp)
 

@@ -57,13 +57,15 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 		dest.reserve(r.size());
 	}
 	
+	static_assert(std::numeric_limits<double>::has_signaling_NaN);
+
 	std::size_t row_idx{0};
 	for (pqxx::row const& rec : r)
 	{
 		rec[0].to(dest.index()[row_idx]);
 		for (std::size_t field_idx{0}; field_idx != dest.col_count(); ++field_idx)
 		{
-			rec[field_idx + 1].to(dest.series(field_idx)[row_idx]);
+			rec[field_idx + 1].to(dest.series(field_idx)[row_idx], shared::data::nan);
 		}
 		++row_idx;
 	}

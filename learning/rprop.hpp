@@ -1,21 +1,8 @@
 #pragma once
 
-#include <random>
 #include <shared/shared.hpp>
 #include "common.hpp"
 #include "progress_view.hpp"
-
-//-----------------------------------------------------------------------------------------------------
-/// ProgessView should provide
-///  bool stop_requested() const noexcept { return stop_flag_; }
-///  void begin_teach();
-///  void set_best(double cur_min_err);
-///  void set_last(double err);
-///  void end_teach();
-///  void begin_test();
-///  void add_sample_result(double omega, double target_i);
-///  void end_test(double true_count, double false_count);
-///  void begin_teach();
 
 namespace learning
 {
@@ -40,11 +27,11 @@ namespace learning
 		struct sample_filler
 		{
 			const data_view_t& view_;
-			std::vector<const data_frame_t::series_t*> inputs_;
-			std::vector<const data_frame_t::series_t*> targets_;
+			std::vector<data_frame_t::series_t const*> inputs_;
+			std::vector<data_frame_t::series_t const*> targets_;
 
-			explicit sample_filler(const std::pair<data_frame_t, data_view_t>& dfv,
-				const std::vector<std::string>& in_names, const std::vector<std::string>& target_names);
+			explicit sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+				std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
 			void fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const;
 		};
 
@@ -66,7 +53,7 @@ namespace learning
 
 		std::random_device					rd_;
 		std::mt19937						rand_;
-		std::pair<data_frame_t, data_view_t>		src_data_;
+		std::pair<data_frame_t, data_view_t>src_data_;
 		std::vector<std::ptrdiff_t>			teaching_set_;
 		std::vector<std::ptrdiff_t>			test_set_;
 		sample_filler						sample_filler_;
@@ -74,11 +61,11 @@ namespace learning
 
 	// methods
 	private:
-		void _init(const typename net::config& cfg);
-		void _updateGradients(net& network, const std::vector<double>& targets);
+		void _init(typename net::config_t const& cfg);
+		void _updateGradients(net& network, std::vector<double> const& targets);
 		void _updateWeights(net& network);
 		void _updateBiases(net& network);
-		void _splitData();
+		void _split_data();
 		double _meanSqrError(net& network);
 	public:
 		rprop(std::pair<data_frame_t, data_view_t>&& src_data,
@@ -90,15 +77,15 @@ namespace learning
 			, sample_targets_(target_names.size(), 0.)
 		{}
 
-		double teach(const typename net::config& cfg, net& network, double min_err, progress_view& progress_view);
-		void show_test(net& network, progress_view& progress_view);
+		double teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token);
+		void show_test(net& network, progress_view& pview, std::stop_token stop_token);
 	};
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	rprop<net>::sample_filler::sample_filler(const std::pair<data_frame_t, data_view_t>& dfv,
-		const std::vector<std::string>& in_names,
-		const std::vector<std::string>& target_names)
+	rprop<net>::sample_filler::sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+		std::vector<std::string> const& in_names,
+		std::vector<std::string> const& target_names)
 		: view_{dfv.second}
 		, inputs_(in_names.size(), nullptr)
 		, targets_(target_names.size(), nullptr)
@@ -129,7 +116,7 @@ namespace learning
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	void rprop<net>::_init(const typename net::config& cfg)
+	void rprop<net>::_init(typename net::config_t const& cfg)
 	{
 		grad_terms_			= std::make_unique<grad_terms_t>(cfg, 0.);
 		dEdw_off_			= std::make_unique<weight_grads_t>(*grad_terms_, 0.);
@@ -145,18 +132,18 @@ namespace learning
 	// 3. calc bias gradients for omega layer and hidden layers
 	// 4. calc weight gradients for omega layer and hidden layers
 	template <class net>
-	void rprop<net>::_updateGradients(net& network, const std::vector<double>& targets)
+	void rprop<net>::_updateGradients(net& network, std::vector<double> const& targets)
 	{
-		const size_t layer_count = network.outputs().size();
+		const size_t layer_count{network.output_layers().size()};
 		assert(layer_count >= 3); // input, n * hidden, omega
 
 		std::int64_t layer_idx{layer_count - 1};
 		// 1.
 		{
-			auto& grad_terms = grad_terms_->layers_.back();
-			auto& outputs = network.outputs().back();
-			auto& functions = network.functions().back();
-			for (size_t node_idx = 0; node_idx < grad_terms.size(); ++node_idx)
+			auto& grad_terms{grad_terms_->layers_.back()};
+			auto& outputs{network.output_layers().back()};
+			auto& functions{network.functions().back()};
+			for (size_t node_idx{0}; node_idx < grad_terms.size(); ++node_idx)
 			{
 				grad_terms[node_idx] =
 					functions[node_idx]->derivative(outputs[node_idx]) * (outputs[node_idx] - targets[node_idx]);
@@ -167,8 +154,8 @@ namespace learning
 		{
 			auto& grad_terms = grad_terms_->layers_[layer_idx];
 			auto& prev_grad_terms = grad_terms_->layers_[layer_idx + 1];
-			auto& weights = network.weights()[layer_idx];
-			auto& outputs = network.outputs()[layer_idx];
+			auto& weights = network.weight_layers()[layer_idx];
+			auto& outputs = network.output_layers()[layer_idx];
 			auto& functions = network.functions()[layer_idx - 1];
 			for (size_t src_node_idx = 0; src_node_idx < grad_terms.size(); ++src_node_idx)
 			{
@@ -195,7 +182,7 @@ namespace learning
 		for (layer_idx = layer_count - 2; layer_idx >= 0; --layer_idx)
 		{
 			auto& dEdw_off = dEdw_off_->layers_[layer_idx];
-			auto& outputs = network.outputs()[layer_idx];
+			auto& outputs = network.output_layers()[layer_idx];
 			auto& grad_terms = grad_terms_->layers_[layer_idx + 1];
 			for (size_t src_node_idx = 0; src_node_idx < dEdw_off.size(); ++src_node_idx)
 			{
@@ -212,12 +199,12 @@ namespace learning
 	template <class net>
 	void rprop<net>::_updateWeights(net& network)
 	{
-		const size_t layer_count = network.outputs().size();
+		const size_t layer_count = network.output_layers().size();
 		assert(layer_count >= 3); // input, n * hidden, omega
 
 		for (size_t layer_idx = 0; layer_idx < layer_count - 1; ++layer_idx)
 		{
-			auto& weights = network.weights()[layer_idx];
+			auto& weights = network.weight_layers()[layer_idx];
 			auto& prev_weight_deltas = prev_weight_deltas_->layers_[layer_idx];
 			auto& dEdw_off = dEdw_off_->layers_[layer_idx];
 			auto& prev_dEdw_off = prev_dEdw_off_->layers_[layer_idx];
@@ -257,12 +244,12 @@ namespace learning
 	template <class net>
 	void rprop<net>::_updateBiases(net& network)
 	{
-		const size_t layer_count = network.outputs().size();
+		const size_t layer_count = network.output_layers().size();
 		assert(layer_count >= 3); // input, n * hidden, omega
 
 		for (size_t layer_idx = 1; layer_idx < layer_count; ++layer_idx)
 		{
-			auto& biases = network.biases()[layer_idx];
+			auto& biases = network.bias_layers()[layer_idx];
 			auto& prev_bias_deltas = prev_bias_deltas_->layers_[layer_idx];
 			auto& bias_dEdw_off = bias_dEdw_off_->layers_[layer_idx];
 			auto& prev_bias_dEdw_off = prev_bias_dEdw_off_->layers_[layer_idx];
@@ -297,15 +284,15 @@ namespace learning
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	void rprop<net>::_splitData()
+	void rprop<net>::_split_data()
 	{
-		constexpr double train_frac = 0.8;
+		constexpr double train_fraction{0.8};
 
 		teaching_set_.clear();
 		test_set_.clear();
 
-		const size_t src_row_count = src_data_.second.row_count();
-		const size_t teaching_size = src_row_count * train_frac;
+		const size_t src_row_count{src_data_.second.row_count()};
+		const size_t teaching_size{src_row_count * train_fraction};
 		if (!teaching_size || teaching_size > src_row_count)
 		{
 			return;
@@ -316,7 +303,7 @@ namespace learning
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<size_t> distribution(0, src_row_count - 1);
 
-		for (size_t i = 0; i < src_row_count; ++i)
+		for (size_t i{0}; i < src_row_count /* && teaching_set_.size() < teaching_size*/; ++i)
 		{
 			if (distribution(gen) < teaching_size)
 			{
@@ -327,6 +314,7 @@ namespace learning
 				test_set_.push_back(i);
 			}
 		}
+		assert(teaching_set_.size() == teaching_size);
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
@@ -340,10 +328,10 @@ namespace learning
 		double sqr_err_sum = 0.;
 		for (const size_t row : test_set_)
 		{
-			sample_filler_.fill(row, network.inputLayer(), sample_targets_);
+			sample_filler_.fill(row, network.input_layer(), sample_targets_);
 			network.forward();
 			auto target_i = cbegin(sample_targets_);
-			for (auto omega : network.omegaLayer())
+			for (auto omega : network.omega_layer())
 			{
 				const double err = (omega - *target_i);
 				sqr_err_sum += err * err;
@@ -355,12 +343,11 @@ namespace learning
 	//-----------------------------------------------------------------------------------------------------
 	/// \returns best error
 	template <class net>
-	double rprop<net>::teach(const typename net::config& cfg, net& network, double min_err, progress_view& progress)
+	double rprop<net>::teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token)
 	{
 		constexpr std::int64_t epochs_max{10000};
 
-		std::stop_token stop_token{progress.stop_token()};
-		progress.begin_teach();
+		pview.begin_teach();
 
 		net best_network{network};
 
@@ -373,7 +360,7 @@ namespace learning
 
 		while (epochs_left-- && err > min_err && !stop_token.stop_requested())
 		{
-			_splitData();
+			_split_data();
 
 			dEdw_off_->reset(0.);
 			bias_dEdw_off_->reset(0.);
@@ -381,7 +368,7 @@ namespace learning
 			const size_t teaching_size{teaching_set_.size()};
 			for (size_t row : teaching_set_)
 			{
-				sample_filler_.fill(row, network.inputLayer(), sample_targets_);
+				sample_filler_.fill(row, network.input_layer(), sample_targets_);
 				network.forward();
 				_updateGradients(network, sample_targets_);
 			}
@@ -393,36 +380,40 @@ namespace learning
 			{
 				cur_min_err = err;
 				best_network = network;
-				progress.set_best(cur_min_err);
+				pview.set_best(cur_min_err);
 			}
 
-			progress.set_last(err);
-			progress.set_epoch(epochs_max - epochs_left);
+			pview.set_last(err);
+			pview.set_epoch(epochs_max - epochs_left);
 		}
 
 		network = best_network;
 
-		progress.end_teach();
+		pview.end_teach();
 
 		return cur_min_err;
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	void rprop<net>::show_test(net& network, progress_view& progress)
+	void rprop<net>::show_test(net& network, progress_view& pview, std::stop_token stop_token)
 	{
-		progress.begin_test();
+		pview.begin_test();
 
 		std::size_t true_count{0};
 		std::size_t false_count{0};
 
 		for (std::size_t row : test_set_)
 		{
+			if (stop_token.stop_requested())
+			{
+				return;
+			}
 			sample_filler_.fill(row, network.inputLayer(), sample_targets_);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())
 			{
-				progress.add_sample_result(omega, *target_i);
+				pview.add_sample_result(omega, *target_i);
 				//if (omega * *target_i > 0. || omega == 0. && *target_i == 0.)
 				if (omega * *target_i > 0.)
 				{
@@ -435,6 +426,6 @@ namespace learning
 				++target_i;
 			}
 		}
-		progress.end_test(true_count, false_count);
+		pview.end_test(true_count, false_count);
 	}
 }

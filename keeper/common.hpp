@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <filesystem>
+#include <limits>
 #include <span>
 #include <string>
 #include <stdexcept>

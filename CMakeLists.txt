@@ -24,7 +24,6 @@ add_subdirectory(collector)
 add_subdirectory(learning)
 
 add_executable(autodis
-	pch.h
 	main.cpp
 )
 
@@ -36,10 +35,11 @@ else()
 	target_compile_options(autodis PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
-target_precompile_headers(autodis PUBLIC pch.h)
+target_precompile_headers(autodis PUBLIC pch.hpp)
 
 target_link_libraries(autodis PRIVATE shared)
 target_link_libraries(autodis PRIVATE keeper)
+target_link_libraries(autodis PRIVATE learning)
 
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(autodis PRIVATE spdlog::spdlog spdlog::spdlog_header_only)

@@ -3,6 +3,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <random>
+#include <stop_token>
 #include <string>
 #include <vector>
 

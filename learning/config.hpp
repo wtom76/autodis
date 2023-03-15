@@ -15,6 +15,7 @@ namespace learning
 		static constexpr double initial_weight_min_{-0.1}; //0.01;
 		static constexpr double initial_weight_max_{0.1};
 
+		// provide all layer sizes including input and omega
 		explicit config(std::vector<std::size_t> const& layers_sizes)
 			: layer_sizes_{layers_sizes}
 		{

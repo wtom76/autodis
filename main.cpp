@@ -1,10 +1,12 @@
-#include "pch.h"
-#include "common.hpp"
+#include "pch.hpp"
 #include <shared/shared.hpp>
 #include <keeper/keeper.hpp>
 #include <learning/learning.hpp>
+#include "common.hpp"
+#include "learn_runner.hpp"
 
-void test()
+//----------------------------------------------------------------------------------------------------------
+void test_load_data(shared::data::frame& df)
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
@@ -16,7 +18,6 @@ void test()
 		"000001/f4"s,
 		"000001/f5"s
 	};
-	shared::data::frame df;
 	dr.read(uris, df);
 
 	std::cout << "index";
@@ -32,6 +33,24 @@ void test()
 	std::cout << std::endl;
 }
 
+//----------------------------------------------------------------------------------------------------------
+void test()
+{
+	shared::data::frame df;
+	test_load_data(df);
+	shared::data::view dw{df};
+
+	learning::config mfn_cfg{{5, 15, 1}};
+	learning::multilayer_feed_forward mfn{mfn_cfg};
+	learning::rprop<learning::multilayer_feed_forward> teacher{
+		std::make_pair(df, dw),
+		 {"f1"s, "f2"s, "f3"s, "f4"s, "f5"s},
+		 {"f4"s}};
+
+	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
+}
+
+//----------------------------------------------------------------------------------------------------------
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try

@@ -27,4 +27,5 @@ target_precompile_headers(shared
 	PRIVATE pch.hpp
 	PRIVATE util/pch.hpp
 	PRIVATE data/pch.hpp
+	PRIVATE math/pch.hpp
 )

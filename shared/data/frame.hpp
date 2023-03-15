@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <limits>
 #include <string>
 #include <vector>
 #include <cassert>
@@ -12,6 +13,8 @@ using std::ptrdiff_t;
 
 namespace shared::data
 {
+	constexpr double nan{std::numeric_limits<double>::signaling_NaN()};
+
 	//-----------------------------------------------------------------------------------------------------
 	// class frame
 	//-----------------------------------------------------------------------------------------------------

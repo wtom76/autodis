@@ -15,6 +15,7 @@ namespace learning
 	{
 	// types
 	public:
+		using config_t = config;
 		struct outputs
 		{
 		private:
@@ -29,7 +30,7 @@ namespace learning
 			std::vector<std::vector<activation::function*>> functions_;
 
 			outputs() = default;
-			outputs(config const& cfg, double def);
+			outputs(config_t const& cfg, double def);
 			void reset(double val);
 		};
 		struct biases
@@ -61,24 +62,21 @@ namespace learning
 
 	// methods
 	public:
-		multilayer_feed_forward() = default;
-		explicit multilayer_feed_forward(config const& cfg);
+		multilayer_feed_forward() = delete;
+		explicit multilayer_feed_forward(config_t const& cfg);
 		~multilayer_feed_forward();
-
-		void construct(config const& cfg);
 
 		std::vector<double>& input_layer() noexcept { return outputs_.layers_.front(); }
 		std::vector<double> const& omega_layer() const noexcept { return outputs_.layers_.back(); }
 		std::vector<std::vector<double>> const& output_layers() const noexcept { return outputs_.layers_; }
 		std::vector<std::vector<double>> const& bias_layers() const noexcept { return biases_.layers_; }
+		std::vector<std::vector<double>>& bias_layers() noexcept { return biases_.layers_; }
 		double weight(size_t layer, size_t src_node, size_t dst_node) const noexcept { return weights_.layers_[layer][src_node][dst_node]; }
 		std::vector<weights::source_to_dest_matrix_t> const& weight_layers() const noexcept { return weights_.layers_; }
-		void forward();
+		std::vector<weights::source_to_dest_matrix_t>& weight_layers() noexcept { return weights_.layers_; }
+		std::vector<std::vector<activation::function*>> const& functions() const noexcept { return outputs_.functions_; }
 
-		//double output(size_t layer, size_t node) const noexcept { return outputs_.layers_[layer][node]; }
-		//const std::vector<std::vector<activation::function*>>& functions() const noexcept { return outputs_.functions_; }
-		//std::vector<std::vector<double>>& biases() noexcept { return biases_.layers_; }
-		//std::vector<weights::source_to_dest_matrix_t>& weights() noexcept { return weights_.layers_; }
+		void forward();
 
 		friend std::ostream& operator <<(std::ostream& strm, multilayer_feed_forward const& network);
 		friend std::istream& operator >>(std::istream& strm, multilayer_feed_forward& network);

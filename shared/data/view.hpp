@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 
@@ -28,8 +29,8 @@ namespace shared::data
 		size_t row_count() const noexcept { return index_.size(); }
 		frame const& data() const noexcept { return frame_; }
 		size_t frame_index(size_t view_index) const noexcept;
-		//bool row_has_nan(size_t row_idx) const noexcept;
-		//void delete_rows_with_nan() noexcept;
+		bool row_has_nan(size_t row_idx) const noexcept;
+		void delete_rows_with_nan() noexcept;
 	};
 	//-----------------------------------------------------------------------------------------------------
 	inline view::view(frame& frame)
@@ -44,29 +45,29 @@ namespace shared::data
 		return index_[view_index];
 	}
 	//-----------------------------------------------------------------------------------------------------
-	//inline bool view::row_has_nan(size_t row_idx) const noexcept
-	//{
-	//	for (const auto& series : frame_.data())
-	//	{
-	//		if (std::isnan(series[index_[row_idx]]))
-	//		{
-	//			return true;
-	//		}
-	//	}
-	//	return false;
-	//}
+	inline bool view::row_has_nan(size_t row_idx) const noexcept
+	{
+		for (const auto& series : frame_.data())
+		{
+			if (std::isnan(series[index_[row_idx]]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	//-----------------------------------------------------------------------------------------------------
-	//inline void view::delete_rows_with_nan() noexcept
-	//{
-	//	std::vector<size_t> new_index;
-	//	new_index.reserve(index_.size());
-	//	for (size_t i = 0; i != index_.size(); ++i)
-	//	{
-	//		if (!row_has_nan(i))
-	//		{
-	//			new_index.emplace_back(index_[i]);
-	//		}
-	//	}
-	//	index_ = std::move(new_index);
-	//}
+	inline void view::delete_rows_with_nan() noexcept
+	{
+		std::vector<size_t> new_index;
+		new_index.reserve(index_.size());
+		for (size_t i = 0; i != index_.size(); ++i)
+		{
+			if (!row_has_nan(i))
+			{
+				new_index.emplace_back(index_[i]);
+			}
+		}
+		index_ = std::move(new_index);
+	}
 }

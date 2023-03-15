@@ -1,16 +1,20 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <fstream>
 #include <filesystem>
-#include <iostream>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <numeric>
 #include <span>
 #include <string>
 #include <stdexcept>
-#include <thread>
+#include <sstream>
 #include <vector>
-#include <unordered_map>
-#include <utility>
 
 using namespace std::literals;

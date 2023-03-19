@@ -13,6 +13,7 @@ namespace learning
 	//-----------------------------------------------------------------------------------------------------
 	class progress_view
 	{
+		double min_err_{-1.};
 	public:
 		void begin_teach()
 		{
@@ -20,11 +21,12 @@ namespace learning
 		}
 		void set_best(double min_err)
 		{
+			min_err_ = min_err;
 			std::cout << "current best err: " << min_err << '\n';
 		}
 		void set_last(double min_err)
 		{
-			std::cout << "last err: " << min_err << '\n';
+			std::cout << "last err: " << min_err << ", min err: " << min_err_ << '\n';
 		}
 		void set_epoch(std::int64_t epoch)
 		{

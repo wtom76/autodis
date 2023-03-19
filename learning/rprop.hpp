@@ -90,6 +90,9 @@ namespace learning
 		, inputs_(in_names.size(), nullptr)
 		, targets_(target_names.size(), nullptr)
 	{
+		std::cout << "rprop::ctor\n";
+		dfv.first.print_head(std::cout);
+
 		for (size_t i = 0; i != in_names.size(); ++i)
 		{
 			inputs_[i] = &dfv.first.series(in_names[i]);
@@ -303,7 +306,7 @@ namespace learning
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<size_t> distribution(0, src_row_count - 1);
 
-		for (size_t i{0}; i < src_row_count /* && teaching_set_.size() < teaching_size*/; ++i)
+		for (size_t i{0}; i < src_row_count && test_set_.size() < src_row_count - teaching_size; ++i)
 		{
 			if (distribution(gen) < teaching_size)
 			{
@@ -314,7 +317,6 @@ namespace learning
 				test_set_.push_back(i);
 			}
 		}
-		assert(teaching_set_.size() == teaching_size);
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>

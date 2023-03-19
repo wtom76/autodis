@@ -1,12 +1,13 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <limits>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <cassert>
 
 using std::size_t;
 using std::ptrdiff_t;
@@ -57,7 +58,7 @@ namespace shared::data
 
 		void clear();
 		void reserve(std::size_t size);
-		void reset(index_t&& index_series, const names_t& series_names, value_t initial_value);
+		void resize(size_t row_count);
 		
 		series_t* create_series(name_t const& name, value_t initial_value = {});
 
@@ -65,7 +66,7 @@ namespace shared::data
 		template <class other_frame>
 		void append_series(other_frame&& other);
 
-		void append_row();
+		void print_head(std::ostream& strm) const;
 	};
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
@@ -110,14 +111,12 @@ namespace shared::data
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------
-	inline void frame::reset(index_t&& index_series, const names_t& series_names, value_t initial_value)
+	inline void frame::resize(size_t row_count)
 	{
-		series_names_ = series_names;
-		index_ = move(index_series);
-		data_.resize(series_names_.size());
+		index_.resize(row_count);
 		for (series_t& col : data_)
 		{
-			col.resize(index_.size(), initial_value);
+			col.resize(index_.size());
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------
@@ -152,5 +151,25 @@ namespace shared::data
 			data_.emplace_back(std::forward<series_t>(*data_i));
 			series_names_.emplace_back(std::forward<std::string>(*name_i));
 		}
+	}
+	//-----------------------------------------------------------------------------------------------------
+	inline void frame::print_head(std::ostream& strm) const
+	{
+		strm << "index";
+		for (std::size_t i{0}; i != col_count(); ++i)
+		{
+			strm << ';' << names()[i];
+		}
+		if (index().empty())
+		{
+			strm << "\nempty\n";
+			return;
+		}
+		strm << "\n" << index()[0];
+		for (std::size_t i{0}; i != col_count(); ++i)
+		{
+			strm << ';' << series(i)[0];
+		}
+		strm << '\n';
 	}
 }

@@ -2,7 +2,7 @@
 #include <shared/shared.hpp>
 #include <keeper/keeper.hpp>
 #include <learning/learning.hpp>
-#include "common.hpp"
+#include "framework.hpp"
 #include "learn_runner.hpp"
 
 //----------------------------------------------------------------------------------------------------------
@@ -19,18 +19,7 @@ void test_load_data(shared::data::frame& df)
 		"000001/f5"s
 	};
 	dr.read(uris, df);
-
-	std::cout << "index";
-	for (std::size_t i{0}; i != df.col_count(); ++i)
-	{
-		std::cout << ';' << df.names()[i];
-	}
-	std::cout << "\n" << df.index()[0];
-	for (std::size_t i{0}; i != df.col_count(); ++i)
-	{
-		std::cout << ';' << df.series(i)[0];
-	}
-	std::cout << std::endl;
+	df.print_head(std::cout);
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -56,6 +45,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 	try
 	{
 		test();
+		std::cout << "test ended" << std::endl;
 	}
 	catch (std::exception const& ex)
 	{

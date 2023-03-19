@@ -50,11 +50,11 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 
 	{
 		dest.clear();
+		dest.resize(r.size());
 		for (std::string const& field : request.begin()->second)
 		{
 			dest.create_series(field);
 		}
-		dest.reserve(r.size());
 	}
 	
 	static_assert(std::numeric_limits<double>::has_signaling_NaN);

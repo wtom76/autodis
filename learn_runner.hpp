@@ -1,5 +1,5 @@
 #pragma once
-#include "common.hpp"
+#include "framework.hpp"
 
 namespace autodis
 {
@@ -18,11 +18,12 @@ namespace autodis
 		std::jthread					thread_;
 
 	public:
+		//----------------------------------------------------------------------------------------------------------
 		~learn_runner()
 		{
 			thread_.join();
 		}
-
+		//----------------------------------------------------------------------------------------------------------
 		learn_runner(typename net::config_t const& cfg, net& network, learning::rprop<net>& teacher)
 			: cfg_{cfg}
 			, network_{network}

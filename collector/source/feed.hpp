@@ -1,7 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <span>
+#include "framework.hpp"
 #include <keeper/keeper.hpp>
 
 namespace collector::source

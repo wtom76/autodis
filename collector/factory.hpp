@@ -1,4 +1,5 @@
 #pragma once
+#include "framework.hpp"
 #include "source/feed.hpp"
 #include "source/base.hpp"
 #include "feed_uri.hpp"

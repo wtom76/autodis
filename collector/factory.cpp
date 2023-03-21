@@ -1,7 +1,9 @@
 #include "pch.hpp"
 #include "factory.hpp"
 #include "feed/finam_daily_csv.hpp"
+#include "feed/linear_generator.hpp"
 #include "source/file.hpp"
+#include "source/dummy.hpp"
 
 //----------------------------------------------------------------------------------------------------------
 std::unique_ptr<collector::source::base> collector::factory::_create_file(std::string file_name)
@@ -16,6 +18,10 @@ std::unique_ptr<collector::source::feed> collector::factory::feed(feed_uri const
 	{
 		return std::make_unique<feed::finam_daily_csv>(uri.field_name());
 	}
+	if (uri.feed_name() == "linear_generator")
+	{
+		return std::make_unique<feed::linear_generator>(uri.field_name());
+	}
 	throw std::runtime_error("unknown feed in uri "s + uri.to_string());
 }
 //----------------------------------------------------------------------------------------------------------
@@ -24,6 +30,10 @@ std::unique_ptr<collector::source::base> collector::factory::source(source_uri c
 	if (uri.type_name() == "file")
 	{
 		return _create_file(uri.name());
+	}
+	if (uri.type_name() == "dummy")
+	{
+		return std::make_unique<source::dummy>();
 	}
 	throw std::runtime_error("unknown source in uri "s + uri.to_string());
 }

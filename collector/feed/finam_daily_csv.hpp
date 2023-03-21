@@ -1,11 +1,6 @@
 #pragma once
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <vector>
-#include <span>
-#include <sstream>
+#include "framework.hpp"
 
 #include <keeper/keeper.hpp>
 #include <collector/source/base.hpp>

@@ -1,21 +1,22 @@
 #pragma once
 
-#include "framework.hpp"
 #include "base.hpp"
 
 namespace collector::source
 {
 	//---------------------------------------------------------------------------------------------------------
-	/// class file
+	/// class dummy
 	//---------------------------------------------------------------------------------------------------------
-	class file
+	class dummy
 		: public base
 	{
-		static constexpr size_t buf_size_{4 * 1024 * 1024};
-		std::ifstream f_;
 	public:
-		file(const std::filesystem::path& path);
+		dummy(){}
 
-		void fetch_to(feed& dest) override;
+		void fetch_to(feed& dest) override
+		{
+			dest.read({});
+			dest.finish({});
+		}
 	};
 }

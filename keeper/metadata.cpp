@@ -42,4 +42,5 @@ void keeper::metadata::drop_pending_flag(series_info::id_t series_id)
 {
 	pqxx::work t{con_};
 	t.exec_prepared("dpf", series_id);
+	t.commit();
 }

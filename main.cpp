@@ -1,8 +1,4 @@
 #include "pch.hpp"
-#include <shared/shared.hpp>
-#include <keeper/keeper.hpp>
-#include <learning/learning.hpp>
-#include "framework.hpp"
 #include "learn_runner.hpp"
 
 //----------------------------------------------------------------------------------------------------------
@@ -12,14 +8,21 @@ void test_load_data(shared::data::frame& df)
 	keeper_cfg.load();
 	keeper::data_read dr{keeper_cfg};
 	std::vector<keeper::data_uri> uris{
-		"000001/f1"s,
-		"000001/f2"s,
-		"000001/f3"s,
-		"000001/f4"s,
-		"000001/f5"s
+		"test_linear/x"s,
+		"test_linear/y"s
 	};
 	dr.read(uris, df);
 	df.print_head(std::cout);
+}
+
+//----------------------------------------------------------------------------------------------------------
+void test_normalize(shared::data::frame& df)
+{
+	shared::math::range_normalization norm{{0, 1}};
+	for (auto& series : df.data())
+	{
+		norm.normalize(series);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -27,14 +30,15 @@ void test()
 {
 	shared::data::frame df;
 	test_load_data(df);
+	test_normalize(df);
 	shared::data::view dw{df};
 
 	learning::config mfn_cfg{{5, 15, 1}};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::rprop<learning::multilayer_feed_forward> teacher{
 		std::make_pair(df, dw),
-		 {"f1"s, "f2"s, "f3"s, "f4"s, "f5"s},
-		 {"f4"s}};
+		 {"x"s},
+		 {"y"s}};
 
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
 }

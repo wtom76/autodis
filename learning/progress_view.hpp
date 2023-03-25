@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include "framework.hpp"
 
 namespace learning
 {
@@ -43,7 +43,10 @@ namespace learning
 		}
 		void add_sample_result(double result, double tagret)
 		{
-			std::cout << "result vs tagret: " << result << ", " << tagret << '\n';
+			std::cout << "result vs tagret: " << result << ", " << tagret
+				<< ", abs err: " << result - tagret
+				<< ", rel err: " << (tagret ? (result - tagret) / tagret : 0.)
+				<< '\n';
 		}
 		void end_test(size_t true_count, size_t false_count)
 		{

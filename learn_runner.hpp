@@ -31,7 +31,12 @@ namespace autodis
 			, thread_{
 				[this](std::stop_token stoken)
 				{
-					teacher_.teach(cfg_, network_, min_err_, progress_view_, std::move(stoken));
+					teacher_.teach(cfg_, network_, min_err_, progress_view_, stoken);
+					if (stoken.stop_requested())
+					{
+						return;
+					}
+					teacher_.show_test(network_, progress_view_, stoken);
 				}
 			}
 		{

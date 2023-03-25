@@ -1,7 +1,6 @@
 #pragma once
 
-#include <shared/shared.hpp>
-#include "common.hpp"
+#include "framework.hpp"
 #include "progress_view.hpp"
 
 namespace learning
@@ -410,7 +409,7 @@ namespace learning
 			{
 				return;
 			}
-			sample_filler_.fill(row, network.inputLayer(), sample_targets_);
+			sample_filler_.fill(row, network.input_layer(), sample_targets_);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())

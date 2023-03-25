@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmath>
+#include "framework.hpp"
 
 namespace learning::activation
 {

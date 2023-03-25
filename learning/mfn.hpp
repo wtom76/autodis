@@ -1,8 +1,6 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
-
-#include "common.hpp"
+#include "framework.hpp"
 #include "config.hpp"
 #include "activation.hpp"
 

@@ -15,6 +15,10 @@ namespace learning
 	{
 		double min_err_{-1.};
 	public:
+		double min_err() const noexcept
+		{
+			return min_err_;
+		}
 		void begin_teach()
 		{
 			std::cout << "begin_teach\n";
@@ -22,7 +26,7 @@ namespace learning
 		void set_best(double min_err)
 		{
 			min_err_ = min_err;
-			std::cout << "current best err: " << min_err << '\n';
+			std::cout << "current best mean sqr err: " << min_err_ << '\n';
 		}
 		void set_last(double min_err)
 		{
@@ -30,7 +34,7 @@ namespace learning
 		}
 		void set_epoch(std::int64_t epoch)
 		{
-			std::cout << "epoch: " << epoch << '\n';
+			std::cout << "epoch: " << epoch << ". ";
 		}
 		void end_teach()
 		{
@@ -50,7 +54,9 @@ namespace learning
 		}
 		void end_test(size_t true_count, size_t false_count)
 		{
-			std::cout << "end_test: hits vs errors:" << true_count << ", " << false_count << '\n';
+			std::cout
+				<< "end_test: hits vs errors: " << true_count << ", " << false_count << ". "
+				<< "best mean sqr err: " << min_err_ << '\n';
 		}
 	};
 }

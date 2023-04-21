@@ -65,7 +65,7 @@ namespace learning
 		void _updateWeights(net& network);
 		void _updateBiases(net& network);
 		void _split_data();
-		double _meanSqrError(net& network);
+		double _mean_sqr_error(net& network);
 	public:
 		rprop(std::pair<data_frame_t, data_view_t>&& src_data,
 			const std::vector<std::string>& in_names,
@@ -319,22 +319,22 @@ namespace learning
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	double rprop<net>::_meanSqrError(net& network)
+	double rprop<net>::_mean_sqr_error(net& network)
 	{
 		if (test_set_.empty())
 		{
 			return 0.;
 		}
 
-		double sqr_err_sum = 0.;
+		double sqr_err_sum{0.};
 		for (const size_t row : test_set_)
 		{
 			sample_filler_.fill(row, network.input_layer(), sample_targets_);
 			network.forward();
-			auto target_i = cbegin(sample_targets_);
+			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())
 			{
-				const double err = (omega - *target_i);
+				const double err{omega - *target_i};
 				sqr_err_sum += err * err;
 				++target_i;
 			}
@@ -342,7 +342,7 @@ namespace learning
 		return sqr_err_sum / test_set_.size();
 	}
 	//-----------------------------------------------------------------------------------------------------
-	/// \returns best error
+	/// \returns best mean square error
 	template <class net>
 	double rprop<net>::teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token)
 	{
@@ -375,7 +375,7 @@ namespace learning
 			}
 			_updateWeights(network);
 			_updateBiases(network);
-			err = std::sqrt(_meanSqrError(network));
+			err = std::sqrt(_mean_sqr_error(network));
 
 			if (cur_min_err > err)
 			{

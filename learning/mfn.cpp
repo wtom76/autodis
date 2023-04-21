@@ -115,9 +115,9 @@ void learning::multilayer_feed_forward::weights::reset(double val)
 /// multilayer_feed_forward
 //-----------------------------------------------------------------------------------------------------
 learning::multilayer_feed_forward::multilayer_feed_forward(const config& cfg)
-	: outputs_(cfg, 0.)
-	, biases_(outputs_, cfg.initial_weight_min_, cfg.initial_weight_max_)
-	, weights_(outputs_, cfg.initial_weight_min_, cfg.initial_weight_max_)
+	: outputs_{cfg, 0.}
+	, biases_{outputs_, cfg.initial_weight_min_, cfg.initial_weight_max_}
+	, weights_{outputs_, cfg.initial_weight_min_, cfg.initial_weight_max_}
 {
 }
 //-----------------------------------------------------------------------------------------------------

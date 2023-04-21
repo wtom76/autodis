@@ -21,7 +21,14 @@ namespace autodis
 		//----------------------------------------------------------------------------------------------------------
 		~learn_runner()
 		{
-			thread_.join();
+			try
+			{
+				wait();
+			}
+			catch (std::exception const& ex)
+			{
+				std::cout << ex.what() << std::endl;
+			}
 		}
 		//----------------------------------------------------------------------------------------------------------
 		learn_runner(typename net::config_t const& cfg, net& network, learning::rprop<net>& teacher)
@@ -40,6 +47,19 @@ namespace autodis
 				}
 			}
 		{
+		}
+		//----------------------------------------------------------------------------------------------------------
+		void wait()
+		{
+			if (thread_.joinable())
+			{
+				thread_.join();
+			}
+		}
+		//----------------------------------------------------------------------------------------------------------
+		double min_err() const noexcept
+		{
+			return progress_view_.min_err();
 		}
 	};
 }

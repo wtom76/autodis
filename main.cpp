@@ -26,14 +26,14 @@ void test_normalize(shared::data::frame& df)
 }
 
 //----------------------------------------------------------------------------------------------------------
-void test()
+double test(std::vector<std::size_t> const& layers_sizes)
 {
 	shared::data::frame df;
 	test_load_data(df);
 	test_normalize(df);
 	shared::data::view dw{df};
 
-	learning::config mfn_cfg{{5, 15, 1}};
+	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::rprop<learning::multilayer_feed_forward> teacher{
 		std::make_pair(df, dw),
@@ -41,6 +41,8 @@ void test()
 		 {"y"s}};
 
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
+	runner.wait();
+	return runner.min_err();
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -48,8 +50,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try
 	{
-		test();
-		std::cout << "test ended" << std::endl;
+		double min_msqrerr{std::numeric_limits<double>::max()};
+		std::size_t best_n{0};
+		for (std::size_t n{1}; n <= 20; ++n)
+		{
+			for (int i{10}; i; --i)
+			{
+				const double err{test({1, n, 1})};
+				if (err < min_msqrerr)
+				{
+					min_msqrerr = err;
+					best_n = n;
+				}
+			}
+		}
+		std::cout << "test ended\nbest internal layer size: " << best_n << "\nmean square error of best result: " << min_msqrerr << std::endl;
 	}
 	catch (std::exception const& ex)
 	{

@@ -43,28 +43,29 @@ namespace shared::data
 		size_t col_count() const noexcept { return data_.size(); }
 
 		index_t& index() noexcept { return index_; }
-		const index_t& index() const noexcept { return index_; }
+		index_t const& index() const noexcept { return index_; }
 
 		data_t& data() noexcept { return data_; }
-		const data_t& data() const noexcept { return data_; }
+		data_t const& data() const noexcept { return data_; }
 
 		series_t& series(name_t const& name);
-		const series_t& series(name_t const& name) const;
+		series_t const& series(name_t const& name) const;
 
 		series_t& series(std::size_t idx);
-		const series_t& series(std::size_t idx) const;
+		series_t const& series(std::size_t idx) const;
 
-		const names_t& names() const noexcept { return series_names_; }
+		names_t& names() noexcept { return series_names_; }
+		names_t const& names() const noexcept { return series_names_; }
 
 		void clear();
 		void reserve(std::size_t size);
 		void resize(size_t row_count);
 		
-		series_t* create_series(name_t const& name, value_t initial_value = {});
+		series_t* create_series(name_t const& name, value_t initial_value = nan);
 
 		/// appends series from other if indexes are equal, throws runtime_error otherwise
 		template <class other_frame>
-		void append_series(other_frame&& other);
+		void append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});
 
 		void print_head(std::ostream& strm) const;
 	};
@@ -134,22 +135,39 @@ namespace shared::data
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class other_frame>
-	inline void frame::append_series(other_frame&& other)
+	inline void frame::append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
 	{
-		if (!std::equal(index_.cbegin(), index_.cend(),
-			other.index_.cbegin(), other.index_.cend()))
+		if (index_.empty())
+		{
+			index_ = other.index_;
+		}
+		else if (!std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()))
 		{
 			throw std::runtime_error("indexes of frames are not equal"s);
 		}
-		data_.reserve(data_.size() + other.data_.size());
-		series_names_.reserve(series_names_.size() + other.series_names_.size());
-		auto data_i = other.data_.begin();
-		const auto data_e = other.data_.cend();
-		auto name_i = other.series_names_.begin();
-		for (; data_i != data_e; ++data_i, ++name_i)
+		if (series_idxs.empty())
 		{
-			data_.emplace_back(std::forward<series_t>(*data_i));
-			series_names_.emplace_back(std::forward<std::string>(*name_i));
+			data_.reserve(data_.size() + other.data_.size());
+			series_names_.reserve(series_names_.size() + other.series_names_.size());
+
+			auto data_i{other.data_.begin()};
+			auto const data_e{other.data_.cend()};
+			auto name_i{other.series_names_.begin()};
+			for (; data_i != data_e; ++data_i, ++name_i)
+			{
+				data_.emplace_back(std::forward<series_t>(*data_i));
+				series_names_.emplace_back(std::forward<std::string>(*name_i));
+			}
+		}
+		else
+		{
+			data_.reserve(data_.size() + series_idxs.size());
+			series_names_.reserve(series_names_.size() + series_idxs.size());
+			for (std::size_t idx_idx{0}; idx_idx < series_idxs.size(); ++idx_idx)
+			{
+				data_.emplace_back(std::forward<series_t>(other.series(series_idxs[idx_idx])));
+				series_names_.emplace_back(std::forward<std::string>(other.names(series_idxs[idx_idx])));
+			}
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------

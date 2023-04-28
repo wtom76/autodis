@@ -2,17 +2,15 @@
 #include "learn_runner.hpp"
 
 //----------------------------------------------------------------------------------------------------------
-void test_load_data(shared::data::frame& df)
+shared::data::frame test_load_data(std::vector<keeper::data_uri> const& uris)
 {
+	shared::data::frame df;
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::data_read dr{keeper_cfg};
-	std::vector<keeper::data_uri> uris{
-		"test_linear/x"s,
-		"test_linear/y"s
-	};
 	dr.read(uris, df);
 	df.print_head(std::cout);
+	return df;
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -28,8 +26,12 @@ void test_normalize(shared::data::frame& df)
 //----------------------------------------------------------------------------------------------------------
 double test(std::vector<std::size_t> const& layers_sizes)
 {
-	shared::data::frame df;
-	test_load_data(df);
+	shared::data::frame df{test_load_data(
+		{
+			"test_linear/x"s,
+			"test_linear/y"s
+		}
+	)};
 	test_normalize(df);
 	shared::data::view dw{df};
 

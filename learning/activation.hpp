@@ -42,12 +42,15 @@ namespace learning::activation
 		//-----------------------------------------------------------------------------------------------------
 		double activation(double x) const override
 		{
-			return 2. / (1. + std::exp(-2. * x)) - 1.;
+			return 2. / (1. + std::exp(-2. * x)) - 1.; // gives better result than commented variant
+
+			//double const e2x{std::exp(2. * x)};
+			//return (e2x - 1.) / (e2x + 1.);
 		}
 		//-----------------------------------------------------------------------------------------------------
 		double derivative(double x) const override
 		{
-			const double act = activation(x);
+			double const act{activation(x)};
 			return 1. - act * act;
 		}
 	};

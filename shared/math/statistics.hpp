@@ -1,10 +1,6 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <limits>
-#include <vector>
+#include "framework.hpp"
 
 namespace shared::math
 {

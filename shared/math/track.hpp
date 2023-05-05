@@ -10,25 +10,25 @@ namespace shared::math
 	// creates x(t-1) - x(t), ..., x(t-n) - x(t)
 	// n = depth
 	//---------------------------------------------------------------------------------------------------------
-	void track(data::frame const& src, std::size_t series_idx, size_t depth, data::frame& dest)
+	void track(data::frame& df, std::size_t src_idx, std::size_t depth)
 	{
-		dest.clear();
-		if (depth < 0)
+		if (!depth)
 		{
 			return;
 		}
-		dest.append_series(src, {0});
-		for (size_t i{1}; i <= depth; ++i)
+		std::string src_name{df.name(src_idx)};
+		std::size_t first_dst_idx{df.col_count()};
+		for (std::size_t i{1}; i <= depth; ++i)
 		{
-			dest.create_series("d(t-"s + std::to_string(i) + ")"s);
+			df.create_series(src_name + "_delta(t-"s + std::to_string(i) + ")"s);
 		}
-		data::frame::series_t const& series_0{dest.series(0)};
-		for (size_t d{1}; d <= depth; ++d)
+		data::frame::series_t const& src_series{df.series(src_idx)};
+		for (std::size_t dst_idx{0}; dst_idx < depth; ++dst_idx)
 		{
-			data::frame::series_t const& series_d{dest.series(d)};
-			for (size_t t{d}, t_d{0}; t < series_0.size(); ++t, ++t_d)
+			data::frame::series_t& dst_series{df.series(first_dst_idx + dst_idx)};
+			for (std::size_t t{dst_idx + 1}, t_d{0}; t < src_series.size(); ++t, ++t_d)
 			{
-				series_d[t] = series_0[t_d] - series_0[t];
+				dst_series[t] = src_series[t_d] - src_series[t];
 			}
 		}
 	}

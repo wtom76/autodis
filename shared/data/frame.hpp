@@ -1,24 +1,13 @@
 #pragma once
-
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <iterator>
-#include <limits>
-#include <ostream>
-#include <string>
-#include <vector>
-
-using std::size_t;
-using std::ptrdiff_t;
+#include "framework.hpp"
 
 namespace shared::data
 {
 	constexpr double nan{std::numeric_limits<double>::signaling_NaN()};
 
-	//-----------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------
 	// class frame
-	//-----------------------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------------------------
 	class frame
 	{
 	// types
@@ -38,6 +27,13 @@ namespace shared::data
 		names_t		series_names_;
 
 	// methods
+	private:
+		void _shrink_to_fit();
+		template <class other_frame>
+		void _append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs);
+		void _left_join(frame const& other, std::size_t series_idx);
+		void _left_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
+		void _outer_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
 	public:
 		size_t row_count() const noexcept { return index_.size(); }
 		size_t col_count() const noexcept { return data_.size(); }
@@ -57,94 +53,44 @@ namespace shared::data
 		names_t& names() noexcept { return series_names_; }
 		names_t const& names() const noexcept { return series_names_; }
 
-		void clear();
+		name_t& name(std::size_t idx) noexcept { return series_names_[idx]; }
+		name_t const& name(std::size_t idx) const noexcept { return series_names_[idx]; }
+
+		void clear() noexcept;
 		void reserve(std::size_t size);
 		void resize(size_t row_count);
+		void swap(frame& other) noexcept;
 		
 		series_t* create_series(name_t const& name, value_t initial_value = nan);
 
-		/// appends series from other if indexes are equal, throws runtime_error otherwise
 		template <class other_frame>
-		void append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});
+		void append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});		// appends series from other if indexes are equal, throws runtime_error otherwise
+		template <class other_frame>
+		void left_join(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});
+		template <class other_frame>
+		void outer_join(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});
 
+		void delete_series(std::size_t idx) noexcept;
+
+		frame clear_lacunas() const;																	// returns frame without rows containing nan
+
+		void print(std::ostream& strm) const;
 		void print_head(std::ostream& strm) const;
+		void print_shape(std::ostream& strm) const;
 	};
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
-	inline typename frame::series_t& frame::series(name_t const& name)
-	{
-		const auto name_i{std::find(series_names_.cbegin(), series_names_.cend(), name)};
-		if (name_i == series_names_.cend())
-		{
-			throw std::runtime_error("No '"s + name + "' series"s);
-		}
-		return data_[std::distance(series_names_.cbegin(), name_i)];
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline const typename frame::series_t& frame::series(name_t const& name) const
-	{
-		return const_cast<frame*>(this)->series(name);
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline typename frame::series_t& frame::series(std::size_t idx)
-	{
-		return data_[idx];
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline const typename frame::series_t& frame::series(std::size_t idx) const
-	{
-		return const_cast<frame*>(this)->series(idx);
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline void frame::clear()
-	{
-		index_.clear();
-		data_.clear();
-		series_names_.clear();
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline void frame::reserve(std::size_t size)
-	{
-		index_.reserve(size);
-		for (series_t& col : data_)
-		{
-			col.reserve(size);
-		}
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline void frame::resize(size_t row_count)
-	{
-		index_.resize(row_count);
-		for (series_t& col : data_)
-		{
-			col.resize(index_.size());
-		}
-	}
-	//-----------------------------------------------------------------------------------------------------
-	inline typename frame::series_t* frame::create_series(name_t const& name, value_t initial_value)
-	{
-		const auto name_i{std::find(series_names_.cbegin(), series_names_.cend(), name)};
-		if (name_i != series_names_.cend())
-		{
-			assert(false);
-			return nullptr;
-		}
-		data_.emplace_back(index_.size(), initial_value);
-		series_names_.emplace_back(name);
-		return &data_.back();
-	}
-	//-----------------------------------------------------------------------------------------------------
 	template <class other_frame>
-	inline void frame::append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
+	inline void frame::_append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
 	{
+		assert(index_.empty() || std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()));
+
 		if (index_.empty())
 		{
-			index_ = other.index_;
+			index_ = std::forward<typename other_frame::index_t>(other.index_);
+			index_.shrink_to_fit();
 		}
-		else if (!std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()))
-		{
-			throw std::runtime_error("indexes of frames are not equal"s);
-		}
+
 		if (series_idxs.empty())
 		{
 			data_.reserve(data_.size() + other.data_.size());
@@ -155,8 +101,8 @@ namespace shared::data
 			auto name_i{other.series_names_.begin()};
 			for (; data_i != data_e; ++data_i, ++name_i)
 			{
-				data_.emplace_back(std::forward<series_t>(*data_i));
-				series_names_.emplace_back(std::forward<std::string>(*name_i));
+				data_.emplace_back(std::forward<typename other_frame::series_t>(*data_i));
+				series_names_.emplace_back(std::forward<typename other_frame::name_t>(*name_i));
 			}
 		}
 		else
@@ -165,29 +111,43 @@ namespace shared::data
 			series_names_.reserve(series_names_.size() + series_idxs.size());
 			for (std::size_t idx_idx{0}; idx_idx < series_idxs.size(); ++idx_idx)
 			{
-				data_.emplace_back(std::forward<series_t>(other.series(series_idxs[idx_idx])));
-				series_names_.emplace_back(std::forward<std::string>(other.names(series_idxs[idx_idx])));
+				data_.emplace_back(std::forward<typename other_frame::series_t>(other.series(series_idxs[idx_idx])));
+				series_names_.emplace_back(std::forward<typename other_frame::name_t>(other.name(series_idxs[idx_idx])));
 			}
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------
-	inline void frame::print_head(std::ostream& strm) const
+	// appends series from other if indexes are equal, throws runtime_error otherwise
+	template <class other_frame>
+	inline void frame::append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
 	{
-		strm << "index";
-		for (std::size_t i{0}; i != col_count(); ++i)
+		if (!index_.empty() && !std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()))
 		{
-			strm << ';' << names()[i];
+			throw std::runtime_error("indexes of frames are not equal"s);
 		}
-		if (index().empty())
+		_append_series(std::forward<other_frame>(other), series_idxs);
+	}
+	//-----------------------------------------------------------------------------------------------------
+	template <class other_frame>
+	inline void frame::left_join(other_frame&& other, std::vector<std::size_t> const& series_idxs)
+	{
+		if (index_.empty() || std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()))
 		{
-			strm << "\nempty\n";
+			_append_series(std::forward<other_frame>(other), series_idxs);
 			return;
 		}
-		strm << "\n" << index()[0];
-		for (std::size_t i{0}; i != col_count(); ++i)
+		_left_join(other, series_idxs);
+	}
+	//-----------------------------------------------------------------------------------------------------
+	// indexes should be sorted in ascending order
+	template <class other_frame>
+	inline void frame::outer_join(other_frame&& other, std::vector<std::size_t> const& series_idxs)
+	{
+		if (index_.empty() || std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()))
 		{
-			strm << ';' << series(i)[0];
+			_append_series(std::forward<other_frame>(other), series_idxs);
+			return;
 		}
-		strm << '\n';
+		_outer_join(other, series_idxs);
 	}
 }

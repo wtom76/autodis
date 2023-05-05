@@ -45,7 +45,7 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 
 	pqxx::work t{con_};
 	const pqxx::result r{t.exec_params(
-		"select \"idx\","s + _field_list(request.begin()->second) + " from \"data\".\""s + request.begin()->first + "\""s)
+		"select \"idx\","s + _field_list(request.begin()->second) + " from \"data\".\""s + request.begin()->first + "\" order by idx asc"s)
 	};
 
 	{

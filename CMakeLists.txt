@@ -24,6 +24,7 @@ add_subdirectory(collector)
 add_subdirectory(learning)
 
 add_executable(autodis
+	model_001.cpp
 	main.cpp
 )
 

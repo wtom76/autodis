@@ -53,7 +53,7 @@ char collector::feed::finam_daily_csv::_determine_separator(auto header_begin, a
 }
 //---------------------------------------------------------------------------------------------------------
 // <TICKER>;<PER>;<DATE>;<TIME>;<OPEN>;<HIGH>;<LOW>;<CLOSE>;<VOL>
-std::span<char>::iterator collector::feed::finam_daily_csv::_parse_header(std::span<char> const chunk)
+std::span<const char>::iterator collector::feed::finam_daily_csv::_parse_header(std::span<const char> chunk)
 {
 	const auto line_e{std::find(chunk.begin(), chunk.end(), '\n')};
 	if (line_e == chunk.end())
@@ -146,7 +146,7 @@ void collector::feed::finam_daily_csv::start(std::unique_ptr<keeper::data_write>
 	dest_ = std::move(dest);
 }
 //---------------------------------------------------------------------------------------------------------
-size_t collector::feed::finam_daily_csv::read(const std::span<char> chunk)
+size_t collector::feed::finam_daily_csv::read(std::span<const char> chunk)
 {
 	auto next_i{chunk.begin()};
 	if (!header_parsed_)
@@ -180,7 +180,7 @@ size_t collector::feed::finam_daily_csv::read(const std::span<char> chunk)
 }
 //---------------------------------------------------------------------------------------------------------
 // should be last line without line end or an empty chunk
-void collector::feed::finam_daily_csv::finish(const std::span<char> chunk)
+void collector::feed::finam_daily_csv::finish(std::span<const char> chunk)
 {
 	assert(header_parsed_);
 

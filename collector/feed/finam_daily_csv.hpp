@@ -42,7 +42,7 @@ namespace collector::feed
 	private:
 		static std::ptrdiff_t _field_index(std::string const& name) noexcept;
 		static char _determine_separator(auto header_begin, auto header_end) noexcept;
-		std::span<char>::iterator _parse_header(std::span<char> const chunk);
+		std::span<const char>::iterator _parse_header(std::span<const char> chunk);
 		void _read_row(std::stringstream& s, row& dest);
 		void _send(row const& r);
 		
@@ -52,8 +52,8 @@ namespace collector::feed
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------
 		void start(std::unique_ptr<keeper::data_write> dest) override;
-		size_t read(const std::span<char> chunk) override;
-		void finish(const std::span<char> chunk) override;
+		size_t read(std::span<const char> chunk) override;
+		void finish(std::span<const char> chunk) override;
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

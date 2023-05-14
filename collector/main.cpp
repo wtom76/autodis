@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include <curl/curl.h>
 #include <keeper/keeper.hpp>
 #include <shared/shared.hpp>
 #include "source/file.hpp"
@@ -42,6 +43,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try
 	{
+		//auto const curl_code{curl_global_init(CURL_GLOBAL_ALL)};
+		curl_global_init(CURL_GLOBAL_ALL);	// TODO: call on demand
+		
 		collect();
 	}
 	catch (std::exception const& ex)

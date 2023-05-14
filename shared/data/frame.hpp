@@ -35,26 +35,26 @@ namespace shared::data
 		void _left_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
 		void _outer_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
 	public:
-		size_t row_count() const noexcept { return index_.size(); }
-		size_t col_count() const noexcept { return data_.size(); }
+		[[nodiscard]] size_t row_count() const noexcept { return index_.size(); }
+		[[nodiscard]] size_t col_count() const noexcept { return data_.size(); }
 
-		index_t& index() noexcept { return index_; }
-		index_t const& index() const noexcept { return index_; }
+		[[nodiscard]] index_t& index() noexcept { return index_; }
+		[[nodiscard]] index_t const& index() const noexcept { return index_; }
 
-		data_t& data() noexcept { return data_; }
-		data_t const& data() const noexcept { return data_; }
+		[[nodiscard]] data_t& data() noexcept { return data_; }
+		[[nodiscard]] data_t const& data() const noexcept { return data_; }
 
-		series_t& series(name_t const& name);
-		series_t const& series(name_t const& name) const;
+		[[nodiscard]] series_t& series(name_t const& name);
+		[[nodiscard]] series_t const& series(name_t const& name) const;
 
-		series_t& series(std::size_t idx);
-		series_t const& series(std::size_t idx) const;
+		[[nodiscard]] series_t& series(std::size_t idx);
+		[[nodiscard]] series_t const& series(std::size_t idx) const;
 
-		names_t& names() noexcept { return series_names_; }
-		names_t const& names() const noexcept { return series_names_; }
+		[[nodiscard]] names_t& names() noexcept { return series_names_; }
+		[[nodiscard]] names_t const& names() const noexcept { return series_names_; }
 
-		name_t& name(std::size_t idx) noexcept { return series_names_[idx]; }
-		name_t const& name(std::size_t idx) const noexcept { return series_names_[idx]; }
+		[[nodiscard]] name_t& name(std::size_t idx) noexcept { return series_names_[idx]; }
+		[[nodiscard]] name_t const& name(std::size_t idx) const noexcept { return series_names_[idx]; }
 
 		void clear() noexcept;
 		void reserve(std::size_t size);
@@ -72,7 +72,7 @@ namespace shared::data
 
 		void delete_series(std::size_t idx) noexcept;
 
-		frame clear_lacunas() const;																	// returns frame without rows containing nan
+		[[nodiscard]] frame clear_lacunas() const;																	// returns frame without rows containing nan
 
 		void print(std::ostream& strm) const;
 		void print_head(std::ostream& strm) const;

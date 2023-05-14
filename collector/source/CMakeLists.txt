@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22.0)
 
 add_library(source OBJECT
 	file.cpp
+	curl.cpp
+	rest.cpp
 )
 
 target_include_directories(source PRIVATE
@@ -25,3 +27,6 @@ find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(source PRIVATE libpqxx::pqxx)
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+# curl is for MOEX ISS
+find_package(CURL CONFIG REQUIRED)
+target_link_libraries(source PRIVATE CURL::libcurl)

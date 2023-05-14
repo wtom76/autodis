@@ -23,12 +23,12 @@ void collector::feed::linear_generator::start(std::unique_ptr<keeper::data_write
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-size_t collector::feed::linear_generator::read(const std::span<char>)
+size_t collector::feed::linear_generator::read(std::span<const char>)
 {
 	return 0;
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::linear_generator::finish(const std::span<char>)
+void collector::feed::linear_generator::finish(std::span<const char>)
 {
 	for (long long idx{0}; idx != row_count_; ++idx)
 	{

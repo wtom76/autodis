@@ -8,25 +8,18 @@
 namespace collector::feed
 {
 	//---------------------------------------------------------------------------------------------------------
-	/// class linear_generator
+	/// class moex_rest
 	//---------------------------------------------------------------------------------------------------------
-	class linear_generator
+	class moex_rest
 		: public source::feed
 	{
 	private:
-		using row_t = std::array<double, 2>;	// x, y
+		std::unique_ptr<keeper::data_write>	dest_;
+		std::ptrdiff_t	field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
 
 	private:
-		static constexpr long long row_count_{200};
-		static constexpr double a_{0.02};
-		static constexpr double b_{0.01};
-
-		std::vector<row_t>	data_;
-		std::ptrdiff_t		field_idx_to_store_{-1}; // index in row to store to dest
-		std::unique_ptr<keeper::data_write>	dest_;
-
 	public:
-		linear_generator(std::string const& field_name);
+		moex_rest();
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

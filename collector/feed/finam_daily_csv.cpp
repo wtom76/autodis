@@ -14,36 +14,17 @@ namespace collector::feed
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-std::ptrdiff_t collector::feed::finam_daily_csv::_field_index(std::string const& name) noexcept
-{
-	static const std::array<std::string, 5> field_name_idx
-	{
-		"open"s,
-		"high"s,
-		"low"s,
-		"close"s,
-		"vol"s
-	};
-	std::ptrdiff_t idx{0};
-	for (auto const& fni : field_name_idx)
-	{
-		if (fni == name)
+collector::feed::finam_daily_csv::finam_daily_csv(std::vector<std::string> const& feed_args)
+	: field_map_{
 		{
-			return idx;
-		}
-		++idx;
-	}
-	return row_idx_null_;
-}
-//---------------------------------------------------------------------------------------------------------
-collector::feed::finam_daily_csv::finam_daily_csv(std::string const& field_name)
-	: field_idx_to_store_{_field_index(field_name)}
-{
-	if (field_idx_to_store_ == row_idx_null_)
-	{
-		throw std::runtime_error("requested field is unknown: \""s + field_name + '\"');
-	}
-}
+			{"<OPEN>"s, "open"s},
+			{"<HIGH>"s, "high"s},
+			{"<LOW>"s, "low"s},
+			{"<CLOSE>"s, "close"s},
+			{"<VOL>"s, "vol"s}
+		},
+		feed_args, "<DATE>"s}
+{}
 //---------------------------------------------------------------------------------------------------------
 char collector::feed::finam_daily_csv::_determine_separator(auto header_begin, auto header_end) noexcept
 {
@@ -70,75 +51,45 @@ std::span<const char>::iterator collector::feed::finam_daily_csv::_parse_header(
 		throw std::runtime_error("failed to determine field separator"s);
 	}
 
-	bool requested_field_found{false};
 	std::stringstream s{{chunk.begin(), header_e}, std::ios_base::in};
 	std::string field;
 	while (std::getline(s, field, separator_))
 	{
-		if (field == "<DATE>"s)
-		{
-			field_map_.emplace_back(row_idx_date_);
-		}
-		else if (field == "<OPEN>"s)
-		{
-			field_map_.emplace_back(row_idx_open_);
-		}
-		else if (field == "<HIGH>"s)
-		{
-			field_map_.emplace_back(row_idx_high_);
-		}
-		else if (field == "<LOW>"s)
-		{
-			field_map_.emplace_back(row_idx_low_);
-		}
-		else if (field == "<CLOSE>"s)
-		{
-			field_map_.emplace_back(row_idx_close_);
-		}
-		else if (field == "<VOL>"s)
-		{
-			field_map_.emplace_back(row_idx_vol_);
-		}
-		else
-		{
-			field_map_.emplace_back(row_idx_null_);
-		}
-		if (field_map_.back() == field_idx_to_store_)
-		{
-			requested_field_found = true;
-		}
+		field_map_.map_next_src_name(field);
 	}
-	if (!requested_field_found)
-	{
-		throw std::runtime_error("requested field is not found in file"s);
-	}
+	field_map_.validate();
 	return line_e;
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::finam_daily_csv::_read_row(std::stringstream& s, row& dest)
+collector::feed::finam_daily_csv::row collector::feed::finam_daily_csv::_read_row(std::stringstream& s)
 {
-	std::size_t idx{0};
+	std::size_t src_idx{0};
 	std::string field;
-	while (std::getline(s, field, separator_) && idx < field_map_.size())
+	row result{field_map_.field_num()};
+	while (std::getline(s, field, separator_))
 	{
-		if (field_map_[idx] == row_idx_date_)
+		if (src_idx == field_map_.index_field_src_idx())
 		{
-			read_field(field, dest.date_);
+			read_field(field, result.date_);
 		}
-		else if (field_map_[idx] != row_idx_null_)
+		else if (field_map_.dst_idx(src_idx) != field_map_.null())
 		{
-			read_field(field, dest.ohlcv_[field_map_[idx]]);
+			read_field(field, result.data_[field_map_.dst_idx(src_idx)]);
 		}
-		++idx;
+		else if (src_idx >= result.data_.size())
+		{
+			throw std::runtime_error("line in file has more fields than header"s);
+		}
+		++src_idx;
 	}
+	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::finam_daily_csv::_send(row const& r)
+void collector::feed::finam_daily_csv::_send(row&& r)
 {
 	assert(dest_);
-	assert(field_idx_to_store_ >= 0);
 
-	dest_->add(std::make_pair(r.date_, r.ohlcv_[field_idx_to_store_]));
+	dest_->add(std::make_pair(r.date_, std::move(r.data_)));
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::finam_daily_csv::start(std::unique_ptr<keeper::data_write> dest)
@@ -159,7 +110,6 @@ size_t collector::feed::finam_daily_csv::read(std::span<const char> chunk)
 		}
 	}
 
-	row r;
 	while (next_i != chunk.end())
 	{
 		while (next_i != chunk.end() && *next_i == '\n')
@@ -172,8 +122,7 @@ size_t collector::feed::finam_daily_csv::read(std::span<const char> chunk)
 			break;
 		}
 		std::stringstream s{{next_i, line_e}, std::ios_base::in};
-		_read_row(s, r);
-		_send(r);
+		_send(_read_row(s));
 		next_i = line_e;
 	}
 	return std::distance(chunk.begin(), next_i);
@@ -184,7 +133,6 @@ void collector::feed::finam_daily_csv::finish(std::span<const char> chunk)
 {
 	assert(header_parsed_);
 
-	row r;
 	auto next_i{chunk.begin()};
 	if (next_i != chunk.end())
 	{
@@ -194,8 +142,7 @@ void collector::feed::finam_daily_csv::finish(std::span<const char> chunk)
 			return;
 		}
 		std::stringstream s{{next_i, line_e}, std::ios_base::in};
-		_read_row(s, r);
-		_send(r);
+		_send(_read_row(s));
 	}
 
 	dest_->finish();

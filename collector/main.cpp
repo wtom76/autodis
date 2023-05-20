@@ -6,12 +6,12 @@
 #include "factory.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-void collect(keeper::metadata::series_info const& info, keeper::config const& keeper_cfg)
+void process_source(keeper::metadata::source_info const& info, keeper::config const& keeper_cfg)
 {
 	assert(info.pending_);
-	auto feed{collector::factory::feed(info.feed_uri_)};
 	auto src{collector::factory::source(info.source_uri_)};
-	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.data_uri_));
+	auto feed{collector::factory::feed(info.dest_)};
+	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
 	src->fetch_to(*feed);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -20,17 +20,17 @@ void collect()
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::metadata metadata{keeper_cfg};
-	const auto series_info{metadata.load()};
-	for (auto const& info : series_info)
+	const auto sources{metadata.load()};
+	for (auto const& source_info : sources)
 	{
-		if (!info.pending_)
+		if (!source_info.pending_)
 		{
 			continue;
 		}
 		try
 		{
-			collect(info, keeper_cfg);
-			metadata.drop_pending_flag(info.id_);
+			process_source(source_info, keeper_cfg);
+			metadata.drop_pending_flag(source_info.source_id_);
 		}
 		catch (std::exception const& ex)
 		{

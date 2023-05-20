@@ -1,19 +1,17 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include <iostream>
+#include <initializer_list>
 #include <fstream>
 #include <filesystem>
 #include <limits>
+#include <memory>
 #include <span>
 #include <string>
 #include <stdexcept>
+#include <sstream>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 
 using namespace std::literals;
-
-#include <shared/shared.hpp>

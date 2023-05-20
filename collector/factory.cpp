@@ -12,15 +12,16 @@ std::unique_ptr<collector::source::base> collector::factory::_create_file(std::s
 	return std::make_unique<source::file>(folder_path / file_name);
 }
 //----------------------------------------------------------------------------------------------------------
-std::unique_ptr<collector::source::feed> collector::factory::feed(feed_uri const& uri)
+std::unique_ptr<collector::source::feed> collector::factory::feed(keeper::metadata::feed_info const& info)
 {
+	feed_uri const uri{info.feed_uri_};
 	if (uri.feed_name() == "finam_daily_csv")
 	{
-		return std::make_unique<feed::finam_daily_csv>(uri.field_name());
+		return std::make_unique<feed::finam_daily_csv>(info.feed_args_);
 	}
 	if (uri.feed_name() == "linear_generator")
 	{
-		return std::make_unique<feed::linear_generator>(uri.field_name());
+		return std::make_unique<feed::linear_generator>(info.feed_args_);
 	}
 	throw std::runtime_error("unknown feed in uri "s + uri.to_string());
 }

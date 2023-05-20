@@ -14,19 +14,14 @@ namespace collector::feed
 		: public source::feed
 	{
 	private:
-		using row_t = std::array<double, 2>;	// x, y
+		const std::size_t dst_idx_x_;
+		const std::size_t dst_idx_y_;
 
 	private:
-		static constexpr long long row_count_{200};
-		static constexpr double a_{0.02};
-		static constexpr double b_{0.01};
-
-		std::vector<row_t>	data_;
-		std::ptrdiff_t		field_idx_to_store_{-1}; // index in row to store to dest
-		std::unique_ptr<keeper::data_write>	dest_;
-
+		static std::size_t _index(std::vector<std::string> const& list, std::string const& value);
+		
 	public:
-		linear_generator(std::string const& field_name);
+		linear_generator(std::vector<std::string> const& feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

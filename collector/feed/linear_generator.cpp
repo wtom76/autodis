@@ -2,25 +2,37 @@
 #include "linear_generator.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-collector::feed::linear_generator::linear_generator(std::string const& field_name)
-	: field_idx_to_store_{field_name == "x" ? 0 : (field_name == "y" ? 1 : -1)}
+std::size_t collector::feed::linear_generator::_index(std::vector<std::string> const& list, std::string const& value)
 {
-	if (field_idx_to_store_ == -1)
+	std::size_t const idx{static_cast<std::size_t>(std::distance(list.cbegin(), std::ranges::find(list, value)))};
+	if (idx >= list.size())
 	{
-		throw std::runtime_error("requested field is unknown: \""s + field_name + '\"');
+		throw std::runtime_error("feed arguments for linear generator do not contain "s + value);
 	}
+	return idx;
+}
+
+//---------------------------------------------------------------------------------------------------------
+collector::feed::linear_generator::linear_generator(std::vector<std::string> const& feed_args)
+	: dst_idx_x_{_index(feed_args, "x"s)}
+	, dst_idx_y_{_index(feed_args, "y"s)}
+{
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::linear_generator::start(std::unique_ptr<keeper::data_write> dest)
 {
-	dest_ = std::move(dest);
+	constexpr long long row_count_{200};
+	constexpr double a_{0.02};
+	constexpr double b_{0.01};
 
-	data_.clear();
-	data_.reserve(row_count_);
-	for (long long idx{0}; idx != row_count_; ++idx)
+	std::vector<double> values(2, 0.);
+	for (long long x{0}; x != row_count_; ++x)
 	{
-		data_.emplace_back(row_t{static_cast<double>(idx), a_ * idx + b_});
+		values[dst_idx_x_] = x;
+		values[dst_idx_y_] = a_ * x + b_;
+		dest->add(std::make_pair(x, values));
 	}
+	dest->finish();
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::linear_generator::read(std::span<const char>)
@@ -29,12 +41,4 @@ size_t collector::feed::linear_generator::read(std::span<const char>)
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::linear_generator::finish(std::span<const char>)
-{
-	for (long long idx{0}; idx != row_count_; ++idx)
-	{
-		dest_->add(std::make_pair(idx, data_[idx][field_idx_to_store_]));
-	}
-
-	dest_->finish();
-	dest_.reset();
-}
+{}

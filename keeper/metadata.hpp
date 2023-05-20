@@ -1,6 +1,7 @@
 #pragma once
-#include "framework.hpp"
 #include <pqxx/pqxx>
+#include "framework.hpp"
+#include "data_uri.hpp"
 
 namespace keeper
 {
@@ -12,14 +13,24 @@ namespace keeper
 	class metadata
 	{
 	public:
-		struct series_info
+		//---------------------------------------------------------------------------------------------------------
+		// struct feed_info
+		//---------------------------------------------------------------------------------------------------------
+		struct feed_info
 		{
-			using id_t = long long;
-			id_t		id_{0};
-			std::string	data_uri_;
-			std::string	feed_uri_;
+			std::string					feed_uri_;
+			std::vector<std::string>	feed_args_;
+			std::vector<data_uri>		data_uri_;
+		};
+		//---------------------------------------------------------------------------------------------------------
+		// struct source_info
+		//---------------------------------------------------------------------------------------------------------
+		struct source_info
+		{
+			long long	source_id_{0};
 			std::string	source_uri_;
-			bool		pending_{false};	// flag to update data from source
+			bool		pending_{false};	// flag that source has new data to fetch
+			feed_info	dest_;
 		};
 
 	private:
@@ -27,7 +38,7 @@ namespace keeper
 
 	public:
 		metadata(const config& cfg);
-		std::vector<series_info> load();
-		void drop_pending_flag(series_info::id_t series_id);
+		std::vector<source_info> load();
+		void drop_pending_flag(long long source_id);
 	};
 }

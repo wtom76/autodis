@@ -18,9 +18,5 @@ namespace collector
 		{
 			return part(0);
 		}
-		const std::string& field_name() const noexcept
-		{
-			return part(1);
-		}
 	};
 }

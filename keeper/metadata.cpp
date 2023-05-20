@@ -7,38 +7,55 @@ keeper::metadata::metadata(const config& cfg)
 	: con_{cfg.db_connection_}
 {
 	// drop pending flag
-	con_.prepare("dpf", "update metadata.data_registry set pending = false where id = $1");
+	con_.prepare("dpf", "update metadata.source_registry set pending = false where id = $1");
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::series_info> keeper::metadata::load()
+std::vector<keeper::metadata::source_info> keeper::metadata::load()
 {
-	pqxx::work t{con_};
-	const pqxx::result r{t.exec_params(
-		"select dr.id, dr.uri, fr.uri, sr.uri, dr.pending "
-		"from metadata.data_registry dr "
-		"inner join metadata.feed_registry fr on dr.feed_id = fr.id "
-		"inner join metadata.source_registry sr on dr.source_id = sr.id")
-	};
-	std::vector<keeper::metadata::series_info> result;
-	if (r.empty())
+	std::vector<source_info> result;
 	{
-		return result;
-	}
-	result.reserve(r.size());
-	for (const pqxx::row& rec : r)
-	{
-		result.emplace_back(
-			rec[0].as<long long>(),
-			rec[1].as<std::string>(),
-			rec[2].as<std::string>(),
-			rec[3].as<std::string>(),
-			rec[4].as<bool>()
-		);
+		std::unordered_map<long long/*source id*/, source_info> source_map;
+
+		{
+			pqxx::work t{con_};
+			const pqxx::result r{t.exec_params("select source_id, source_uri, feed_uri, feed_args, data_uri, pending from metadata.metadata_view")};
+			if (r.empty())
+			{
+				return {};
+			}
+			for (const pqxx::row& rec : r)
+			{
+				long long	source_id{rec[0].as<long long>()};
+				std::string	suri{rec[1].as<std::string>()};
+				std::string	furi{rec[2].as<std::string>()};
+				std::string	fargs{rec[3].as<std::string>()};
+				data_uri	duri{rec[4].as<std::string>()};
+				bool		pending{rec[5].as<bool>()};
+
+				source_info& source{source_map[source_id]};
+				source.source_id_ = source_id;
+				source.source_uri_ = std::move(suri);
+				source.pending_ = pending;
+
+				feed_info& feed{source.dest_};
+				if (feed.feed_uri_.empty())
+				{
+					feed.feed_uri_ = std::move(furi);
+				}
+				feed.feed_args_.emplace_back(std::move(fargs));
+				feed.data_uri_.emplace_back(std::move(duri));
+			}
+		}
+		result.reserve(source_map.size());
+		for (auto& source_pr : source_map)
+		{
+			result.emplace_back(std::move(source_pr.second));
+		}
 	}
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::metadata::drop_pending_flag(series_info::id_t series_id)
+void keeper::metadata::drop_pending_flag(long long series_id)
 {
 	pqxx::work t{con_};
 	t.exec_prepared("dpf", series_id);

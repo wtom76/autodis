@@ -18,7 +18,7 @@ namespace collector::source
 	private:
 		void _data_callback(char const* data, size_t size, size_t nmemb);
 	public:
-		rest(std::string url);
+		rest(std::string source_args);
 
 		// base impl
 		void fetch_to(feed& dest) override;

@@ -29,6 +29,7 @@ namespace keeper
 		{
 			long long	source_id_{0};
 			std::string	source_uri_;
+			std::string	source_args_;
 			bool		pending_{false};	// flag that source has new data to fetch
 			feed_info	dest_;
 		};

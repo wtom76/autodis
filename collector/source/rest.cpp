@@ -3,8 +3,8 @@
 #include "curl.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-collector::source::rest::rest(std::string url)
-	: url_{std::move(url)}
+collector::source::rest::rest(std::string source_args)
+	: url_{std::move(source_args)}
 {
 }
 //---------------------------------------------------------------------------------------------------------

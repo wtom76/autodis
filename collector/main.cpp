@@ -9,7 +9,7 @@
 void process_source(keeper::metadata::source_info const& info, keeper::config const& keeper_cfg)
 {
 	assert(info.pending_);
-	auto src{collector::factory::source(info.source_uri_)};
+	auto src{collector::factory::source(info.source_uri_, info.source_args_)};
 	auto feed{collector::factory::feed(info.dest_)};
 	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
 	src->fetch_to(*feed);

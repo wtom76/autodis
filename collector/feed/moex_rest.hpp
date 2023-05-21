@@ -14,12 +14,28 @@ namespace collector::feed
 		: public source::feed
 	{
 	private:
-		std::unique_ptr<keeper::data_write>	dest_;
-		std::ptrdiff_t	field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
+		struct row
+		{
+			int					date_{0};
+			std::vector<double>	data_;
+
+			row() = default;
+			row(std::size_t fields_num) : data_(fields_num, 0.) {}
+		};
 
 	private:
+		std::vector<std::string>			feed_args_;
+		std::unique_ptr<keeper::data_write>	dest_;
+		std::ptrdiff_t						field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
+		std::vector<char>					buffer_;
+		row									result_;
+
+	private:
+		void _parse_date(std::string dt_str);
+		void _parse_store();
+
 	public:
-		moex_rest();
+		moex_rest(std::vector<std::string> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

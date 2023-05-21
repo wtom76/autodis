@@ -16,8 +16,8 @@ namespace collector::feed
 	private:
 		struct row
 		{
-			int						date_{0};
-			std::vector<double>		data_;
+			int					date_{0};
+			std::vector<double>	data_;
 
 			row(std::size_t fields_num) : data_(fields_num, 0.) {}
 		};

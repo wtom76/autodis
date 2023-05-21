@@ -18,7 +18,7 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load()
 
 		{
 			pqxx::work t{con_};
-			const pqxx::result r{t.exec_params("select source_id, source_uri, feed_uri, feed_args, data_uri, pending from metadata.metadata_view")};
+			const pqxx::result r{t.exec_params("select source_id, source_uri, source_args, feed_uri, feed_args, data_uri, pending from metadata.metadata_view")};
 			if (r.empty())
 			{
 				return {};
@@ -27,14 +27,16 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load()
 			{
 				long long	source_id{rec[0].as<long long>()};
 				std::string	suri{rec[1].as<std::string>()};
-				std::string	furi{rec[2].as<std::string>()};
-				std::string	fargs{rec[3].as<std::string>()};
-				data_uri	duri{rec[4].as<std::string>()};
-				bool		pending{rec[5].as<bool>()};
+				std::string	sargs{rec[2].as<std::string>({})};
+				std::string	furi{rec[3].as<std::string>()};
+				std::string	fargs{rec[4].as<std::string>()};
+				data_uri	duri{rec[5].as<std::string>()};
+				bool		pending{rec[6].as<bool>()};
 
 				source_info& source{source_map[source_id]};
 				source.source_id_ = source_id;
 				source.source_uri_ = std::move(suri);
+				source.source_args_ = std::move(sargs);
 				source.pending_ = pending;
 
 				feed_info& feed{source.dest_};

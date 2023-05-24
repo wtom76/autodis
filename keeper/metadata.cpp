@@ -7,7 +7,7 @@ keeper::metadata::metadata(const config& cfg)
 	: con_{cfg.db_connection_}
 {
 	// drop pending flag
-	con_.prepare("dpf", "update metadata.source_registry set pending = false where id = $1");
+	con_.prepare("dpf", "call \"metadata\".drop_pending_flag($1)");
 }
 //---------------------------------------------------------------------------------------------------------
 std::vector<keeper::metadata::source_info> keeper::metadata::load()

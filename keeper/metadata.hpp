@@ -31,6 +31,7 @@ namespace keeper
 			std::string	source_uri_;
 			std::string	source_args_;
 			bool		pending_{false};	// flag that source has new data to fetch
+			bool		always_{false};		// true if pending_ shouldn't be dropped after data acquisition
 			feed_info	dest_;
 		};
 

@@ -11,29 +11,16 @@ CREATE TYPE metadata.data_registry AS (
 	field_description text,
 	uri text);
 
--- DROP TYPE metadata.data_registry_id_seq;
-
-CREATE TYPE metadata.data_registry_id_seq AS (
-	"last_value" int8,
-	log_cnt int8,
-	is_called bool);
-
 -- DROP TYPE metadata.feed_registry;
 
 CREATE TYPE metadata.feed_registry AS (
 	id serial4,
 	uri text);
 
--- DROP TYPE metadata.feed_registry_id_seq;
-
-CREATE TYPE metadata.feed_registry_id_seq AS (
-	"last_value" int8,
-	log_cnt int8,
-	is_called bool);
-
 -- DROP TYPE metadata.human_metadata;
 
 CREATE TYPE metadata.human_metadata AS (
+	"always" bool,
 	pending bool,
 	field_description text,
 	"type" text,
@@ -42,13 +29,6 @@ CREATE TYPE metadata.human_metadata AS (
 	feed_args text,
 	source_uri text,
 	source_args text);
-
--- DROP TYPE metadata.index_type_id_seq;
-
-CREATE TYPE metadata.index_type_id_seq AS (
-	"last_value" int8,
-	log_cnt int8,
-	is_called bool);
 
 -- DROP TYPE metadata.metadata_view;
 
@@ -59,7 +39,8 @@ CREATE TYPE metadata.metadata_view AS (
 	feed_uri text,
 	feed_args text,
 	data_uri text,
-	pending bool);
+	pending bool,
+	"always" bool);
 
 -- DROP TYPE metadata.source_binding;
 
@@ -69,13 +50,6 @@ CREATE TYPE metadata.source_binding AS (
 	source_id int4,
 	feed_args text);
 
--- DROP TYPE metadata.source_binding_id_seq;
-
-CREATE TYPE metadata.source_binding_id_seq AS (
-	"last_value" int8,
-	log_cnt int8,
-	is_called bool);
-
 -- DROP TYPE metadata.source_registry;
 
 CREATE TYPE metadata.source_registry AS (
@@ -83,14 +57,8 @@ CREATE TYPE metadata.source_registry AS (
 	uri text,
 	args text,
 	pending bool,
-	feed_id int4);
-
--- DROP TYPE metadata.source_registry_id_seq;
-
-CREATE TYPE metadata.source_registry_id_seq AS (
-	"last_value" int8,
-	log_cnt int8,
-	is_called bool);
+	feed_id int4,
+	"always" bool);
 
 -- DROP TYPE metadata.type_registry;
 
@@ -296,9 +264,15 @@ CREATE TABLE metadata.source_registry (
 	uri text NOT NULL,
 	args text NULL,
 	pending bool NOT NULL DEFAULT false,
-	feed_id int4 NULL
+	feed_id int4 NULL,
+	"always" bool NULL, -- always penging. pending flag is not dropped
+	CONSTRAINT sr_always_pending CHECK ((((always = true) AND (pending = true)) OR (always = false)))
 );
 CREATE UNIQUE INDEX source_registry_id_idx ON metadata.source_registry USING btree (id);
+
+-- Column comments
+
+COMMENT ON COLUMN metadata.source_registry."always" IS 'always penging. pending flag is not dropped';
 
 
 -- metadata.type_registry definition
@@ -317,7 +291,8 @@ CREATE TABLE metadata.type_registry (
 -- metadata.human_metadata source
 
 CREATE OR REPLACE VIEW metadata.human_metadata
-AS SELECT sr.pending,
+AS SELECT sr.always,
+    sr.pending,
     dr.field_description,
     tr.name AS type,
     dr.uri AS data_uri,
@@ -342,9 +317,19 @@ AS SELECT sr.id AS source_id,
     fr.uri AS feed_uri,
     sb.feed_args,
     dr.uri AS data_uri,
-    sr.pending
+    sr.pending,
+    sr.always
    FROM metadata.source_binding sb
      JOIN metadata.data_registry dr ON sb.data_id = dr.id
      JOIN metadata.source_registry sr ON sb.source_id = sr.id
      JOIN metadata.feed_registry fr ON sr.feed_id = fr.id
   ORDER BY dr.uri;
+
+
+
+CREATE OR REPLACE PROCEDURE metadata.drop_pending_flag(IN source_registry_id integer)
+ LANGUAGE sql
+AS $procedure$
+update metadata.source_registry set pending = false where id = source_registry_id and "always" = false;
+$procedure$
+;

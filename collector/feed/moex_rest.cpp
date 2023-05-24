@@ -10,7 +10,7 @@ collector::feed::moex_rest::moex_rest(std::vector<std::string> feed_args)
 // "2023-05-21..." -> "2023052121..." -> 20230521
 void collector::feed::moex_rest::_parse_date(std::string dt_str)
 {
-	if (dt_str.size() <= 10)
+	if (dt_str.size() < 10)
 	{
 		throw std::runtime_error{"unknown SYSTIME format: \""s + dt_str + "\""};
 	}

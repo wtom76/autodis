@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.22.0)
 add_library(util OBJECT
 	uri.cpp
 	field_map.cpp
+	file_system.cpp
 )
 
 target_include_directories(util PRIVATE

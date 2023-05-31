@@ -53,23 +53,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try
 	{
+		shared::util::spdlog_async_init spdlog_init;
+		auto log{shared::util::create_console_logger()};
 		autodis::model_001{}.run();
-
-		//double min_msqrerr{std::numeric_limits<double>::max()};
-		//std::size_t best_n{0};
-		//for (std::size_t n{1}; n <= 20; ++n)
-		//{
-		//	for (int i{10}; i; --i)
-		//	{
-		//		const double err{test({1, n, 1})};
-		//		if (err < min_msqrerr)
-		//		{
-		//			min_msqrerr = err;
-		//			best_n = n;
-		//		}
-		//	}
-		//}
-		//std::cout << "test ended\nbest internal layer size: " << best_n << "\nmean square error of best result: " << min_msqrerr << std::endl;
 	}
 	catch (std::exception const& ex)
 	{

@@ -4,6 +4,7 @@ add_library(util OBJECT
 	uri.cpp
 	field_map.cpp
 	file_system.cpp
+	logger.cpp
 )
 
 target_include_directories(util PRIVATE
@@ -22,4 +23,6 @@ endif()
 target_precompile_headers(util PRIVATE pch.hpp)
 
 find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(util PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
+
 find_package(nlohmann_json CONFIG REQUIRED)

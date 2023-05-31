@@ -346,7 +346,7 @@ namespace learning
 	template <class net>
 	double rprop<net>::teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token)
 	{
-		constexpr std::int64_t epochs_max{10000};
+		constexpr std::int64_t epochs_max{1000000};
 
 		pview.begin_teach();
 

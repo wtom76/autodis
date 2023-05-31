@@ -41,8 +41,8 @@ target_link_libraries(collector PRIVATE keeper)
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(collector PRIVATE libpqxx::pqxx)
 
-find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(collector PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+#find_package(spdlog CONFIG REQUIRED)
+#target_link_libraries(collector PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(collector PRIVATE nlohmann_json::nlohmann_json)

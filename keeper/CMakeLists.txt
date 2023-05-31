@@ -22,10 +22,15 @@ endif()
 
 target_precompile_headers(keeper PRIVATE pch.hpp)
 
+target_link_directories(keeper PRIVATE
+	${CMAKE_BINARY_DIR}/shared
+)
+target_link_libraries(keeper PRIVATE shared)
+
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(keeper PRIVATE libpqxx::pqxx)
 
-find_package(spdlog CONFIG REQUIRED)
+#find_package(spdlog CONFIG REQUIRED)
 #target_link_libraries(keeper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 
 find_package(nlohmann_json CONFIG REQUIRED)

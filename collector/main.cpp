@@ -13,6 +13,8 @@ void process_source(keeper::metadata::source_info const& info, keeper::config co
 	auto feed{collector::factory::feed(info.dest_)};
 	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
 	src->fetch_to(*feed);
+
+	SPDLOG_LOGGER_INFO(shared::util::log(), "processed source '{}' ({})", info.source_uri_, info.source_args_);
 }
 //---------------------------------------------------------------------------------------------------------
 void collect()
@@ -34,7 +36,7 @@ void collect()
 		}
 		catch (std::exception const& ex)
 		{
-			std::cout << ex.what() << std::endl;
+			SPDLOG_LOGGER_ERROR(shared::util::log(), ex.what());
 		}
 	}
 }
@@ -43,7 +45,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
 	try
 	{
-		//auto const curl_code{curl_global_init(CURL_GLOBAL_ALL)};
+		shared::util::spdlog_async_init spdlog_init;
+		auto log{shared::util::create_logger("log")};
+
 		curl_global_init(CURL_GLOBAL_ALL);	// TODO: call on demand
 		
 		collect();

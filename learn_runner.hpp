@@ -7,10 +7,11 @@ namespace autodis
 	// class learn_runner
 	//----------------------------------------------------------------------------------------------------------
 	template <class net>
-	class learn_runner
+	class learn_runner :
+		private shared::util::logged
 	{
 	private:
-		double							min_err_{0.01};	// TODO: pass as arg or config
+		double							min_err_{0.001};	// TODO: pass as arg or config
 		learning::progress_view			progress_view_;
 		typename net::config_t const&	cfg_;
 		net&							network_;
@@ -27,7 +28,7 @@ namespace autodis
 			}
 			catch (std::exception const& ex)
 			{
-				std::cout << ex.what() << std::endl;
+				SPDLOG_LOGGER_ERROR(log(), ex.what());
 			}
 		}
 		//----------------------------------------------------------------------------------------------------------

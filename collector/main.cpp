@@ -8,13 +8,15 @@
 //---------------------------------------------------------------------------------------------------------
 void process_source(keeper::metadata::source_info const& info, keeper::config const& keeper_cfg)
 {
+	SPDLOG_LOGGER_INFO(shared::util::log(), "processing source '{}' ({})...", info.source_uri_, info.source_args_);
+
 	assert(info.pending_);
 	auto src{collector::factory::source(info.source_uri_, info.source_args_)};
 	auto feed{collector::factory::feed(info.dest_)};
 	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
 	src->fetch_to(*feed);
 
-	SPDLOG_LOGGER_INFO(shared::util::log(), "processed source '{}' ({})", info.source_uri_, info.source_args_);
+	SPDLOG_LOGGER_INFO(shared::util::log(), "...done");
 }
 //---------------------------------------------------------------------------------------------------------
 void collect()
@@ -43,18 +45,22 @@ void collect()
 //---------------------------------------------------------------------------------------------------------
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+	shared::util::spdlog_async_init const spdlog_init;
+	auto log{shared::util::create_logger()};
+	SPDLOG_LOGGER_INFO(log, "collector started");
+
 	try
 	{
-		shared::util::spdlog_async_init spdlog_init;
-		auto log{shared::util::create_logger("log")};
-
 		curl_global_init(CURL_GLOBAL_ALL);	// TODO: call on demand
 		
 		collect();
 	}
 	catch (std::exception const& ex)
 	{
-		std::cout << ex.what() << std::endl;
+		SPDLOG_LOGGER_CRITICAL(log, ex.what());
 	}
+
+	SPDLOG_LOGGER_INFO(log, "collector finished");
+
 	return 0;
 }

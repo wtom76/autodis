@@ -12,15 +12,13 @@ namespace shared::util
 		using func_t = std::function<void(data&)>;
 	private:
 		data	data_;
-		func_t	ctor_func_;
 		func_t	dtor_func_;
 
 	public:
 		scope_lifetime(func_t&& ctor_func, func_t&& dtor_func)
-			: ctor_func_{std::move(ctor_func)}
-			, dtor_func_{std::move(dtor_func)}
+			: dtor_func_{std::move(dtor_func)}
 		{
-			ctor_func_(data_);
+			ctor_func(data_);
 		}
 		~scope_lifetime()
 		{
@@ -34,15 +32,13 @@ namespace shared::util
 	public:
 		using func_t = std::function<void()>;
 	private:
-		func_t	ctor_func_;
 		func_t	dtor_func_;
 
 	public:
 		scope_lifetime(func_t&& ctor_func, func_t&& dtor_func)
-			: ctor_func_{std::move(ctor_func)}
-			, dtor_func_{std::move(dtor_func)}
+			: dtor_func_{std::move(dtor_func)}
 		{
-			ctor_func_();
+			ctor_func();
 		}
 		~scope_lifetime()
 		{

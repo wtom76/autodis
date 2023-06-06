@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------------------------------------------
 std::unique_ptr<collector::source::base> collector::factory::_create_file(std::string file_name)
 {
-	static const std::filesystem::path folder_path{"data_source"};
+	static const std::filesystem::path folder_path{shared::util::exe_dir_path() / "data_source"};
 	return std::make_unique<source::file>(folder_path / file_name);
 }
 //----------------------------------------------------------------------------------------------------------

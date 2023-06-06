@@ -14,6 +14,8 @@ namespace learning
 	class progress_view : private shared::util::logged
 	{
 		double min_err_{-1.};
+		std::int64_t epoch_{0};
+
 	public:
 		double min_err() const noexcept
 		{
@@ -30,11 +32,11 @@ namespace learning
 		}
 		void set_last(double min_err)
 		{
-			SPDLOG_LOGGER_INFO(log(), "last err: {}, min err: {}", min_err, min_err_);
+			SPDLOG_LOGGER_INFO(log(), "epoch: {}. last err: {}, min err: {}", epoch_, min_err, min_err_);
 		}
 		void set_epoch(std::int64_t epoch)
 		{
-			SPDLOG_LOGGER_INFO(log(), "epoch: {}. ", epoch);
+			epoch_ = epoch;
 		}
 		void end_teach()
 		{

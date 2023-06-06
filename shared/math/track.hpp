@@ -10,7 +10,7 @@ namespace shared::math
 	// creates x(t-1) - x(t), ..., x(t-n) - x(t)
 	// n = depth
 	//---------------------------------------------------------------------------------------------------------
-	void track(data::frame& df, std::size_t src_idx, std::size_t depth)
+	inline void track(data::frame& df, std::size_t src_idx, std::size_t depth)
 	{
 		if (!depth)
 		{

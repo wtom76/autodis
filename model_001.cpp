@@ -69,7 +69,7 @@ void autodis::model_001::_normalize()
 //---------------------------------------------------------------------------------------------------------
 void autodis::model_001::_learn()
 {
-	std::vector<std::size_t> const layers_sizes{10, 20, 1};
+	std::vector<std::size_t> const layers_sizes{10, 40, 1};
 	shared::data::view dw{df_};
 
 	learning::config mfn_cfg{layers_sizes};

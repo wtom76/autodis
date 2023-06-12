@@ -36,8 +36,8 @@ void shared::util::field_map::field_map::map_next_src_name(std::string const& sr
 {
 	if (src_name == index_src_name_)
 	{
-		src_idx_dst_idx_.emplace_back(idx_null_);
 		index_field_src_idx_ = src_idx_dst_idx_.size();
+		src_idx_dst_idx_.emplace_back(idx_null_);
 		return;
 	}
 	auto const iter{std::ranges::find(src_name_dst_idx_, src_name, [](auto const& pr) noexcept -> std::string const& { return pr.src_; })};

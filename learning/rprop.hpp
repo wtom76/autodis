@@ -188,8 +188,7 @@ namespace learning
 			auto& grad_terms = grad_terms_->layers_[layer_idx + 1];
 			for (size_t src_node_idx = 0; src_node_idx < dEdw_off.size(); ++src_node_idx)
 			{
-				for (size_t dst_node_idx = 0; dst_node_idx < dEdw_off[src_node_idx].size();
-					++dst_node_idx)
+				for (size_t dst_node_idx = 0; dst_node_idx < dEdw_off[src_node_idx].size(); ++dst_node_idx)
 				{
 					dEdw_off[src_node_idx][dst_node_idx]
 						+= grad_terms[dst_node_idx] * outputs[src_node_idx];

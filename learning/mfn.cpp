@@ -158,27 +158,6 @@ void learning::multilayer_feed_forward::forward()
 		}
 	}
 }
-////---------------------------------------------------------------------------------------------------------
-//void to_json(json& j, const multilayer_feed_forward::biases& src)
-//{
-//	j = json{src.layers_};
-//}
-////---------------------------------------------------------------------------------------------------------
-//void from_json(const json& j, multilayer_feed_forward::biases& dst)
-//{
-//	dst.layers_ = j.get<decltype(dst.layers_)>();
-//}
-////---------------------------------------------------------------------------------------------------------
-//void to_json(json& j, const multilayer_feed_forward::weights& src)
-//{
-//	j = json{src.layers_};
-//}
-////---------------------------------------------------------------------------------------------------------
-//void from_json(const json& j, multilayer_feed_forward::weights& dst)
-//{
-//	dst.layers_ = j.get<decltype(dst.layers_)>();
-//}
-
 //---------------------------------------------------------------------------------------------------------
 void learning::to_json(nlohmann::json& j, const multilayer_feed_forward& src)
 {

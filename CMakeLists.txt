@@ -26,6 +26,7 @@ add_subdirectory(learning)
 add_executable(autodis
 	model_000.cpp
 	model_001.cpp
+	model_002.cpp
 	main.cpp
 )
 

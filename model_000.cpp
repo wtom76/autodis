@@ -17,7 +17,7 @@ void autodis::model_000::_load_data()
 			"test_linear/y"s
 		};
 		dr.read(uris, df_);
-		assert(std::ranges::is_sorted(df.index()));
+		assert(std::ranges::is_sorted(df_.index()));
 		df_.name(0) = "x"s;
 		df_.name(1) = "y"s;
 	}

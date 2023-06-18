@@ -1,12 +1,12 @@
 #include "pch.hpp"
-#include "model_002.hpp"
+#include "model_001.hpp"
 #include "learn_runner.hpp"
 #include <shared/math/target_delta.hpp>
 #include <shared/math/track.hpp>
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
-void autodis::model_002::_load_data()
+void autodis::model::model_001::_load_data()
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
@@ -34,48 +34,29 @@ void autodis::model_002::_load_data()
 		df.name(0) = "GOLD_close"s;
 		df_.outer_join(std::move(df));
 	}
-	{
-		std::vector<keeper::data_uri> const uris
-		{
-			"000003/f4"s			// IMOEX close
-		};
-		shared::data::frame df;
-		dr.read(uris, df);
-		assert(std::ranges::is_sorted(df.index()));
-		df.name(0) = "IMOEX_close"s;
-		df_.outer_join(std::move(df));
-	}
-	original_series_count_ = df_.col_count();
-	assert(original_series_count_ == 3);
 }
 //---------------------------------------------------------------------------------------------------------
 // add computed target to df_
-void autodis::model_002::_create_target()
+void autodis::model::model_001::_create_target()
 {
 	shared::math::target_delta(df_, 0, df_);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model_002::_create_features()
+void autodis::model::model_001::_create_features()
 {
 	constexpr std::size_t track_depth{5};
-	for (size_t i{0}; i != original_series_count_; ++i)
-	{
-		shared::math::track(df_, i, track_depth);
-	}
+	shared::math::track(df_, 0, track_depth);
+	shared::math::track(df_, 1, track_depth);
 }
 //---------------------------------------------------------------------------------------------------------
-// 1. delete original closes
-void autodis::model_002::_clear_data()
+void autodis::model::model_001::_clear_data()
 {
-	// 1.
-	for (size_t i{0}; i != original_series_count_; ++i)
-	{
-		df_.delete_series(0);	// always 0. 1 will be 0 after first delete
-	}
+	df_.delete_series(0);
+	df_.delete_series(0);	// 1 will be 0 after first delete
 	df_ = df_.clear_lacunas();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model_002::_normalize()
+void autodis::model::model_001::_normalize()
 {
 	norm_.clear();
 	norm_.reserve(df_.col_count());
@@ -86,9 +67,9 @@ void autodis::model_002::_normalize()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model_002::_learn()
+void autodis::model::model_001::_learn()
 {
-	std::vector<std::size_t> const layers_sizes{15, 40, 1};
+	std::vector<std::size_t> const layers_sizes{10, 40, 1};
 	shared::data::view dw{df_};
 
 	learning::config mfn_cfg{layers_sizes};
@@ -105,12 +86,7 @@ void autodis::model_002::_learn()
 			"GOLD_close_delta(t-2)"s,
 			"GOLD_close_delta(t-3)"s,
 			"GOLD_close_delta(t-4)"s,
-			"GOLD_close_delta(t-5)"s,
-			"IMOEX_close_delta(t-1)"s,
-			"IMOEX_close_delta(t-2)"s,
-			"IMOEX_close_delta(t-3)"s,
-			"IMOEX_close_delta(t-4)"s,
-			"IMOEX_close_delta(t-5)"s
+			"GOLD_close_delta(t-5)"s
 		},
 		{
 			"GAZP_close_delta(t+1)"s
@@ -123,7 +99,7 @@ void autodis::model_002::_learn()
 }
 //---------------------------------------------------------------------------------------------------------
 // learn
-void autodis::model_002::run()
+void autodis::model::model_001::run()
 {
 	_load_data();
 	_create_target();

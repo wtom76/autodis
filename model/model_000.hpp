@@ -3,12 +3,13 @@
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
 
-namespace autodis
+namespace autodis::model
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class model_001
+	// class model_000
+	// testing model
 	//---------------------------------------------------------------------------------------------------------
-	class model_001
+	class model_000
 	{
 	// types
 	private:
@@ -24,8 +25,6 @@ namespace autodis
 	private:
 		void _load_data();
 		void _create_target();
-		void _create_features();
-		void _clear_data();
 		void _normalize();
 		void _learn();
 

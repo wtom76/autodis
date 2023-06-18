@@ -5,7 +5,8 @@
 namespace learning::activation
 {
 	//-----------------------------------------------------------------------------------------------------
-	// abstract class Function
+	// abstract class function
+	// TODO: get rid of viruality here
 	//-----------------------------------------------------------------------------------------------------
 	class function
 	{

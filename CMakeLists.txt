@@ -22,11 +22,9 @@ add_subdirectory(shared)
 add_subdirectory(keeper)
 add_subdirectory(collector)
 add_subdirectory(learning)
+add_subdirectory(model)
 
 add_executable(autodis
-	model_000.cpp
-	model_001.cpp
-	model_002.cpp
 	main.cpp
 )
 
@@ -43,6 +41,7 @@ target_precompile_headers(autodis PUBLIC pch.hpp)
 target_link_libraries(autodis PRIVATE shared)
 target_link_libraries(autodis PRIVATE keeper)
 target_link_libraries(autodis PRIVATE learning)
+target_link_libraries(autodis PRIVATE model)
 
 #find_package(spdlog CONFIG REQUIRED)
 #target_link_libraries(autodis PRIVATE spdlog::spdlog spdlog::spdlog_header_only)

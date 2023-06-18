@@ -4,7 +4,7 @@
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
-void autodis::model_000::_load_data()
+void autodis::model::model_000::_load_data()
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
@@ -23,7 +23,7 @@ void autodis::model_000::_load_data()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model_000::_normalize()
+void autodis::model::model_000::_normalize()
 {
 	norm_.clear();
 	norm_.reserve(df_.col_count());
@@ -34,7 +34,7 @@ void autodis::model_000::_normalize()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model_000::_learn()
+void autodis::model::model_000::_learn()
 {
 	std::vector<std::size_t> const layers_sizes{1, 4, 1};
 	shared::data::view dw{df_};
@@ -57,7 +57,7 @@ void autodis::model_000::_learn()
 }
 //---------------------------------------------------------------------------------------------------------
 // learn
-void autodis::model_000::run()
+void autodis::model::model_000::run()
 {
 	_load_data();
 

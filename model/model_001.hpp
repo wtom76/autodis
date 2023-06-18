@@ -3,12 +3,12 @@
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
 
-namespace autodis
+namespace autodis::model
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class model_002
+	// class model_001
 	//---------------------------------------------------------------------------------------------------------
-	class model_002
+	class model_001
 	{
 	// types
 	private:
@@ -19,7 +19,6 @@ namespace autodis
 		frame_t	df_;
 		norm_t	norm_;
 		double	min_err_{0};
-		size_t	original_series_count_{0};
 
 	// methods
 	private:

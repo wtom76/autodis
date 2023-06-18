@@ -1,8 +1,8 @@
 #include "pch.hpp"
 #include "learn_runner.hpp"
-#include "model_000.hpp"
-#include "model_001.hpp"
-#include "model_002.hpp"
+#include "model/model_000.hpp"
+#include "model/model_001.hpp"
+#include "model/model_002.hpp"
 
 //----------------------------------------------------------------------------------------------------------
 shared::data::frame test_load_data(std::vector<keeper::data_uri> const& uris)
@@ -57,7 +57,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 	{
 		shared::util::spdlog_async_init spdlog_init;
 		auto log{shared::util::create_console_logger()};
-		autodis::model_002{}.run();
+		autodis::model::model_002{}.run();
 	}
 	catch (std::exception const& ex)
 	{

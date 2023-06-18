@@ -139,7 +139,7 @@ namespace learning
 		const size_t layer_count{network.output_layers().size()};
 		assert(layer_count >= 3); // input, n * hidden, omega
 
-		std::int64_t layer_idx{layer_count - 1};
+		std::int64_t layer_idx{static_cast<std::int64_t>(layer_count) - 1};
 		// 1.
 		{
 			auto& grad_terms{grad_terms_->layers_.back()};
@@ -293,7 +293,7 @@ namespace learning
 		test_set_.clear();
 
 		const size_t src_row_count{src_data_.second.row_count()};
-		const size_t teaching_size{src_row_count * train_fraction};
+		const size_t teaching_size{static_cast<size_t>(src_row_count * train_fraction)};
 		if (!teaching_size || teaching_size > src_row_count)
 		{
 			return;
@@ -365,7 +365,7 @@ namespace learning
 			dEdw_off_->reset(0.);
 			bias_dEdw_off_->reset(0.);
 
-			const size_t teaching_size{teaching_set_.size()};
+			//const size_t teaching_size{teaching_set_.size()};
 			for (size_t row : teaching_set_)
 			{
 				sample_filler_.fill(row, network.input_layer(), sample_targets_);
@@ -401,6 +401,7 @@ namespace learning
 
 		std::size_t true_count{0};
 		std::size_t false_count{0};
+		std::size_t total_count{0};
 
 		for (std::size_t row : test_set_)
 		{
@@ -423,9 +424,10 @@ namespace learning
 				{
 					++false_count;
 				}
+				++total_count;
 				++target_i;
 			}
 		}
-		pview.end_test(true_count, false_count);
+		pview.end_test(true_count, false_count, total_count);
 	}
 }

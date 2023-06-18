@@ -52,10 +52,10 @@ namespace learning
 			SPDLOG_LOGGER_INFO(log(), "result vs tagret: {}, {}, abs err: {}, rel err: {}",
 				result, tagret, result - tagret, (tagret ? (result - tagret) / tagret : 0.));
 		}
-		void end_test(size_t true_count, size_t false_count)
+		void end_test(size_t true_count, size_t false_count, size_t total_count)
 		{
-			SPDLOG_LOGGER_INFO(log(), "end_test: hits vs errors: {}, {}, best mean sqr err: {}",
-				true_count, false_count,  min_err_);
+			SPDLOG_LOGGER_INFO(log(), "end_test: hits/misses/total: {}/{}/{}, best mean sqr err: {}",
+				true_count, false_count, total_count, min_err_);
 		}
 	};
 }

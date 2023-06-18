@@ -94,6 +94,37 @@ namespace shared::math
 	}
 
 	//-----------------------------------------------------------------------------------------------------
+	// class tanh_normalization
+	//-----------------------------------------------------------------------------------------------------
+	class tanh_normalization : public normalization
+	{
+		// data
+	private:
+		range original_range_;
+		range current_range_;
+
+		// methods
+	private:
+	public:
+		explicit tanh_normalization(){}
+		void normalize(std::vector<double>& series) override;
+		double restore(double normalized_val) const override;
+	};
+	//-----------------------------------------------------------------------------------------------------
+	inline void tanh_normalization::normalize(std::vector<double>& series)
+	{
+		original_range_ = range::min_max(series);
+		normalize_tanh(original_range_, series);
+		current_range_ = {-1., 1.};
+	}
+	//-----------------------------------------------------------------------------------------------------
+	inline double tanh_normalization::restore(double normalized_val) const
+	{
+		return (normalized_val - current_range_.min()) * original_range_ / current_range_
+			+ original_range_.min();
+	}
+
+	//-----------------------------------------------------------------------------------------------------
 	// class lognormal
 	//-----------------------------------------------------------------------------------------------------
 	class lognormal : public normalization

@@ -82,7 +82,6 @@ class test_draw_candle
 		-.47f, .3f		// tr
 	};
 	GLuint vertex_buffer_{0};
-	GLuint program_id_{0};
 
 public:
 	test_draw_candle()
@@ -124,6 +123,61 @@ public:
 };
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
+class autodis::visual::chart::chart::gl_context
+{
+	GLuint vao_{0};
+	GLuint vertex_buffer_{0};
+	std::vector<float> vertices_;
+
+public:
+	static constexpr size_t dimentions_{2};
+	static constexpr size_t vertices_in_candle_{6};
+
+public:
+	gl_context()
+	{
+		throw_on_fail(glewInit());
+		glGenVertexArrays(1, &vao_);
+		glBindVertexArray(vao_);
+		glGenBuffers(1, &vertex_buffer_);
+		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+	}
+
+	std::vector<float>& vertices() noexcept { return vertices_; }
+	void draw();
+};
+//---------------------------------------------------------------------------------------------------------
+void autodis::visual::chart::chart::gl_context::draw()
+{
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_.size(), vertices_.data(), GL_STATIC_DRAW);
+
+	// 1st attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		2,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		nullptr             // array buffer offset
+	);
+
+	for (size_t vidx{0}; vidx < vertices_.size();)
+	{
+		glDrawArrays(GL_LINE_STRIP, vidx, 2);
+		vidx += 2;
+		glDrawArrays(GL_TRIANGLES, vidx, 3);
+		vidx += 1;
+		glDrawArrays(GL_TRIANGLES, vidx, 3);
+		vidx += 3;
+	}
+	glDisableVertexAttribArray(0);
+}
+//---------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------
 autodis::visual::chart::chart::chart(shared::data::frame const& df)
 	: df_{df}
 	, scale_x_{df}
@@ -157,6 +211,69 @@ shared::math::range autodis::visual::chart::_min_max(std::array<size_t, 4> const
 	};
 }
 //---------------------------------------------------------------------------------------------------------
+std::unique_ptr<autodis::visual::chart::gl_context> autodis::visual::chart::_create_ctx() const
+{
+	std::unique_ptr<autodis::visual::chart::gl_context> ctx{std::make_unique<gl_context>()};
+	for (auto const& candles : candlesticks_)
+	{
+		_add_candles(candles, ctx->vertices());
+	}
+	return ctx;
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>& dst) const
+{
+	constexpr size_t dimentions{gl_context::dimentions_};
+	constexpr size_t vertices_in_candle{gl_context::vertices_in_candle_};
+
+	dst.reserve(dst.size() + dimentions * vertices_in_candle * df_.row_count());
+
+	data_frame_t::series_t const& open_s{df_.series(src.ohlc_[0])};
+	data_frame_t::series_t const& high_s{df_.series(src.ohlc_[1])};
+	data_frame_t::series_t const& low_s{df_.series(src.ohlc_[2])};
+	data_frame_t::series_t const& close_s{df_.series(src.ohlc_[3])};
+	float const candle_half_width{scale_x_.step() / 4.f};
+
+	size_t row{0};
+	for (; row != df_.row_count() && df_.index()[row] < scale_x_.first_visible_value(); ++row)
+	{}
+	for (; row != df_.row_count(); ++row)
+	{
+		float const x{scale_x_.position(row)};
+		float const y_open {src.scale_y_.position(open_s[row])};
+		float const y_high {src.scale_y_.position(high_s[row])};
+		float const y_low  {src.scale_y_.position(low_s[row])};
+		float const y_close{src.scale_y_.position(close_s[row])};
+
+		// wick top
+		dst.emplace_back(x);
+		dst.emplace_back(y_high);
+		// wick bottom
+		dst.emplace_back(x);
+		dst.emplace_back(y_low);
+
+		float const body_top{std::max(y_open, y_close)};
+		float const body_bottom{std::min(y_open, y_close)};
+
+		// triangle 1
+		// top left
+		dst.emplace_back(x - candle_half_width);
+		dst.emplace_back(body_top);
+		// top right
+		dst.emplace_back(x + candle_half_width);
+		dst.emplace_back(body_top);
+		// bottom left
+		dst.emplace_back(x - candle_half_width);
+		dst.emplace_back(body_bottom);
+		// triangle 2
+		// top right ^
+		// bottom left ^
+		// bottom right
+		dst.emplace_back(x + candle_half_width);
+		dst.emplace_back(body_bottom);
+	}
+}
+//---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::set_candlesticks(std::array<size_t, 4> const& ohlc_idc)
 {
 	candlesticks_.emplace_back(ohlc_idc, _min_max(ohlc_idc));
@@ -171,7 +288,7 @@ void autodis::visual::chart::show()
 			window_.setVerticalSyncEnabled(true);
 			window_.setKeyRepeatEnabled(false);
 
-			test_draw_candle td;
+			gl_ctx_ = _create_ctx();
 
 			while (window_.isOpen())
 			{
@@ -186,7 +303,7 @@ void autodis::visual::chart::show()
 					case sf::Event::Resized:
 						glViewport(0, 0, event.size.width, event.size.height);
 						//window_.SetActive();
-						td.draw();
+						gl_ctx_->draw();
 						window_.display();
 						break;
 					default:

@@ -9,8 +9,8 @@ namespace autodis::visual
 	class scale_date
 	{
 	private:
-		static constexpr float device_scale_{1.};
-		static constexpr size_t visible_count_default_{20};
+		static constexpr float device_scale_{1.};			// half of screen
+		static constexpr size_t visible_count_default_{100};
 
 		long long first_visible_value_{0};
 		float left_margin_{0.01};
@@ -24,5 +24,6 @@ namespace autodis::visual
 
 		long long first_visible_value() const noexcept { return first_visible_value_; }
 		float position(size_t idx) const noexcept;
+		float step() const noexcept { return scale_; }
 	};
 }

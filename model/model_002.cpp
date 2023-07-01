@@ -47,6 +47,51 @@ void autodis::model::model_002::_load_data()
 	}
 	original_series_count_ = df_.col_count();
 	assert(original_series_count_ == 3);
+
+	{
+		std::vector<keeper::data_uri> const uris
+		{
+			"000002/f1"s			// GOLD open
+		};
+		shared::data::frame df;
+		dr.read(uris, df);
+		assert(std::ranges::is_sorted(df.index()));
+		df.name(0) = "GOLD_close"s;
+		df_vis_.outer_join(std::move(df));
+	}
+	{
+		std::vector<keeper::data_uri> const uris
+		{
+			"000002/f2"s			// GOLD high
+		};
+		shared::data::frame df;
+		dr.read(uris, df);
+		assert(std::ranges::is_sorted(df.index()));
+		df.name(0) = "GOLD_close"s;
+		df_vis_.outer_join(std::move(df));
+	}
+	{
+		std::vector<keeper::data_uri> const uris
+		{
+			"000002/f3"s			// GOLD low
+		};
+		shared::data::frame df;
+		dr.read(uris, df);
+		assert(std::ranges::is_sorted(df.index()));
+		df.name(0) = "GOLD_close"s;
+		df_vis_.outer_join(std::move(df));
+	}
+	{
+		std::vector<keeper::data_uri> const uris
+		{
+			"000002/f4"s			// GOLD close
+		};
+		shared::data::frame df;
+		dr.read(uris, df);
+		assert(std::ranges::is_sorted(df.index()));
+		df.name(0) = "GOLD_close"s;
+		df_vis_.outer_join(std::move(df));
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 // add computed target to df_
@@ -129,10 +174,6 @@ void autodis::model::model_002::run()
 {
 	_load_data();
 
-	autodis::visual::chart chrt{df_};
-	//chrt.set_candlesticks(
-	chrt.show();
-
 	_create_target();
 	_create_features();
 
@@ -145,6 +186,10 @@ void autodis::model::model_002::run()
 
 	_clear_data();
 	_normalize();
+
+	autodis::visual::chart chrt{df_vis_};
+	chrt.set_candlesticks({0, 1, 2, 3});
+	chrt.show();
 
 	{
 		std::ofstream f{"df_norm.csv"s};

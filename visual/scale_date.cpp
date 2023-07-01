@@ -22,5 +22,5 @@ float autodis::visual::scale_date::position(size_t idx) const noexcept
 	assert(visible_count_ > 0);
 	assert(idx >= first_visible_idx_);
 
-	return left_margin_ + scale_ * (idx - first_visible_idx_);
+	return -device_scale_ + left_margin_ + scale_ * (idx - first_visible_idx_);
 }

@@ -23,6 +23,42 @@ namespace shared::math
 	};
 
 	//-----------------------------------------------------------------------------------------------------
+	inline double min(const std::vector<double>& series) noexcept
+	{
+		assert(!series.empty());
+		double min_val{std::numeric_limits<double>::max()};
+		for (const double val : series)
+		{
+			if (std::isnan(val))
+			{
+				continue;
+			}
+			if (val < min_val)
+			{
+				min_val = val;
+			}
+		}
+		return min_val;
+	}
+	//-----------------------------------------------------------------------------------------------------
+	inline double max(const std::vector<double>& series) noexcept
+	{
+		assert(!series.empty());
+		double max_val{std::numeric_limits<double>::lowest()};
+		for (const double val : series)
+		{
+			if (std::isnan(val))
+			{
+				continue;
+			}
+			if (val > max_val)
+			{
+				max_val = val;
+			}
+		}
+		return max_val;
+	}
+	//-----------------------------------------------------------------------------------------------------
 	inline range range::min_max(const std::vector<double>& series) noexcept
 	{
 		assert(!series.empty());

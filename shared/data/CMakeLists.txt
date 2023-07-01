@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22.0)
 
 add_library(data OBJECT
 	frame.cpp
+	view.cpp
 )
 
 target_include_directories(data PRIVATE

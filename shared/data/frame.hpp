@@ -72,7 +72,7 @@ namespace shared::data
 
 		void delete_series(std::size_t idx) noexcept;
 
-		[[nodiscard]] frame clear_lacunas() const;																	// returns frame without rows containing nan
+		[[nodiscard]] frame clear_lacunas() const;														// returns frame without rows containing nan
 
 		void print(std::ostream& strm) const;
 		void print_head(std::ostream& strm) const;

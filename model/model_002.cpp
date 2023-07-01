@@ -64,15 +64,17 @@ void autodis::model::model_002::_create_features()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-// 1. delete original closes
+// - 1. delete original closes
+// 2. delete rows contaning nans
 void autodis::model::model_002::_clear_data()
 {
 	// 1.
-	for (size_t i{0}; i != original_series_count_; ++i)
-	{
-		df_.delete_series(0);	// always 0. 1 will be 0 after first delete
-	}
-	df_ = df_.clear_lacunas();
+	//for (size_t i{0}; i != original_series_count_; ++i)
+	//{
+	//	df_.delete_series(0);	// always 0. 1 will be 0 after first delete
+	//}
+	// 2.
+	df_ = df_.clear_lacunas(); // normalize should be called on lacune free data, so should clear frame not view till normalize is applied to the former
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_normalize()
@@ -126,6 +128,11 @@ void autodis::model::model_002::_learn()
 void autodis::model::model_002::run()
 {
 	_load_data();
+
+	autodis::visual::chart chrt{df_};
+	//chrt.set_candlesticks(
+	chrt.show();
+
 	_create_target();
 	_create_features();
 

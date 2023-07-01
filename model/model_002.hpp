@@ -2,6 +2,7 @@
 
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
+#include "visual/chart.hpp"
 
 namespace autodis::model
 {

@@ -115,7 +115,7 @@ typename shared::data::frame::series_t& shared::data::frame::series(name_t const
 	const auto name_i{std::find(series_names_.cbegin(), series_names_.cend(), name)};
 	if (name_i == series_names_.cend())
 	{
-		throw std::runtime_error("No '"s + name + "' series"s);
+		throw std::runtime_error{"no '"s + name + "' series"s};
 	}
 	return data_[std::distance(series_names_.cbegin(), name_i)];
 }

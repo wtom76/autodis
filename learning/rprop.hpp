@@ -23,11 +23,21 @@ namespace learning
 		using data_view_t		= shared::data::view;
 
 	private:
+		//struct sample_filler
+		//{
+		//	const data_view_t& view_;
+		//	std::vector<data_frame_t::series_t const*> inputs_;
+		//	std::vector<data_frame_t::series_t const*> targets_;
+
+		//	explicit sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+		//		std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
+		//	void fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const;
+		//};
 		struct sample_filler
 		{
-			const data_view_t& view_;
-			std::vector<data_frame_t::series_t const*> inputs_;
-			std::vector<data_frame_t::series_t const*> targets_;
+			data_view_t const& view_;
+			std::vector<data_view_t::series_view_t> inputs_;
+			std::vector<data_view_t::series_view_t> targets_;
 
 			explicit sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
 				std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
@@ -81,39 +91,76 @@ namespace learning
 	};
 	//-----------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------
+	//template <class net>
+	//rprop<net>::sample_filler::sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+	//	std::vector<std::string> const& in_names,
+	//	std::vector<std::string> const& target_names)
+	//	: view_{dfv.second}
+	//	, inputs_(in_names.size(), nullptr)
+	//	, targets_(target_names.size(), nullptr)
+	//{
+	//	std::cout << "rprop::ctor\n";
+	//	dfv.first.print_head(std::cout);
+
+	//	for (size_t i = 0; i != in_names.size(); ++i)
+	//	{
+	//		inputs_[i] = &dfv.first.series(in_names[i]);
+	//	}
+	//	for (size_t i = 0; i != target_names.size(); ++i)
+	//	{
+	//		targets_[i] = &dfv.first.series(target_names[i]);
+	//	}
+	//}
 	template <class net>
 	rprop<net>::sample_filler::sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
 		std::vector<std::string> const& in_names,
 		std::vector<std::string> const& target_names)
 		: view_{dfv.second}
-		, inputs_(in_names.size(), nullptr)
-		, targets_(target_names.size(), nullptr)
 	{
-		std::cout << "rprop::ctor\n";
+		std::cout << "rprop::sample_filler::ctor\n";
 		dfv.first.print_head(std::cout);
 
-		for (size_t i = 0; i != in_names.size(); ++i)
+		inputs_.reserve(in_names.size());
+		targets_.reserve(in_names.size());
+		for (auto const& name : in_names)
 		{
-			inputs_[i] = &dfv.first.series(in_names[i]);
+			inputs_.emplace_back(dfv.second.series_view(name));
 		}
-		for (size_t i = 0; i != target_names.size(); ++i)
+		for (auto const& name : target_names)
 		{
-			targets_[i] = &dfv.first.series(target_names[i]);
+			targets_.emplace_back(dfv.second.series_view(name));
 		}
 	}
+	////-----------------------------------------------------------------------------------------------------
+	//template <class net>
+	//void rprop<net>::sample_filler::fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const
+	//{
+	//	auto input_i{std::begin(inputs)};
+	//	size_t const frame_idx{view_.frame_idx(row)};
+	//	for (const auto src_input : inputs_)
+	//	{
+	//		++*input_i = (*src_input)[frame_idx];
+	//	}
+	//	auto target_i{std::begin(targets)};
+	//	for (const auto src_target : targets_)
+	//	{
+	//		++*target_i = (*src_target)[frame_idx];
+	//	}
+	//}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
 	void rprop<net>::sample_filler::fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const
 	{
-		auto input_i = std::begin(inputs);
-		for (const auto src_input : inputs_)
+		auto input_i{std::begin(inputs)};
+		size_t const frame_idx{view_.frame_idx(row)};
+		for (auto const src_input : inputs_)
 		{
-			++*input_i = (*src_input)[view_.frame_index(row)];
+			++*input_i = src_input[frame_idx];
 		}
-		auto target_i = std::begin(targets);
-		for (const auto src_target : targets_)
+		auto target_i{std::begin(targets)};
+		for (auto const src_target : targets_)
 		{
-			++*target_i = (*src_target)[view_.frame_index(row)];
+			++*target_i = src_target[frame_idx];
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------

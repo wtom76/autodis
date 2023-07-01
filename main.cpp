@@ -4,6 +4,8 @@
 #include "model/model_001.hpp"
 #include "model/model_002.hpp"
 
+#include "visual/chart.hpp"
+
 //----------------------------------------------------------------------------------------------------------
 shared::data::frame test_load_data(std::vector<keeper::data_uri> const& uris)
 {
@@ -57,6 +59,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 	{
 		shared::util::spdlog_async_init spdlog_init;
 		auto log{shared::util::create_console_logger()};
+
 		autodis::model::model_002{}.run();
 	}
 	catch (std::exception const& ex)

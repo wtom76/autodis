@@ -1,6 +1,8 @@
-#ifndef SHADER_HPP
-#define SHADER_HPP
+#pragma once
 
-GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);
+#include "framework.hpp"
 
-#endif
+namespace autodis::visual
+{
+	GLuint load_shaders(char const* vertex_file_path, char const* fragment_file_path);
+}

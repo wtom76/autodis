@@ -9,6 +9,7 @@
 #include <fstream>
 #include <future>
 #include <iterator>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <numeric>

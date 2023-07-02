@@ -35,7 +35,7 @@ namespace autodis::visual
 		shared::math::range _min_max(std::array<size_t, 4> const& ohlc_idc) const noexcept;
 
 		std::unique_ptr<gl_context> _create_ctx() const;
-		void _add_candles(candles const& src, std::vector<float>& dst) const;
+		void _add_candles(candles const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const;
 
 	public:
 		explicit chart(shared::data::frame const& df);

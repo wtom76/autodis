@@ -196,5 +196,5 @@ void autodis::model::model_002::run()
 		df_.print(f);
 	}
 
-	_learn();
+	//_learn();
 }

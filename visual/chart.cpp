@@ -2,132 +2,142 @@
 #include "chart.hpp"
 #include "shader.hpp"
 
-void throw_on_fail(GLenum err)
+namespace autodis::visual
 {
-	if (err != GLEW_OK)
+	void throw_on_fail(GLenum err)
 	{
-		throw std::runtime_error{"OpenGL error"};
+		if (err != GLEW_OK)
+		{
+			throw std::runtime_error{"OpenGL error"};
+		}
 	}
 }
-
-//---------------------------------------------------------------------------------------------------------
-class test_draw
+namespace autodis::visual::prototypes
 {
-	GLuint vao_{0};
-	std::array<GLfloat, 9> const vertex_buffer_data_{
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		0.0f,  1.0f, 0.0f,
+	//---------------------------------------------------------------------------------------------------------
+	class test_draw
+	{
+		GLuint vao_{0};
+		std::array<GLfloat, 9> const vertex_buffer_data_{
+			-1.0f, -1.0f, 0.0f,
+			1.0f, -1.0f, 0.0f,
+			0.0f,  1.0f, 0.0f,
+		};
+		GLuint vertex_buffer_{0};
+		GLuint program_id_{0};
+
+	public:
+		test_draw()
+		{
+			throw_on_fail(glewInit());
+			glGenVertexArrays(1, &vao_);
+			glBindVertexArray(vao_);
+
+			// Generate 1 buffer, put the resulting identifier in vertexbuffer
+			glGenBuffers(1, &vertex_buffer_);
+			// The following commands will talk about our 'vertexbuffer' buffer
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+			// Give our vertices to OpenGL.
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertex_buffer_data_.size(), vertex_buffer_data_.data(), GL_STATIC_DRAW);
+
+			// Create and compile our GLSL program from the shaders
+			program_id_ = load_shaders("visual/SimpleVertexShader.vertexshader", "visual/SimpleFragmentShader.fragmentshader");
+		}
+		void draw()
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// Use our shader
+			glUseProgram(program_id_);
+
+			// 1st attribute buffer : vertices
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+			glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+			);
+			// Draw the triangle !
+			glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+			glDisableVertexAttribArray(0);
+		}
 	};
-	GLuint vertex_buffer_{0};
-	GLuint program_id_{0};
-
-public:
-	test_draw()
+	//---------------------------------------------------------------------------------------------------------
+	class test_draw_candle
 	{
-		throw_on_fail(glewInit());
-		glGenVertexArrays(1, &vao_);
-		glBindVertexArray(vao_);
+		GLuint vao_{0};
+		std::array<GLfloat, 24> const vertex_buffer_data_{
+			-.5f, -.5f,
+			-.5f, .5f,
+			.0f, -.5f,
+			.0f, .5f,
+			.5f, -.5f,
+			.5f, .5f,
+			// triangles
+			-.47f, -.3f,	// br
+			-.47f, .3f,		// tr
+			-.53f, -.3f,	// bl
+			-.53f, -.3f,	// bl
+			-.53f, .3f,		// tl
+			-.47f, .3f		// tr
+		};
+		GLuint vertex_buffer_{0};
 
-		// Generate 1 buffer, put the resulting identifier in vertexbuffer
-		glGenBuffers(1, &vertex_buffer_);
-		// The following commands will talk about our 'vertexbuffer' buffer
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-		// Give our vertices to OpenGL.
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertex_buffer_data_.size(), vertex_buffer_data_.data(), GL_STATIC_DRAW);
+	public:
+		test_draw_candle()
+		{
+			throw_on_fail(glewInit());
+			glGenVertexArrays(1, &vao_);
+			glBindVertexArray(vao_);
 
-		// Create and compile our GLSL program from the shaders
-		program_id_ = LoadShaders("visual/SimpleVertexShader.vertexshader", "visual/SimpleFragmentShader.fragmentshader");
-	}
-	void draw()
-	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// Generate 1 buffer, put the resulting identifier in vertexbuffer
+			glGenBuffers(1, &vertex_buffer_);
+			// The following commands will talk about our 'vertexbuffer' buffer
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+			// Give our vertices to OpenGL.
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertex_buffer_data_.size(), vertex_buffer_data_.data(), GL_STATIC_DRAW);
+		}
+		void draw()
+		{
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-		// Use our shader
-		glUseProgram(program_id_);
+			// 1st attribute buffer : vertices
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+			glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				2,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				nullptr             // array buffer offset
+			);
 
-		// 1st attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-		glDisableVertexAttribArray(0);
-	}
-};
-//---------------------------------------------------------------------------------------------------------
-class test_draw_candle
-{
-	GLuint vao_{0};
-	std::array<GLfloat, 24> const vertex_buffer_data_{
-		-.5f, -.5f,
-		-.5f, .5f,
-		.0f, -.5f,
-		.0f, .5f,
-		.5f, -.5f,
-		.5f, .5f,
-		// triangles
-		-.47f, -.3f,	// br
-		-.47f, .3f,		// tr
-		-.53f, -.3f,	// bl
-		-.53f, -.3f,	// bl
-		-.53f, .3f,		// tl
-		-.47f, .3f		// tr
+			glDrawArrays(GL_LINE_STRIP, 0, 2);
+			glDrawArrays(GL_LINE_STRIP, 2, 2);
+			glDrawArrays(GL_LINE_STRIP, 4, 2);
+			glDrawArrays(GL_TRIANGLES, 6, 3);
+			glDrawArrays(GL_TRIANGLES, 9, 3);
+			glDisableVertexAttribArray(0);
+		}
 	};
-	GLuint vertex_buffer_{0};
-
-public:
-	test_draw_candle()
-	{
-		throw_on_fail(glewInit());
-		glGenVertexArrays(1, &vao_);
-		glBindVertexArray(vao_);
-
-		// Generate 1 buffer, put the resulting identifier in vertexbuffer
-		glGenBuffers(1, &vertex_buffer_);
-		// The following commands will talk about our 'vertexbuffer' buffer
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-		// Give our vertices to OpenGL.
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertex_buffer_data_.size(), vertex_buffer_data_.data(), GL_STATIC_DRAW);
-	}
-	void draw()
-	{
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-		// 1st attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			2,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			nullptr             // array buffer offset
-		);
-
-		glDrawArrays(GL_LINE_STRIP, 0, 2);
-		glDrawArrays(GL_LINE_STRIP, 2, 2);
-		glDrawArrays(GL_LINE_STRIP, 4, 2);
-		glDrawArrays(GL_TRIANGLES, 6, 3);
-		glDrawArrays(GL_TRIANGLES, 9, 3);
-		glDisableVertexAttribArray(0);
-	}
-};
+} // ~namespace autodis::visual::prototypes
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
 class autodis::visual::chart::chart::gl_context
 {
 	GLuint vao_{0};
-	GLuint vertex_buffer_{0};
+	GLuint vertex_buffer_id_{0};
 	std::vector<float> vertices_;
+	
+	GLuint color_buffer_id_{0};
+	std::vector<float> color_buffer_;
+
+	GLuint program_id_{0};
 
 public:
 	static constexpr size_t dimentions_{2};
@@ -139,23 +149,39 @@ public:
 		throw_on_fail(glewInit());
 		glGenVertexArrays(1, &vao_);
 		glBindVertexArray(vao_);
-		glGenBuffers(1, &vertex_buffer_);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+
+		program_id_ = load_shaders("visual/SimpleVertexShader.vertexshader", "visual/SimpleFragmentShader.fragmentshader");
+	}
+	~gl_context()
+	{
+		glDeleteBuffers(1, &vertex_buffer_id_);
+		glDeleteBuffers(1, &color_buffer_id_);
+		glDeleteProgram(program_id_);
+		glDeleteVertexArrays(1, &vao_);
 	}
 
 	std::vector<float>& vertices() noexcept { return vertices_; }
+	std::vector<float>& color_buffer() noexcept { return color_buffer_; }
 	void draw();
 };
 //---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::chart::gl_context::draw()
 {
+	glGenBuffers(1, &vertex_buffer_id_);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id_);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_.size(), vertices_.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &color_buffer_id_);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer_id_);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * color_buffer_.size(), color_buffer_.data(), GL_STATIC_DRAW);
+
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_.size(), vertices_.data(), GL_STATIC_DRAW);
+	glUseProgram(program_id_);
 
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id_);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
 		2,                  // size
@@ -163,6 +189,17 @@ void autodis::visual::chart::chart::gl_context::draw()
 		GL_FALSE,           // normalized?
 		0,                  // stride
 		nullptr             // array buffer offset
+	);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer_id_);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		3,                                // size
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		nullptr                           // array buffer offset
 	);
 
 	for (size_t vidx{0}; vidx < vertices_.size();)
@@ -174,6 +211,7 @@ void autodis::visual::chart::chart::gl_context::draw()
 		glDrawArrays(GL_TRIANGLES, vidx, 3);
 		vidx += 3;
 	}
+	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -216,17 +254,21 @@ std::unique_ptr<autodis::visual::chart::gl_context> autodis::visual::chart::_cre
 	std::unique_ptr<autodis::visual::chart::gl_context> ctx{std::make_unique<gl_context>()};
 	for (auto const& candles : candlesticks_)
 	{
-		_add_candles(candles, ctx->vertices());
+		_add_candles(candles, ctx->vertices(), ctx->color_buffer());
 	}
 	return ctx;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>& dst) const
+void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const
 {
 	constexpr size_t dimentions{gl_context::dimentions_};
 	constexpr size_t vertices_in_candle{gl_context::vertices_in_candle_};
 
-	dst.reserve(dst.size() + dimentions * vertices_in_candle * df_.row_count());
+	constexpr std::array<float, 3> green{0.f, 1.f, 0.f};
+	constexpr std::array<float, 3> red{1.f, 0.f, 0.f};
+
+	dst_verices.reserve(dst_verices.size() + dimentions * vertices_in_candle * df_.row_count());
+	dst_colors.reserve(dst_colors.size() + 3 * vertices_in_candle * df_.row_count());
 
 	data_frame_t::series_t const& open_s{df_.series(src.ohlc_[0])};
 	data_frame_t::series_t const& high_s{df_.series(src.ohlc_[1])};
@@ -246,31 +288,39 @@ void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>
 		float const y_close{src.scale_y_.position(close_s[row])};
 
 		// wick top
-		dst.emplace_back(x);
-		dst.emplace_back(y_high);
+		dst_verices.emplace_back(x);
+		dst_verices.emplace_back(y_high);
 		// wick bottom
-		dst.emplace_back(x);
-		dst.emplace_back(y_low);
+		dst_verices.emplace_back(x);
+		dst_verices.emplace_back(y_low);
 
 		float const body_top{std::max(y_open, y_close)};
 		float const body_bottom{std::min(y_open, y_close)};
 
 		// triangle 1
 		// top left
-		dst.emplace_back(x - candle_half_width);
-		dst.emplace_back(body_top);
+		dst_verices.emplace_back(x - candle_half_width);
+		dst_verices.emplace_back(body_top);
 		// top right
-		dst.emplace_back(x + candle_half_width);
-		dst.emplace_back(body_top);
+		dst_verices.emplace_back(x + candle_half_width);
+		dst_verices.emplace_back(body_top);
 		// bottom left
-		dst.emplace_back(x - candle_half_width);
-		dst.emplace_back(body_bottom);
+		dst_verices.emplace_back(x - candle_half_width);
+		dst_verices.emplace_back(body_bottom);
 		// triangle 2
 		// top right ^
 		// bottom left ^
 		// bottom right
-		dst.emplace_back(x + candle_half_width);
-		dst.emplace_back(body_bottom);
+		dst_verices.emplace_back(x + candle_half_width);
+		dst_verices.emplace_back(body_bottom);
+
+		std::array<float, 3> const& color{open_s[row] <= close_s[row] ? green : red};
+		for (int i{6}; i; --i)
+		{
+			dst_colors.emplace_back(color[0]);
+			dst_colors.emplace_back(color[1]);
+			dst_colors.emplace_back(color[2]);
+		}
 	}
 }
 //---------------------------------------------------------------------------------------------------------

@@ -188,7 +188,8 @@ void autodis::model::model_002::run()
 	_normalize();
 
 	autodis::visual::chart chrt{df_vis_};
-	chrt.set_candlesticks({0, 1, 2, 3});
+	chrt.add_candlesticks({0, 1, 2, 3});
+	chrt.add_line(3);
 	chrt.show();
 
 	{

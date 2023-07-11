@@ -130,6 +130,25 @@ namespace autodis::visual::prototypes
 //---------------------------------------------------------------------------------------------------------
 class autodis::visual::chart::chart::gl_context
 {
+// types
+private:
+	enum class chart_type
+	{
+		null = 0,
+		line,
+		candles
+	};
+
+	struct chart_meta
+	{
+		chart_type	type_{chart_type::null};
+		size_t		points_num_{0};
+	};
+
+// data
+private:
+	std::vector<chart_meta> charts_;
+
 	GLuint vao_{0};
 	GLuint vertex_buffer_id_{0};
 	std::vector<float> vertices_;
@@ -142,6 +161,11 @@ class autodis::visual::chart::chart::gl_context
 public:
 	static constexpr size_t dimentions_{2};
 	static constexpr size_t vertices_in_candle_{6};
+
+// methods
+private:
+	size_t _draw_line(size_t first_idx, size_t points_num);
+	size_t _draw_candles(size_t first_idx, size_t points_num);
 
 public:
 	gl_context()
@@ -162,6 +186,8 @@ public:
 
 	std::vector<float>& vertices() noexcept { return vertices_; }
 	std::vector<float>& color_buffer() noexcept { return color_buffer_; }
+	void add_line(size_t points_num) { charts_.emplace_back(chart_type::line, points_num); }
+	void add_candles(size_t points_num) { charts_.emplace_back(chart_type::candles, points_num); }
 	void draw();
 };
 //---------------------------------------------------------------------------------------------------------
@@ -202,7 +228,43 @@ void autodis::visual::chart::chart::gl_context::draw()
 		nullptr                           // array buffer offset
 	);
 
-	for (size_t vidx{0}; vidx < vertices_.size();)
+	size_t current_point_idx{0};
+	for (auto const& chart : charts_)
+	{
+		switch (chart.type_)
+		{
+		case chart_type::line:
+			current_point_idx = _draw_line(current_point_idx, chart.points_num_);
+			break;
+		case chart_type::candles:
+			current_point_idx = _draw_candles(current_point_idx, chart.points_num_);
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+}
+//---------------------------------------------------------------------------------------------------------
+size_t autodis::visual::chart::chart::gl_context::_draw_line(size_t first_idx, size_t points_num)
+{
+	size_t idx_end{first_idx + points_num};
+	for (size_t vidx{first_idx}; vidx != idx_end; ++vidx)
+	{
+		glDrawArrays(GL_LINE_STRIP, vidx, 2);
+	}
+	return idx_end;
+}
+//---------------------------------------------------------------------------------------------------------
+size_t autodis::visual::chart::chart::gl_context::_draw_candles(size_t first_idx, size_t points_num)
+{
+	assert(points_num % 6 == 0);
+
+	size_t idx_end{first_idx + points_num};
+	for (size_t vidx{first_idx}; vidx != idx_end;)
 	{
 		glDrawArrays(GL_LINE_STRIP, vidx, 2);
 		vidx += 2;
@@ -211,8 +273,7 @@ void autodis::visual::chart::chart::gl_context::draw()
 		glDrawArrays(GL_TRIANGLES, vidx, 3);
 		vidx += 3;
 	}
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(0);
+	return idx_end;
 }
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
@@ -254,12 +315,42 @@ std::unique_ptr<autodis::visual::chart::gl_context> autodis::visual::chart::_cre
 	std::unique_ptr<autodis::visual::chart::gl_context> ctx{std::make_unique<gl_context>()};
 	for (auto const& candles : candlesticks_)
 	{
-		_add_candles(candles, ctx->vertices(), ctx->color_buffer());
+		ctx->add_candles(_add_candles(candles, ctx->vertices(), ctx->color_buffer()));
+	}
+	for (auto const& line : lines_)
+	{
+		ctx->add_line(_add_line(line, ctx->vertices(), ctx->color_buffer()));
 	}
 	return ctx;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const
+size_t autodis::visual::chart::_add_line(line const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const
+{
+	constexpr size_t dimentions{gl_context::dimentions_};
+
+	constexpr std::array<float, 3> color{.5f, 0.5f, 0.f};
+
+	dst_verices.reserve(dst_verices.size() + dimentions * df_.row_count());
+	dst_colors.reserve(dst_colors.size() + color.size() * df_.row_count());
+
+	data_frame_t::series_t const& series{df_.series(src.series_idx_)};
+
+	for (size_t row{scale_x_.first_visible_idx()}; row != df_.row_count(); ++row)
+	{
+		float const x{scale_x_.position(row)};
+		float const y{src.scale_y_.position(series[row])};
+
+		dst_verices.emplace_back(x);
+		dst_verices.emplace_back(y);
+
+		dst_colors.emplace_back(color[0]);
+		dst_colors.emplace_back(color[1]);
+		dst_colors.emplace_back(color[2]);
+	}
+	return df_.row_count() - scale_x_.first_visible_idx();
+}
+//---------------------------------------------------------------------------------------------------------
+size_t autodis::visual::chart::_add_candles(candles const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const
 {
 	constexpr size_t dimentions{gl_context::dimentions_};
 	constexpr size_t vertices_in_candle{gl_context::vertices_in_candle_};
@@ -276,10 +367,7 @@ void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>
 	data_frame_t::series_t const& close_s{df_.series(src.ohlc_[3])};
 	float const candle_half_width{scale_x_.step() / 4.f};
 
-	size_t row{0};
-	for (; row != df_.row_count() && df_.index()[row] < scale_x_.first_visible_value(); ++row)
-	{}
-	for (; row != df_.row_count(); ++row)
+	for (size_t row{scale_x_.first_visible_idx()}; row != df_.row_count(); ++row)
 	{
 		float const x{scale_x_.position(row)};
 		float const y_open {src.scale_y_.position(open_s[row])};
@@ -322,9 +410,15 @@ void autodis::visual::chart::_add_candles(candles const& src, std::vector<float>
 			dst_colors.emplace_back(color[2]);
 		}
 	}
+	return (df_.row_count() - scale_x_.first_visible_idx()) * 6;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::set_candlesticks(std::array<size_t, 4> const& ohlc_idc)
+void autodis::visual::chart::add_line(size_t series_idx)
+{
+	lines_.emplace_back(series_idx, shared::math::range::min_max(df_.series(series_idx)));
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::visual::chart::add_candlesticks(std::array<size_t, 4> const& ohlc_idc)
 {
 	candlesticks_.emplace_back(ohlc_idc, _min_max(ohlc_idc));
 }

@@ -14,7 +14,6 @@ autodis::visual::scale_date::scale_date(shared::data::frame const& df)
 		scale_ = (2.f * device_scale_ - left_margin_ - right_margin_) / visible_count_;
 	}
 	first_visible_idx_ = df.index().size() - visible_count_;
-	first_visible_value_ = df.index()[first_visible_idx_];
 }
 //---------------------------------------------------------------------------------------------------------
 float autodis::visual::scale_date::position(size_t idx) const noexcept

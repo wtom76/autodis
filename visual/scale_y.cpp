@@ -2,11 +2,18 @@
 #include "scale_y.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-autodis::visual::scale_y::scale_y(shared::math::range rng)
+void autodis::visual::scale_y::update(shared::math::range rng) noexcept
 {
 	if (rng.is_valid())
 	{
-		scale_ = (2.f * device_scale_ - top_margin_ - bottom_margin_) / rng;
-		min_value_ = rng.min();
+		float const new_scale{(2.f * device_scale_ - top_margin_ - bottom_margin_) / static_cast<float>(rng)};
+		if (std::isnan(scale_) || scale_ > new_scale)
+		{
+			scale_ = new_scale;
+		}
+		if (std::isnan(min_value_) || min_value_ > rng.min())
+		{
+			min_value_ = rng.min();
+		}
 	}
 }

@@ -251,12 +251,8 @@ void autodis::visual::chart::chart::gl_context::draw()
 //---------------------------------------------------------------------------------------------------------
 size_t autodis::visual::chart::chart::gl_context::_draw_line(size_t first_idx, size_t points_num)
 {
-	size_t idx_end{first_idx + points_num};
-	for (size_t vidx{first_idx}; vidx != idx_end; ++vidx)
-	{
-		glDrawArrays(GL_LINE_STRIP, vidx, 2);
-	}
-	return idx_end;
+	glDrawArrays(GL_LINE_STRIP, first_idx, points_num);
+	return first_idx + points_num;
 }
 //---------------------------------------------------------------------------------------------------------
 size_t autodis::visual::chart::chart::gl_context::_draw_candles(size_t first_idx, size_t points_num)
@@ -335,10 +331,12 @@ size_t autodis::visual::chart::_add_line(line const& src, std::vector<float>& ds
 
 	data_frame_t::series_t const& series{df_.series(src.series_idx_)};
 
+	scale_y const& scl_y{scales_y_[src.scale_y_idx_]};
+
 	for (size_t row{scale_x_.first_visible_idx()}; row != df_.row_count(); ++row)
 	{
 		float const x{scale_x_.position(row)};
-		float const y{src.scale_y_.position(series[row])};
+		float const y{scl_y.position(series[row])};
 
 		dst_verices.emplace_back(x);
 		dst_verices.emplace_back(y);
@@ -367,13 +365,15 @@ size_t autodis::visual::chart::_add_candles(candles const& src, std::vector<floa
 	data_frame_t::series_t const& close_s{df_.series(src.ohlc_[3])};
 	float const candle_half_width{scale_x_.step() / 4.f};
 
+	scale_y const& scl_y{scales_y_[src.scale_y_idx_]};
+
 	for (size_t row{scale_x_.first_visible_idx()}; row != df_.row_count(); ++row)
 	{
 		float const x{scale_x_.position(row)};
-		float const y_open {src.scale_y_.position(open_s[row])};
-		float const y_high {src.scale_y_.position(high_s[row])};
-		float const y_low  {src.scale_y_.position(low_s[row])};
-		float const y_close{src.scale_y_.position(close_s[row])};
+		float const y_open {scl_y.position(open_s[row])};
+		float const y_high {scl_y.position(high_s[row])};
+		float const y_low  {scl_y.position(low_s[row])};
+		float const y_close{scl_y.position(close_s[row])};
 
 		// wick top
 		dst_verices.emplace_back(x);
@@ -413,14 +413,30 @@ size_t autodis::visual::chart::_add_candles(candles const& src, std::vector<floa
 	return (df_.row_count() - scale_x_.first_visible_idx()) * 6;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::add_line(size_t series_idx)
+void autodis::visual::chart::_add_scale_y(size_t scale_y_idx, shared::math::range rng)
 {
-	lines_.emplace_back(series_idx, shared::math::range::min_max(df_.series(series_idx)));
+	if (scale_y_idx >= max_scales_y_)
+	{
+		assert(false);
+		return;
+	}
+	if (scale_y_idx >= scales_y_.size())
+	{
+		scales_y_.resize(scale_y_idx + 1);
+	}
+	scales_y_[scale_y_idx].update(rng);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::add_candlesticks(std::array<size_t, 4> const& ohlc_idc)
+void autodis::visual::chart::add_line(size_t scale_y_idx, size_t series_idx)
 {
-	candlesticks_.emplace_back(ohlc_idc, _min_max(ohlc_idc));
+	_add_scale_y(scale_y_idx, shared::math::range::min_max(df_.series(series_idx)));
+	lines_.emplace_back(series_idx, scale_y_idx);
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::visual::chart::add_candlesticks(size_t scale_y_idx, std::array<size_t, 4> const& ohlc_idc)
+{
+	_add_scale_y(scale_y_idx, _min_max(ohlc_idc));
+	candlesticks_.emplace_back(ohlc_idc, scale_y_idx);
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::show()

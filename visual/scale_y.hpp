@@ -13,12 +13,11 @@ namespace autodis::visual
 
 		float bottom_margin_{0.01f};
 		float top_margin_{0.01f};
-		float scale_{0.f};
-		float min_value_{0.f};
+		float scale_{std::numeric_limits<float>::signaling_NaN()};
+		float min_value_{std::numeric_limits<float>::signaling_NaN()};
 
 	public:
-		scale_y(shared::math::range rng);
-
+		void update(shared::math::range rng) noexcept;
 		float position(double value) const noexcept { return -device_scale_ + bottom_margin_ + (static_cast<float>(value) - min_value_) * scale_; }
 	};
 }

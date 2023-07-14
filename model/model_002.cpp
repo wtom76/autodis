@@ -190,8 +190,8 @@ void autodis::model::model_002::run()
 
 	autodis::visual::chart chrt{df_vis_};
 	chrt.add_candlesticks(0, {0, 1, 2, 3});
-	chrt.add_line(0, 1);
-	chrt.add_line(0, 2);
+	//chrt.add_line(0, 1);
+	//chrt.add_line(0, 2);
 	chrt.add_line(1, 4);
 	chrt.show();
 

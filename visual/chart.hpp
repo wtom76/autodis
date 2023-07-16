@@ -20,11 +20,13 @@ namespace autodis::visual
 			type x_{0};				
 			type y_{0};				
 		};
+		using color_t = std::array<float, 3>;
 		using data_frame_t = shared::data::frame;
 		struct line
 		{
-			size_t		series_idx_{0};
-			size_t		scale_y_idx_{0};
+			size_t	series_idx_{0};
+			size_t	scale_y_idx_{0};
+			color_t	color_;
 		};
 		struct candles
 		{
@@ -68,7 +70,7 @@ namespace autodis::visual
 		~chart();
 
 		// valid scale_y_idx is in range [0..max_scales_y_]
-		void add_line(size_t scale_y_idx, size_t series_idx);
+		void add_line(size_t scale_y_idx, size_t series_idx, color_t color);
 		// valid scale_y_idx is in range [0..max_scales_y_]
 		void add_candlesticks(size_t scale_y_idx, std::array<size_t, 4> const& ohlc_idc);
 

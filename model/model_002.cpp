@@ -192,7 +192,7 @@ void autodis::model::model_002::run()
 	chrt.add_candlesticks(0, {0, 1, 2, 3});
 	//chrt.add_line(0, 1);
 	//chrt.add_line(0, 2);
-	chrt.add_line(1, 4);
+	chrt.add_line(1, 4, {0.f, 0.f, 1.f});
 	chrt.show();
 
 	{

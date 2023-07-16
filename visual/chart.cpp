@@ -249,10 +249,8 @@ size_t autodis::visual::chart::_add_line(line const& src, std::vector<float>& ds
 {
 	constexpr size_t dimentions{gl_context::dimentions_};
 
-	constexpr std::array<float, 3> color{.5f, 0.5f, 0.f};
-
 	dst_verices.reserve(dst_verices.size() + dimentions * df_.row_count());
-	dst_colors.reserve(dst_colors.size() + color.size() * df_.row_count());
+	dst_colors.reserve(dst_colors.size() + src.color_.size() * df_.row_count());
 
 	data_frame_t::series_t const& series{df_.series(src.series_idx_)};
 
@@ -266,9 +264,9 @@ size_t autodis::visual::chart::_add_line(line const& src, std::vector<float>& ds
 		dst_verices.emplace_back(x);
 		dst_verices.emplace_back(y);
 
-		dst_colors.emplace_back(color[0]);
-		dst_colors.emplace_back(color[1]);
-		dst_colors.emplace_back(color[2]);
+		dst_colors.emplace_back(src.color_[0]);
+		dst_colors.emplace_back(src.color_[1]);
+		dst_colors.emplace_back(src.color_[2]);
 	}
 	return df_.row_count() - scale_x_.first_visible_idx();
 }
@@ -352,10 +350,10 @@ void autodis::visual::chart::_add_scale_y(size_t scale_y_idx, shared::math::rang
 	scales_y_[scale_y_idx].update(rng);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::add_line(size_t scale_y_idx, size_t series_idx)
+void autodis::visual::chart::add_line(size_t scale_y_idx, size_t series_idx, color_t color)
 {
 	_add_scale_y(scale_y_idx, shared::math::range::min_max(df_.series(series_idx)));
-	lines_.emplace_back(series_idx, scale_y_idx);
+	lines_.emplace_back(series_idx, scale_y_idx, std::move(color));
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::add_candlesticks(size_t scale_y_idx, std::array<size_t, 4> const& ohlc_idc)

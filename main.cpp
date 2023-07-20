@@ -43,9 +43,10 @@ double test(std::vector<std::size_t> const& layers_sizes)
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::rprop<learning::multilayer_feed_forward> teacher{
-		std::make_pair(df, dw),
-		 {"x"s},
-		 {"y"s}};
+		dw,
+		{"x"s},
+		{"y"s}
+	};
 
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
 	runner.wait();

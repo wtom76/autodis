@@ -142,7 +142,7 @@ void autodis::model::model_002::_learn()
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::rprop<learning::multilayer_feed_forward> teacher{
-		std::make_pair(df_, dw),
+		dw,
 		{
 			"GAZP_close_delta(t-1)"s,
 			"GAZP_close_delta(t-2)"s,
@@ -200,5 +200,5 @@ void autodis::model::model_002::run()
 		df_.print(f);
 	}
 
-	//_learn();
+	_learn();
 }

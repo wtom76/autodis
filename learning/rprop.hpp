@@ -23,23 +23,14 @@ namespace learning
 		using data_view_t		= shared::data::view;
 
 	private:
-		//struct sample_filler
-		//{
-		//	const data_view_t& view_;
-		//	std::vector<data_frame_t::series_t const*> inputs_;
-		//	std::vector<data_frame_t::series_t const*> targets_;
-
-		//	explicit sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
-		//		std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
-		//	void fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const;
-		//};
+		//-----------------------------------------------------------------------------------------------------
 		struct sample_filler
 		{
 			data_view_t const& view_;
 			std::vector<data_view_t::series_view_t> inputs_;
 			std::vector<data_view_t::series_view_t> targets_;
 
-			explicit sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+			explicit sample_filler(data_view_t const& dfv,
 				std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
 			void fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const;
 		};
@@ -62,7 +53,7 @@ namespace learning
 
 		std::random_device					rd_;
 		std::mt19937						rand_;
-		std::pair<data_frame_t, data_view_t>src_data_;
+		data_view_t const&					src_data_;
 		std::vector<std::ptrdiff_t>			teaching_set_;
 		std::vector<std::ptrdiff_t>			test_set_;
 		sample_filler						sample_filler_;
@@ -77,11 +68,11 @@ namespace learning
 		void _split_data();
 		double _mean_sqr_error(net& network);
 	public:
-		rprop(std::pair<data_frame_t, data_view_t>&& src_data,
+		rprop(data_view_t const& src_data,
 			const std::vector<std::string>& in_names,
 			const std::vector<std::string>& target_names)
 			: rand_{rd_()}
-			, src_data_{std::move(src_data)}
+			, src_data_{src_data}
 			, sample_filler_{src_data_, in_names, target_names}
 			, sample_targets_(target_names.size(), 0.)
 		{}
@@ -90,63 +81,23 @@ namespace learning
 		void show_test(net& network, progress_view& pview, std::stop_token stop_token);
 	};
 	//-----------------------------------------------------------------------------------------------------
-	//-----------------------------------------------------------------------------------------------------
-	//template <class net>
-	//rprop<net>::sample_filler::sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
-	//	std::vector<std::string> const& in_names,
-	//	std::vector<std::string> const& target_names)
-	//	: view_{dfv.second}
-	//	, inputs_(in_names.size(), nullptr)
-	//	, targets_(target_names.size(), nullptr)
-	//{
-	//	std::cout << "rprop::ctor\n";
-	//	dfv.first.print_head(std::cout);
-
-	//	for (size_t i = 0; i != in_names.size(); ++i)
-	//	{
-	//		inputs_[i] = &dfv.first.series(in_names[i]);
-	//	}
-	//	for (size_t i = 0; i != target_names.size(); ++i)
-	//	{
-	//		targets_[i] = &dfv.first.series(target_names[i]);
-	//	}
-	//}
 	template <class net>
-	rprop<net>::sample_filler::sample_filler(std::pair<data_frame_t, data_view_t> const& dfv,
+	rprop<net>::sample_filler::sample_filler(data_view_t const& dv,
 		std::vector<std::string> const& in_names,
 		std::vector<std::string> const& target_names)
-		: view_{dfv.second}
+		: view_{dv}
 	{
-		std::cout << "rprop::sample_filler::ctor\n";
-		dfv.first.print_head(std::cout);
-
 		inputs_.reserve(in_names.size());
 		targets_.reserve(in_names.size());
 		for (auto const& name : in_names)
 		{
-			inputs_.emplace_back(dfv.second.series_view(name));
+			inputs_.emplace_back(view_.series_view(name));
 		}
 		for (auto const& name : target_names)
 		{
-			targets_.emplace_back(dfv.second.series_view(name));
+			targets_.emplace_back(view_.series_view(name));
 		}
 	}
-	////-----------------------------------------------------------------------------------------------------
-	//template <class net>
-	//void rprop<net>::sample_filler::fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const
-	//{
-	//	auto input_i{std::begin(inputs)};
-	//	size_t const frame_idx{view_.frame_idx(row)};
-	//	for (const auto src_input : inputs_)
-	//	{
-	//		++*input_i = (*src_input)[frame_idx];
-	//	}
-	//	auto target_i{std::begin(targets)};
-	//	for (const auto src_target : targets_)
-	//	{
-	//		++*target_i = (*src_target)[frame_idx];
-	//	}
-	//}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
 	void rprop<net>::sample_filler::fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const
@@ -339,7 +290,7 @@ namespace learning
 		teaching_set_.clear();
 		test_set_.clear();
 
-		const size_t src_row_count{src_data_.second.row_count()};
+		const size_t src_row_count{src_data_.row_count()};
 		const size_t teaching_size{static_cast<size_t>(src_row_count * train_fraction)};
 		if (!teaching_size || teaching_size > src_row_count)
 		{

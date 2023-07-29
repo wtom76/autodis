@@ -51,12 +51,23 @@ void autodis::model::model_002::_load_data()
 	{
 		std::vector<keeper::data_uri> const uris
 		{
+			"000001/f4"s,			// GAZP close
+		};
+		shared::data::frame df;
+		dr.read(uris, df);
+		assert(std::ranges::is_sorted(df.index()));
+		df.name(0) = "GAZP_close"s;
+		df_vis_.outer_join(std::move(df));
+	}
+	{
+		std::vector<keeper::data_uri> const uris
+		{
 			"000002/f1"s			// GOLD open
 		};
 		shared::data::frame df;
 		dr.read(uris, df);
 		assert(std::ranges::is_sorted(df.index()));
-		df.name(0) = "GOLD_close"s;
+		df.name(0) = "GOLD_open"s;
 		df_vis_.outer_join(std::move(df));
 	}
 	{
@@ -67,7 +78,7 @@ void autodis::model::model_002::_load_data()
 		shared::data::frame df;
 		dr.read(uris, df);
 		assert(std::ranges::is_sorted(df.index()));
-		df.name(0) = "GOLD_close"s;
+		df.name(0) = "GOLD_high"s;
 		df_vis_.outer_join(std::move(df));
 	}
 	{
@@ -78,7 +89,7 @@ void autodis::model::model_002::_load_data()
 		shared::data::frame df;
 		dr.read(uris, df);
 		assert(std::ranges::is_sorted(df.index()));
-		df.name(0) = "GOLD_close"s;
+		df.name(0) = "GOLD_low"s;
 		df_vis_.outer_join(std::move(df));
 	}
 	{
@@ -98,7 +109,7 @@ void autodis::model::model_002::_load_data()
 void autodis::model::model_002::_create_target()
 {
 	shared::math::target_delta(df_, 0, df_);
-	shared::math::target_delta(df_vis_, 3, df_vis_);	// not learning target
+	shared::math::target_delta(df_vis_, 0, df_vis_);	// not learning target
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_create_features()
@@ -141,33 +152,32 @@ void autodis::model::model_002::_learn()
 
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::rprop<learning::multilayer_feed_forward> teacher{
-		dw,
-		{
-			"GAZP_close_delta(t-1)"s,
-			"GAZP_close_delta(t-2)"s,
-			"GAZP_close_delta(t-3)"s,
-			"GAZP_close_delta(t-4)"s,
-			"GAZP_close_delta(t-5)"s,
-			"GOLD_close_delta(t-1)"s,
-			"GOLD_close_delta(t-2)"s,
-			"GOLD_close_delta(t-3)"s,
-			"GOLD_close_delta(t-4)"s,
-			"GOLD_close_delta(t-5)"s,
-			"IMOEX_close_delta(t-1)"s,
-			"IMOEX_close_delta(t-2)"s,
-			"IMOEX_close_delta(t-3)"s,
-			"IMOEX_close_delta(t-4)"s,
-			"IMOEX_close_delta(t-5)"s
-		},
-		{
+	learning::sample_filler const input_filler{dw,
+	{
+		"GAZP_close_delta(t-1)"s,
+		"GAZP_close_delta(t-2)"s,
+		"GAZP_close_delta(t-3)"s,
+		"GAZP_close_delta(t-4)"s,
+		"GAZP_close_delta(t-5)"s,
+		"GOLD_close_delta(t-1)"s,
+		"GOLD_close_delta(t-2)"s,
+		"GOLD_close_delta(t-3)"s,
+		"GOLD_close_delta(t-4)"s,
+		"GOLD_close_delta(t-5)"s,
+		"IMOEX_close_delta(t-1)"s,
+		"IMOEX_close_delta(t-2)"s,
+		"IMOEX_close_delta(t-3)"s,
+		"IMOEX_close_delta(t-4)"s,
+		"IMOEX_close_delta(t-5)"s
+	}};
+	learning::sample_filler const target_filler{dw,
+	{
 			"GAZP_close_delta(t+1)"s
-		}
-	};
-
+	}};
+	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
 	runner.wait();
-	min_err_ = runner.min_err();
+	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
 // learn
@@ -189,10 +199,8 @@ void autodis::model::model_002::run()
 	_normalize();
 
 	autodis::visual::chart chrt{df_vis_};
-	chrt.add_candlesticks(0, {0, 1, 2, 3});
-	//chrt.add_line(0, 1);
-	//chrt.add_line(0, 2);
-	chrt.add_line(1, 4, {0.f, 0.f, 1.f});
+	chrt.add_candlesticks(0, {1, 2, 3, 4});
+	chrt.add_line(1, 5, {0.f, 0.f, 1.f});
 	chrt.show();
 
 	{

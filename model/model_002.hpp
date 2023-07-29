@@ -20,7 +20,7 @@ namespace autodis::model
 		frame_t	df_;
 		frame_t	df_vis_;
 		norm_t	norm_;
-		double	min_err_{0};
+		double	best_err_{0};
 		size_t	original_series_count_{0};
 
 	// methods

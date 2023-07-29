@@ -74,28 +74,27 @@ void autodis::model::model_001::_learn()
 
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::rprop<learning::multilayer_feed_forward> teacher{
-		dw,
-		{
-			"GAZP_close_delta(t-1)"s,
-			"GAZP_close_delta(t-2)"s,
-			"GAZP_close_delta(t-3)"s,
-			"GAZP_close_delta(t-4)"s,
-			"GAZP_close_delta(t-5)"s,
-			"GOLD_close_delta(t-1)"s,
-			"GOLD_close_delta(t-2)"s,
-			"GOLD_close_delta(t-3)"s,
-			"GOLD_close_delta(t-4)"s,
-			"GOLD_close_delta(t-5)"s
-		},
-		{
-			"GAZP_close_delta(t+1)"s
-		}
-	};
-
+	learning::sample_filler const input_filler{dw,
+	{
+		"GAZP_close_delta(t-1)"s,
+		"GAZP_close_delta(t-2)"s,
+		"GAZP_close_delta(t-3)"s,
+		"GAZP_close_delta(t-4)"s,
+		"GAZP_close_delta(t-5)"s,
+		"GOLD_close_delta(t-1)"s,
+		"GOLD_close_delta(t-2)"s,
+		"GOLD_close_delta(t-3)"s,
+		"GOLD_close_delta(t-4)"s,
+		"GOLD_close_delta(t-5)"s
+	}};
+	learning::sample_filler const target_filler{dw,
+	{
+		"GAZP_close_delta(t+1)"s
+	}};
+	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
 	runner.wait();
-	min_err_ = runner.min_err();
+	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
 // learn

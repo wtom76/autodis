@@ -18,7 +18,7 @@ namespace autodis::model
 	private:
 		frame_t	df_;
 		norm_t	norm_;
-		double	min_err_{0};
+		double	best_err_{0};
 
 	// methods
 	private:

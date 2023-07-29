@@ -7,12 +7,11 @@ namespace autodis
 	// class learn_runner
 	//----------------------------------------------------------------------------------------------------------
 	template <class net>
-	class learn_runner :
-		private shared::util::logged
+	class learn_runner
+		: public learning::progress_view
 	{
 	private:
 		double							min_err_{0.001};	// TODO: pass as arg or config
-		learning::progress_view			progress_view_;
 		typename net::config_t const&	cfg_;
 		net&							network_;
 		learning::rprop<net>&			teacher_;
@@ -39,12 +38,12 @@ namespace autodis
 			, thread_{
 				[this](std::stop_token stoken)
 				{
-					teacher_.teach(cfg_, network_, min_err_, progress_view_, stoken);
+					teacher_.teach(cfg_, network_, min_err_, *this, stoken);
 					if (stoken.stop_requested())
 					{
 						return;
 					}
-					teacher_.show_test(network_, progress_view_, stoken);
+					teacher_.show_test(network_, *this, stoken);
 				}
 			}
 		{
@@ -58,9 +57,10 @@ namespace autodis
 			}
 		}
 		//----------------------------------------------------------------------------------------------------------
-		double min_err() const noexcept
+		// learning::progress_view overrides
+		void set_best(double min_err) override
 		{
-			return progress_view_.min_err();
+			learning::progress_view::set_best(min_err);
 		}
 	};
 }

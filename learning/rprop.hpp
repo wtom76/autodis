@@ -2,6 +2,7 @@
 
 #include "framework.hpp"
 #include "progress_view.hpp"
+#include "sample_filler.hpp"
 
 namespace learning
 {
@@ -22,19 +23,6 @@ namespace learning
 		using data_frame_t		= shared::data::frame;
 		using data_view_t		= shared::data::view;
 
-	private:
-		//-----------------------------------------------------------------------------------------------------
-		struct sample_filler
-		{
-			data_view_t const& view_;
-			std::vector<data_view_t::series_view_t> inputs_;
-			std::vector<data_view_t::series_view_t> targets_;
-
-			explicit sample_filler(data_view_t const& dfv,
-				std::vector<std::string> const& in_names, std::vector<std::string> const& target_names);
-			void fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const;
-		};
-
 	// data
 	private:
 		static constexpr double initial_learning_rate_{0.1};
@@ -53,10 +41,11 @@ namespace learning
 
 		std::random_device					rd_;
 		std::mt19937						rand_;
-		data_view_t const&					src_data_;
+		size_t const						src_row_count_;
 		std::vector<std::ptrdiff_t>			teaching_set_;
 		std::vector<std::ptrdiff_t>			test_set_;
-		sample_filler						sample_filler_;
+		sample_filler const&				input_filler_;
+		sample_filler const&				target_filler_;
 		std::vector<double>					sample_targets_;
 
 	// methods
@@ -68,52 +57,17 @@ namespace learning
 		void _split_data();
 		double _mean_sqr_error(net& network);
 	public:
-		rprop(data_view_t const& src_data,
-			const std::vector<std::string>& in_names,
-			const std::vector<std::string>& target_names)
+		rprop(sample_filler const& input_filler, sample_filler const& target_filler)
 			: rand_{rd_()}
-			, src_data_{src_data}
-			, sample_filler_{src_data_, in_names, target_names}
-			, sample_targets_(target_names.size(), 0.)
+			, src_row_count_{input_filler.row_count()}
+			, input_filler_{input_filler}
+			, target_filler_{target_filler}
+			, sample_targets_(target_filler.col_count(), 0.)
 		{}
 
 		double teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token);
 		void show_test(net& network, progress_view& pview, std::stop_token stop_token);
 	};
-	//-----------------------------------------------------------------------------------------------------
-	template <class net>
-	rprop<net>::sample_filler::sample_filler(data_view_t const& dv,
-		std::vector<std::string> const& in_names,
-		std::vector<std::string> const& target_names)
-		: view_{dv}
-	{
-		inputs_.reserve(in_names.size());
-		targets_.reserve(in_names.size());
-		for (auto const& name : in_names)
-		{
-			inputs_.emplace_back(view_.series_view(name));
-		}
-		for (auto const& name : target_names)
-		{
-			targets_.emplace_back(view_.series_view(name));
-		}
-	}
-	//-----------------------------------------------------------------------------------------------------
-	template <class net>
-	void rprop<net>::sample_filler::fill(std::ptrdiff_t row, std::vector<double>& inputs, std::vector<double>& targets) const
-	{
-		auto input_i{std::begin(inputs)};
-		size_t const frame_idx{view_.frame_idx(row)};
-		for (auto const src_input : inputs_)
-		{
-			++*input_i = src_input[frame_idx];
-		}
-		auto target_i{std::begin(targets)};
-		for (auto const src_target : targets_)
-		{
-			++*target_i = src_target[frame_idx];
-		}
-	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
 	void rprop<net>::_init(typename net::config_t const& cfg)
@@ -290,19 +244,18 @@ namespace learning
 		teaching_set_.clear();
 		test_set_.clear();
 
-		const size_t src_row_count{src_data_.row_count()};
-		const size_t teaching_size{static_cast<size_t>(src_row_count * train_fraction)};
-		if (!teaching_size || teaching_size > src_row_count)
+		const size_t teaching_size{static_cast<size_t>(src_row_count_ * train_fraction)};
+		if (!teaching_size || teaching_size > src_row_count_)
 		{
 			return;
 		}
 		teaching_set_.reserve(teaching_size);
-		test_set_.reserve(src_row_count - teaching_size);
+		test_set_.reserve(src_row_count_ - teaching_size);
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_int_distribution<size_t> distribution(0, src_row_count - 1);
+		std::uniform_int_distribution<size_t> distribution(0, src_row_count_ - 1);
 
-		for (size_t i{0}; i < src_row_count && test_set_.size() < src_row_count - teaching_size; ++i)
+		for (size_t i{0}; i < src_row_count_ && test_set_.size() < src_row_count_ - teaching_size; ++i)
 		{
 			if (distribution(gen) < teaching_size)
 			{
@@ -326,7 +279,8 @@ namespace learning
 		double sqr_err_sum{0.};
 		for (const size_t row : test_set_)
 		{
-			sample_filler_.fill(row, network.input_layer(), sample_targets_);
+			input_filler_.fill(row, network.input_layer());
+			target_filler_.fill(row, sample_targets_);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())
@@ -366,7 +320,8 @@ namespace learning
 			//const size_t teaching_size{teaching_set_.size()};
 			for (size_t row : teaching_set_)
 			{
-				sample_filler_.fill(row, network.input_layer(), sample_targets_);
+				input_filler_.fill(row, network.input_layer());
+				target_filler_.fill(row, sample_targets_);
 				network.forward();
 				_updateGradients(network, sample_targets_);
 			}
@@ -407,7 +362,8 @@ namespace learning
 			{
 				return;
 			}
-			sample_filler_.fill(row, network.input_layer(), sample_targets_);
+			input_filler_.fill(row, network.input_layer());
+			target_filler_.fill(row, sample_targets_);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())

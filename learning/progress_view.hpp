@@ -11,51 +11,53 @@ namespace learning
 	// learning progress output interface
 	// to be implemented by callers
 	//-----------------------------------------------------------------------------------------------------
-	class progress_view : private shared::util::logged
+	class progress_view
+		: protected shared::util::logged
 	{
-		double min_err_{-1.};
+	protected:
+		double best_err_{-1.};
 		std::int64_t epoch_{0};
 
 	public:
-		double min_err() const noexcept
+		double best_err() const noexcept
 		{
-			return min_err_;
+			return best_err_;
 		}
-		void begin_teach()
+		virtual void begin_teach()
 		{
 			SPDLOG_LOGGER_INFO(log(), "begin_teach");
 		}
-		void set_best(double min_err)
+		virtual void set_best(double min_err)
 		{
-			min_err_ = min_err;
-			SPDLOG_LOGGER_INFO(log(), "current best mean sqr err: {}", min_err_);
+			best_err_ = min_err;
+			SPDLOG_LOGGER_INFO(log(), "current best mean sqr err: {}", best_err_);
 		}
-		void set_last(double min_err)
+		virtual void set_last(double min_err)
 		{
-			SPDLOG_LOGGER_INFO(log(), "epoch: {}. last err: {}, min err: {}", epoch_, min_err, min_err_);
+			SPDLOG_LOGGER_INFO(log(), "epoch: {}. last err: {}, min err: {}", epoch_, min_err, best_err_);
 		}
-		void set_epoch(std::int64_t epoch)
+		virtual void set_epoch(std::int64_t epoch)
 		{
 			epoch_ = epoch;
 		}
-		void end_teach()
+		virtual void end_teach()
 		{
 			SPDLOG_LOGGER_INFO(log(), "end_teach");
 		}
 
-		void begin_test()
+		virtual void begin_test()
 		{
 			SPDLOG_LOGGER_INFO(log(), "begin_test");;
 		}
-		void add_sample_result(double result, double tagret)
+		virtual void add_sample_result(double result, double tagret)
 		{
 			SPDLOG_LOGGER_INFO(log(), "result vs tagret: {}, {}, abs err: {}, rel err: {}",
 				result, tagret, result - tagret, (tagret ? (result - tagret) / tagret : 0.));
 		}
-		void end_test(size_t true_count, size_t false_count, size_t total_count)
+		virtual void end_test(size_t true_count, size_t false_count, size_t total_count)
 		{
 			SPDLOG_LOGGER_INFO(log(), "end_test: hits/misses/total: {}/{}/{}, best mean sqr err: {}",
-				true_count, false_count, total_count, min_err_);
+				true_count, false_count, total_count, best_err_);
 		}
 	};
 }

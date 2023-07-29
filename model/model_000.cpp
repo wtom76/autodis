@@ -41,19 +41,12 @@ void autodis::model::model_000::_learn()
 
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::rprop<learning::multilayer_feed_forward> teacher{
-		dw,
-		{
-			"x"s
-		},
-		{
-			"y"s
-		}
-	};
-
+	learning::sample_filler const input_filler{dw, {"x"s}};
+	learning::sample_filler const target_filler{dw, {"y"s}};
+	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
 	runner.wait();
-	min_err_ = runner.min_err();
+	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
 // learn

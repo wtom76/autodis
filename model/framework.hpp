@@ -23,3 +23,5 @@
 using namespace std::literals;
 
 #include <shared/shared.hpp>
+#include <learning/learning.hpp>
+#include <visual/chart.hpp>

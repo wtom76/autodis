@@ -109,7 +109,7 @@ void autodis::model::model_002::_load_data()
 void autodis::model::model_002::_create_target()
 {
 	shared::math::target_delta(df_, 0, df_);
-	shared::math::target_delta(df_vis_, 0, df_vis_);	// not learning target
+	shared::math::target_delta(df_vis_, 0, df_vis_);
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_create_features()
@@ -172,10 +172,14 @@ void autodis::model::model_002::_learn()
 	}};
 	learning::sample_filler const target_filler{dw,
 	{
-			"GAZP_close_delta(t+1)"s
+		"GAZP_close_delta(t+1)"s
 	}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
-	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
+	shared::data::view dw_vis{df_vis_};
+	auto predicted_series{dw_vis.series_view("predicted"s)};
+	autodis::learn_runner<learning::multilayer_feed_forward> runner{
+		mfn_cfg, mfn, teacher,
+		input_filler, predicted_series, *chart_};
 	runner.wait();
 	best_err_ = runner.best_err();
 }
@@ -198,10 +202,12 @@ void autodis::model::model_002::run()
 	_clear_data();
 	_normalize();
 
-	autodis::visual::chart chrt{df_vis_};
-	chrt.add_candlesticks(0, {1, 2, 3, 4});
-	chrt.add_line(1, 5, {0.f, 0.f, 1.f});
-	chrt.show();
+	df_vis_.create_series("predicted"s);
+	chart_ = std::make_shared<autodis::visual::chart>(df_vis_);
+	chart_->add_candlesticks(0, {1, 2, 3, 4});		// gold candles (aka inputs)
+	chart_->add_line(1, 5, {0.f, 0.f, 1.f});		// target
+	chart_->add_line(1, 6, {0.f, .5f, .5f});		// predicted
+	chart_->show();
 
 	{
 		std::ofstream f{"df_norm.csv"s};

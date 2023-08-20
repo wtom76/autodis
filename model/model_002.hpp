@@ -2,7 +2,6 @@
 
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
-#include "visual/chart.hpp"
 
 namespace autodis::model
 {
@@ -22,6 +21,7 @@ namespace autodis::model
 		norm_t	norm_;
 		double	best_err_{0};
 		size_t	original_series_count_{0};
+		std::shared_ptr<autodis::visual::chart> chart_;
 
 	// methods
 	private:

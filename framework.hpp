@@ -5,6 +5,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <span>
 #include <string>
 #include <stdexcept>
@@ -18,4 +19,4 @@ using namespace std::literals;
 #include <shared/shared.hpp>
 #include <keeper/keeper.hpp>
 #include <learning/learning.hpp>
-
+#include <visual/chart.hpp>

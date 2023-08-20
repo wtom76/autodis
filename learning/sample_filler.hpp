@@ -41,7 +41,7 @@ namespace learning
 			auto dst_i{std::begin(dst)};
 			for (auto const& src : src_)
 			{
-				++*dst_i = src[row];
+				*dst_i++ = src[row];
 			}
 		}
 	};

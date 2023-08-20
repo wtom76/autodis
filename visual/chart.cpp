@@ -362,6 +362,11 @@ void autodis::visual::chart::add_candlesticks(size_t scale_y_idx, std::array<siz
 	candlesticks_.emplace_back(ohlc_idc, scale_y_idx);
 }
 //---------------------------------------------------------------------------------------------------------
+void autodis::visual::chart::invalidate() noexcept
+{
+	need_recalc_.store(true);
+}
+//---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::show()
 {
 	fut_ = std::async(std::launch::async,
@@ -377,7 +382,7 @@ void autodis::visual::chart::show()
 			while (window_.isOpen())
 			{
 				sf::Event event;
-				while (window_.waitEvent(event))
+				while (window_.pollEvent(event))
 				{
 					switch (event.type)
 					{
@@ -389,9 +394,7 @@ void autodis::visual::chart::show()
 						window_size_.y_ = event.size.height;
 						std::cout << "Resized. {" << window_size_.x_ << ", " << window_size_.y_ << "}\n";
 						glViewport(0, 0, event.size.width, event.size.height);
-						//window_.SetActive();
-						gl_ctx_->draw();
-						window_.display();
+						need_redraw_.store(true);
 						break;
 					case sf::Event::MouseButtonPressed:
 						switch (event.mouseButton.button)
@@ -427,9 +430,7 @@ void autodis::visual::chart::show()
 							std::cout << "MouseMoved. {" << mouse_.current_point_.x_ << ", " << mouse_.current_point_.y_ << "}\n";
 							if (scale_x_.scroll(static_cast<float>(mouse_.current_point_.x_ - mouse_.start_point_.x_) / window_size_.x_))
 							{
-								_fill_ctx(*gl_ctx_);
-								gl_ctx_->draw();
-								window_.display();
+								need_recalc_.store(true);
 							}
 						}
 						break;
@@ -437,6 +438,17 @@ void autodis::visual::chart::show()
 						break;
 					}
 				}
+				if (need_recalc_.exchange(false))
+				{
+					_fill_ctx(*gl_ctx_);
+					need_redraw_.store(true);
+				}
+				if (need_redraw_.exchange(false))
+				{
+					gl_ctx_->draw();
+					window_.display();
+				}
+				std::this_thread::sleep_for(10ms);
 			}
 		}
 	);

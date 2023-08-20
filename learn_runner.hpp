@@ -43,6 +43,7 @@ namespace autodis
 				network_.forward();
 				dest = network_.omega_layer().front();
 			}
+			chrt_->invalidate();
 		}
 
 	public:

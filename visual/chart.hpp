@@ -52,6 +52,9 @@ namespace autodis::visual
 		std::vector<scale_y>	scales_y_;
 		std::vector<line>		lines_;
 		std::vector<candles>	candlesticks_;
+		
+		std::atomic<bool>		need_recalc_{false};
+		std::atomic<bool>		need_redraw_{false};
 
 		std::unique_ptr<gl_context> gl_ctx_;
 	
@@ -75,5 +78,7 @@ namespace autodis::visual
 		void add_candlesticks(size_t scale_y_idx, std::array<size_t, 4> const& ohlc_idc);
 
 		void show();
+
+		void invalidate() noexcept;
 	};
 }

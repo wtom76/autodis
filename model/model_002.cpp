@@ -76,32 +76,32 @@ void autodis::model::model_002::_learn()
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::sample_filler const input_filler{dw,
 	{
-		"GAZP_close_delta(t-1)"s,
-		"GAZP_close_delta(t-2)"s,
-		"GAZP_close_delta(t-3)"s,
-		"GAZP_close_delta(t-4)"s,
-		"GAZP_close_delta(t-5)"s,
-		"GOLD_close_delta(t-1)"s,
-		"GOLD_close_delta(t-2)"s,
-		"GOLD_close_delta(t-3)"s,
-		"GOLD_close_delta(t-4)"s,
-		"GOLD_close_delta(t-5)"s,
-		"IMOEX_close_delta(t-1)"s,
-		"IMOEX_close_delta(t-2)"s,
-		"IMOEX_close_delta(t-3)"s,
-		"IMOEX_close_delta(t-4)"s,
-		"IMOEX_close_delta(t-5)"s
+		"GAZP close_delta(t-1)"s,
+		"GAZP close_delta(t-2)"s,
+		"GAZP close_delta(t-3)"s,
+		"GAZP close_delta(t-4)"s,
+		"GAZP close_delta(t-5)"s,
+		"GOLD close_delta(t-1)"s,
+		"GOLD close_delta(t-2)"s,
+		"GOLD close_delta(t-3)"s,
+		"GOLD close_delta(t-4)"s,
+		"GOLD close_delta(t-5)"s,
+		"IMOEX close_delta(t-1)"s,
+		"IMOEX close_delta(t-2)"s,
+		"IMOEX close_delta(t-3)"s,
+		"IMOEX close_delta(t-4)"s,
+		"IMOEX close_delta(t-5)"s
 	}};
 	learning::sample_filler const target_filler{dw,
 	{
-		"GAZP_close_delta(t+1)"s
+		"GAZP close_delta(t+1)"s
 	}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	shared::data::view dw_vis{df_chart_};
 	auto predicted_series{dw_vis.series_view("predicted"s)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		mfn_cfg, mfn, teacher,
-		input_filler, predicted_series, norm_[dw.series_idx("GAZP_close_delta(t+1)"s)],
+		input_filler, predicted_series, norm_[dw.series_idx("GAZP close_delta(t+1)"s)],
 		*chart_};
 	runner.wait();
 	best_err_ = runner.best_err();

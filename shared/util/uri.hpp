@@ -17,6 +17,7 @@ namespace shared::util
 		static std::vector<std::string> _parse(std::initializer_list<std::string> src);
 		
 	public:
+		uri(){}
 		uri(std::string src);
 		uri(std::initializer_list<std::string> src);
 

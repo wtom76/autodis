@@ -74,7 +74,7 @@ namespace shared::data
 
 	// methods
 	private:
-		[[nodiscard]] size_t _frame_idx(size_t view_idx) const noexcept { return row_index_[view_idx]; }
+		//[[nodiscard]] size_t _frame_idx(size_t view_idx) const noexcept { return row_index_[view_idx]; }
 		[[nodiscard]] bool _row_has_nan(size_t view_idx) const noexcept;
 
 	public:
@@ -84,8 +84,9 @@ namespace shared::data
 		[[nodiscard]] size_t col_count() const noexcept { return col_index_.size(); }
 		[[nodiscard]] series_view_t series_view(size_t idx) const noexcept { return series_view_t{frame_.series(idx), row_index_}; }
 		[[nodiscard]] series_view_t series_view(frame::name_t const& name) const;
+		[[nodiscard]] size_t series_idx(frame::name_t const& name) const;
 		// deprecated
-		[[nodiscard]] size_t frame_idx(size_t view_idx) const noexcept { return row_index_[view_idx]; }
+		//[[nodiscard]] size_t frame_idx(size_t view_idx) const noexcept { return row_index_[view_idx]; }
 		void delete_column(size_t idx) noexcept;
 		void clear_lacunas() noexcept;
 	};

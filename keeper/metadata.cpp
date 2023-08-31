@@ -57,6 +57,44 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load()
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
+std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_info()
+{
+	std::vector<data_info> result;
+	{
+		pqxx::work t{con_};
+		const pqxx::result r{t.exec_params("select data_id, data_uri, data_description from metadata.metadata_view")};
+		if (r.empty())
+		{
+			return {};
+		}
+		result.reserve(r.size());
+		for (const pqxx::row& rec : r)
+		{
+			long long	data_id{rec[0].as<long long>()};
+			data_uri	duri{rec[1].as<std::string>()};
+			std::string	descr{rec[2].as<std::string>()};
+			result.emplace_back(data_id, std::move(duri), std::move(descr));
+		}
+	}
+	return result;
+}
+//---------------------------------------------------------------------------------------------------------
+void keeper::metadata::load_data_info(std::vector<long long> const& reg_data_ids, std::vector<data_info>& dest)
+{
+	dest.clear();
+	std::vector<data_info> data{_load_data_info()};
+	std::unordered_map<long long /*data_id*/, data_info> all_data_map;
+	for (auto& entry : data)
+	{
+		all_data_map.emplace(entry.data_id_, entry);
+	}
+	dest.reserve(reg_data_ids.size());
+	for (long long requested_id : reg_data_ids)
+	{
+		dest.emplace_back(std::move(all_data_map[requested_id]));
+	}
+}
+//---------------------------------------------------------------------------------------------------------
 void keeper::metadata::drop_pending_flag(long long series_id)
 {
 	pqxx::work t{con_};

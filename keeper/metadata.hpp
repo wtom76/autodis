@@ -34,13 +34,25 @@ namespace keeper
 			bool		always_{false};		// true if pending_ shouldn't be dropped after data acquisition
 			feed_info	dest_;
 		};
+		//---------------------------------------------------------------------------------------------------------
+		// struct data_info
+		//---------------------------------------------------------------------------------------------------------
+		struct data_info
+		{
+			long long	data_id_{0};
+			data_uri	data_uri_;
+			std::string	description_;
+		};
 
 	private:
 		pqxx::connection con_;
 
+	private:
+		std::vector<data_info> _load_data_info();
 	public:
 		metadata(const config& cfg);
 		std::vector<source_info> load();
+		void load_data_info(std::vector<long long> const& reg_data_ids, std::vector<data_info>& dest);
 		void drop_pending_flag(long long source_id);
 	};
 }

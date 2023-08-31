@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shared/math/normalization.hpp>
+#include <keeper/keeper.hpp>
 #include "framework.hpp"
 
 namespace autodis::model
@@ -13,18 +14,20 @@ namespace autodis::model
 	// types
 	private:
 		using frame_t = shared::data::frame;
-		using norm_t = std::vector<shared::math::tanh_normalization>;
+		using norm_t = shared::math::tanh_normalization;
+		using norm_container_t = std::vector<shared::math::tanh_normalization>;
 	// data
 	private:
-		frame_t	df_;
-		frame_t	df_vis_;
-		norm_t	norm_;
-		double	best_err_{0};
-		size_t	original_series_count_{0};
+		frame_t				df_;
+		frame_t				df_chart_;									// data for chart. no normalization
+		norm_container_t	norm_;
+		double				best_err_{0};
+		size_t				original_series_count_{0};
 		std::shared_ptr<autodis::visual::chart> chart_;
 
 	// methods
 	private:
+		void _print_df(frame_t const& df) const;
 		void _load_data();
 		void _create_target();
 		void _create_features();

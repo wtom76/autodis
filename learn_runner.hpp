@@ -6,12 +6,13 @@ namespace autodis
 	//----------------------------------------------------------------------------------------------------------
 	// class learn_runner
 	//----------------------------------------------------------------------------------------------------------
-	template <class net>
+	template <class net, class target_normalization = shared::math::tanh_normalization>
 	class learn_runner
 		: public learning::progress_view
 	{
 	public:
 		using series_view_t = shared::data::view::series_view_t;
+		using target_normalization_t = target_normalization;
 		using chart_t = autodis::visual::chart;
 	
 	private:
@@ -22,6 +23,7 @@ namespace autodis
 
 		learning::sample_filler const*	inputs_filler_;
 		series_view_t*					prediction_;
+		target_normalization_t const	norm_;
 		chart_t*						chrt_;
 
 		std::jthread					thread_;		// keep it last member
@@ -41,7 +43,7 @@ namespace autodis
 			{
 				inputs_filler_->fill(row++, network_.input_layer());
 				network_.forward();
-				dest = network_.omega_layer().front();
+				dest = norm_.restore(network_.omega_layer().front());
 			}
 			chrt_->invalidate();
 		}
@@ -72,12 +74,14 @@ namespace autodis
 			learning::rprop<net>& teacher,
 			learning::sample_filler const& inputs_filler,
 			series_view_t& prediction,
+			target_normalization_t const& norm,
 			chart_t& chrt)
 			: cfg_{cfg}
 			, network_{network}
 			, teacher_{teacher}
 			, inputs_filler_{&inputs_filler}
 			, prediction_{&prediction}
+			, norm_{norm}
 			, chrt_{&chrt}
 			, thread_{
 				[this](std::stop_token stoken)

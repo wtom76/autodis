@@ -14,6 +14,18 @@ shared::data::view::series_view_t shared::data::view::series_view(frame::name_t 
 	throw std::runtime_error{"no '"s + name + "' series"s};
 }
 //-----------------------------------------------------------------------------------------------------
+size_t shared::data::view::series_idx(frame::name_t const& name) const
+{
+	for (auto col_idx : col_index_)
+	{
+		if (frame_.name(col_idx) == name)
+		{
+			return col_idx;
+		}
+	}
+	throw std::runtime_error{"no '"s + name + "' series"s};
+}
+//-----------------------------------------------------------------------------------------------------
 shared::data::view::view(frame& frame)
 	: frame_{frame}
 {

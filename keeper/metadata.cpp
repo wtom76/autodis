@@ -10,7 +10,7 @@ keeper::metadata::metadata(const config& cfg)
 	con_.prepare("dpf", "call \"metadata\".drop_pending_flag($1)");
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::source_info> keeper::metadata::load()
+std::vector<keeper::metadata::source_info> keeper::metadata::load_source_meta()
 {
 	std::vector<source_info> result;
 	{
@@ -57,7 +57,7 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load()
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_info()
+std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_meta()
 {
 	std::vector<data_info> result;
 	{
@@ -79,20 +79,21 @@ std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_info()
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::metadata::load_data_info(std::vector<long long> const& reg_data_ids, std::vector<data_info>& dest)
+std::vector<keeper::metadata::data_info> keeper::metadata::load_data_meta(std::vector<long long> const& reg_data_ids)
 {
-	dest.clear();
-	std::vector<data_info> data{_load_data_info()};
+	std::vector<keeper::metadata::data_info> result;
+	std::vector<data_info> data{_load_data_meta()};
 	std::unordered_map<long long /*data_id*/, data_info> all_data_map;
 	for (auto& entry : data)
 	{
 		all_data_map.emplace(entry.data_id_, entry);
 	}
-	dest.reserve(reg_data_ids.size());
+	result.reserve(reg_data_ids.size());
 	for (long long requested_id : reg_data_ids)
 	{
-		dest.emplace_back(std::move(all_data_map[requested_id]));
+		result.emplace_back(std::move(all_data_map[requested_id]));
 	}
+	return result;
 }
 //---------------------------------------------------------------------------------------------------------
 void keeper::metadata::drop_pending_flag(long long series_id)

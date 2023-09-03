@@ -80,11 +80,7 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 //---------------------------------------------------------------------------------------------------------
 void keeper::data_read::read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest)
 {
-	std::vector<metadata::data_info> metainfo;
-	{
-		metadata md{cfg_};
-		md.load_data_info(data_reg_ids, metainfo);
-	}
+	std::vector<metadata::data_info> const metainfo{metadata{cfg_}.load_data_meta(data_reg_ids)};
 
 	for (metadata::data_info const& mf : metainfo)
 	{

@@ -48,11 +48,11 @@ namespace keeper
 		pqxx::connection con_;
 
 	private:
-		std::vector<data_info> _load_data_info();
+		std::vector<data_info> _load_data_meta();
 	public:
 		metadata(const config& cfg);
-		std::vector<source_info> load();
-		void load_data_info(std::vector<long long> const& reg_data_ids, std::vector<data_info>& dest);
+		[[nodiscard]] std::vector<source_info> load_source_meta();
+		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
 	};
 }

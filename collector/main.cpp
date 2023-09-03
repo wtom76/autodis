@@ -24,7 +24,7 @@ void collect()
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::metadata metadata{keeper_cfg};
-	const auto sources{metadata.load()};
+	auto const sources{metadata.load_source_meta()};
 	for (auto const& source_info : sources)
 	{
 		if (!source_info.pending_)

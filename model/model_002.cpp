@@ -67,9 +67,17 @@ void autodis::model::model_002::_normalize()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
+void autodis::model::model_002::_create_chart()
+{
+	chart_ = std::make_shared<autodis::visual::chart>(df_chart_);
+	chart_->add_candlesticks(0, {1, 2, 3, 4});		// gold candles (aka inputs)
+	chart_->add_line(1, 5, {0.f, 0.f, 1.f});		// target
+	chart_->add_line(1, 6, {0.f, .5f, .5f});		// predicted
+}
+//---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_learn()
 {
-	std::vector<std::size_t> const layers_sizes{15, 40, 1};
+	std::vector<std::size_t> const layers_sizes{15, 30, 30, 1};
 	shared::data::view dw{df_};
 
 	learning::config mfn_cfg{layers_sizes};
@@ -123,8 +131,6 @@ void autodis::model::model_002::run()
 	_create_target();
 	_create_features();
 
-	_print_df(df_);
-
 	_clear_data();
 	_normalize();
 
@@ -134,10 +140,7 @@ void autodis::model::model_002::run()
 
 	_print_df(df_chart_);
 
-	chart_ = std::make_shared<autodis::visual::chart>(df_chart_);
-	chart_->add_candlesticks(0, {1, 2, 3, 4});		// gold candles (aka inputs)
-	chart_->add_line(1, 5, {0.f, 0.f, 1.f});		// target
-	chart_->add_line(1, 6, {0.f, .5f, .5f});		// predicted
+	_create_chart();
 	chart_->show();
 
 	_learn();

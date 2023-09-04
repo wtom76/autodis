@@ -24,7 +24,7 @@ namespace autodis
 		learning::sample_filler const*	inputs_filler_;
 		series_view_t*					prediction_;
 		target_normalization_t const	norm_;
-		chart_t*						chrt_;
+		chart_t*						chrt_{nullptr};
 
 		std::jthread					thread_;		// keep it last member
 

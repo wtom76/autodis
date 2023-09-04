@@ -15,7 +15,7 @@ namespace autodis::model
 	private:
 		using frame_t = shared::data::frame;
 		using norm_t = shared::math::tanh_normalization;
-		using norm_container_t = std::vector<shared::math::tanh_normalization>;
+		using norm_container_t = std::vector<norm_t>;
 	// data
 	private:
 		frame_t				df_;
@@ -33,6 +33,7 @@ namespace autodis::model
 		void _create_features();
 		void _clear_data();
 		void _normalize();
+		void _create_chart();
 		void _learn();
 
 	public:

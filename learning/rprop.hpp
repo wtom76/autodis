@@ -91,7 +91,7 @@ namespace learning
 		const size_t layer_count{network.output_layers().size()};
 		assert(layer_count >= 3); // input, n * hidden, omega
 
-		std::int64_t layer_idx{static_cast<std::int64_t>(layer_count) - 1};
+		ptrdiff_t layer_idx{static_cast<ptrdiff_t>(layer_count) - 1};
 		// 1.
 		{
 			auto& grad_terms{grad_terms_->layers_.back()};

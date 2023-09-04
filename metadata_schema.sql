@@ -17,9 +17,9 @@ CREATE TYPE metadata.feed_registry AS (
 	id serial4,
 	uri text);
 
--- DROP TYPE metadata.human_metadata;
+-- DROP TYPE metadata.human_metadata_view;
 
-CREATE TYPE metadata.human_metadata AS (
+CREATE TYPE metadata.human_metadata_view AS (
 	"always" bool,
 	pending bool,
 	field_description text,
@@ -33,12 +33,14 @@ CREATE TYPE metadata.human_metadata AS (
 -- DROP TYPE metadata.metadata_view;
 
 CREATE TYPE metadata.metadata_view AS (
+	data_id int8,
 	source_id int4,
 	source_uri text,
 	source_args text,
 	feed_uri text,
 	feed_args text,
 	data_uri text,
+	data_description text,
 	pending bool,
 	"always" bool);
 
@@ -95,9 +97,9 @@ CREATE TYPE metadata."_feed_registry" (
 	ELEMENT = metadata.feed_registry,
 	DELIMITER = ',');
 
--- DROP TYPE metadata."_human_metadata";
+-- DROP TYPE metadata."_human_metadata_view";
 
-CREATE TYPE metadata."_human_metadata" (
+CREATE TYPE metadata."_human_metadata_view" (
 	INPUT = array_in,
 	OUTPUT = array_out,
 	RECEIVE = array_recv,
@@ -106,7 +108,7 @@ CREATE TYPE metadata."_human_metadata" (
 	ALIGNMENT = 8,
 	STORAGE = any,
 	CATEGORY = A,
-	ELEMENT = metadata.human_metadata,
+	ELEMENT = metadata.human_metadata_view,
 	DELIMITER = ',');
 
 -- DROP TYPE metadata."_metadata_view";
@@ -288,9 +290,9 @@ CREATE TABLE metadata.type_registry (
 );
 
 
--- metadata.human_metadata source
+-- metadata.human_metadata_view source
 
-CREATE OR REPLACE VIEW metadata.human_metadata
+CREATE OR REPLACE VIEW metadata.human_metadata_view
 AS SELECT sr.always,
     sr.pending,
     dr.field_description,
@@ -311,12 +313,14 @@ AS SELECT sr.always,
 -- metadata.metadata_view source
 
 CREATE OR REPLACE VIEW metadata.metadata_view
-AS SELECT sr.id AS source_id,
+AS SELECT dr.id AS data_id,
+    sr.id AS source_id,
     sr.uri AS source_uri,
     sr.args AS source_args,
     fr.uri AS feed_uri,
     sb.feed_args,
     dr.uri AS data_uri,
+    dr.field_description AS data_description,
     sr.pending,
     sr.always
    FROM metadata.source_binding sb

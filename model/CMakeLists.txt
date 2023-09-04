@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.22.0)
 
 add_library(model OBJECT
-	model_000.cpp
-	model_001.cpp
+	linear_test.cpp
 	model_002.cpp
 )
 

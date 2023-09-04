@@ -1,29 +1,25 @@
 #include "pch.hpp"
-#include "model_000.hpp"
+#include "linear_test.hpp"
 #include "learn_runner.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
-void autodis::model::model_000::_load_data()
+void autodis::model::linear_test::_load_data()
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::data_read dr{keeper_cfg};
-
-	{
-		std::vector<keeper::data_uri> const uris
+	dr.read(
 		{
-			"test_linear/x"s,
-			"test_linear/y"s
-		};
-		dr.read(uris, df_);
-		assert(std::ranges::is_sorted(df_.index()));
-		df_.name(0) = "x"s;
-		df_.name(1) = "y"s;
-	}
+			6,	// test_linear/x
+			7	// test_linear/y
+		},
+		df_
+	);
+	df_chart_ = df_;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_000::_normalize()
+void autodis::model::linear_test::_normalize()
 {
 	norm_.clear();
 	norm_.reserve(df_.col_count());
@@ -34,9 +30,16 @@ void autodis::model::model_000::_normalize()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_000::_learn()
+void autodis::model::linear_test::_create_chart()
 {
-	std::vector<std::size_t> const layers_sizes{1, 4, 1};
+	chart_ = std::make_shared<autodis::visual::chart>(df_chart_);
+	chart_->add_line(1, 1, {0.f, 0.f, 1.f});		// target
+	chart_->add_line(1, 2, {0.f, .5f, .5f});		// predicted
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::linear_test::_learn()
+{
+	std::vector<std::size_t> const layers_sizes{1, 3, 3, 3, 1};
 	shared::data::view dw{df_};
 
 	learning::config mfn_cfg{layers_sizes};
@@ -44,29 +47,23 @@ void autodis::model::model_000::_learn()
 	learning::sample_filler const input_filler{dw, {"x"s}};
 	learning::sample_filler const target_filler{dw, {"y"s}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
-	autodis::learn_runner<learning::multilayer_feed_forward> runner{mfn_cfg, mfn, teacher};
+	shared::data::view dw_vis{df_chart_};
+	auto predicted_series{dw_vis.series_view("predicted"s)};
+	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
+		mfn_cfg, mfn, teacher,
+		input_filler, predicted_series, norm_[dw.series_idx("y"s)],
+		*chart_};
 	runner.wait();
 	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
 // learn
-void autodis::model::model_000::run()
+void autodis::model::linear_test::run()
 {
 	_load_data();
-
-	{
-		df_.print_shape(std::cout);
-		std::cout << "\n\n";
-		std::ofstream f{"df.csv"s};
-		df_.print(f);
-	}
-
 	_normalize();
-
-	{
-		std::ofstream f{"df_norm.csv"s};
-		df_.print(f);
-	}
-
+	df_chart_.create_series("predicted"s);
+	_create_chart();
+	chart_->show();
 	_learn();
 }

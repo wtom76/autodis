@@ -301,27 +301,26 @@ namespace learning
 
 		pview.begin_teach();
 
-		net best_network{network};
-
 		_init(cfg);
 
 		double err{std::numeric_limits<double>::max()};
-		double cur_min_err{std::numeric_limits<double>::max()};
+		double cur_min_err{err};
+		net best_network{network};
+		pview.set_best(cur_min_err);
 
 		std::int64_t epochs_left{epochs_max};
 
-		while (epochs_left-- && err > min_err && !stop_token.stop_requested())
+		while (err > min_err && !stop_token.stop_requested() && epochs_left--)
 		{
 			_split_data();
 
 			dEdw_off_->reset(0.);
 			bias_dEdw_off_->reset(0.);
 
-			//const size_t teaching_size{teaching_set_.size()};
-			for (size_t row : teaching_set_)
+			for (size_t row_idx : teaching_set_)
 			{
-				input_filler_.fill(row, network.input_layer());
-				target_filler_.fill(row, sample_targets_);
+				input_filler_.fill(row_idx, network.input_layer());
+				target_filler_.fill(row_idx, sample_targets_);
 				network.forward();
 				_updateGradients(network, sample_targets_);
 			}

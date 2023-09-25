@@ -43,7 +43,8 @@ namespace autodis
 			{
 				inputs_filler_->fill(row++, network_.input_layer());
 				network_.forward();
-				dest = norm_.restore(network_.omega_layer().front());
+				//dest = norm_.restore(network_.omega_layer().front());
+				dest = network_.omega_layer().front();
 			}
 			chrt_->invalidate();
 		}
@@ -121,6 +122,7 @@ namespace autodis
 		void set_best(double min_err) override
 		{
 			learning::progress_view::set_best(min_err);
+			std::ofstream{"best.net"s} << network_;
 			_update_chart();
 		}
 	};

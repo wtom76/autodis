@@ -135,6 +135,18 @@ const typename shared::data::frame::series_t& shared::data::frame::series(std::s
 	return const_cast<frame*>(this)->series(idx);
 }
 //-----------------------------------------------------------------------------------------------------
+size_t shared::data::frame::series_idx(name_t const& name) const
+{
+	for (size_t col_idx{0}; col_idx != series_names_.size(); ++col_idx)
+	{
+		if (series_names_[col_idx] == name)
+		{
+			return col_idx;
+		}
+	}
+	throw std::runtime_error{"no '"s + name + "' series"s};
+}
+//-----------------------------------------------------------------------------------------------------
 void shared::data::frame::clear() noexcept
 {
 	index_.clear();

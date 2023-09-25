@@ -362,8 +362,20 @@ void autodis::visual::chart::add_candlesticks(size_t scale_y_idx, std::array<siz
 	candlesticks_.emplace_back(ohlc_idc, scale_y_idx);
 }
 //---------------------------------------------------------------------------------------------------------
+// DEBUG
+void _dump_df(shared::data::frame const& df)
+{
+	std::ofstream f{"df_chart.csv"s};
+	df.print(f);
+}
+//~DEBUG
+//---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::invalidate() noexcept
 {
+// DEBUG
+	_dump_df(df_);
+//~DEBUG
+
 	need_recalc_.store(true);
 }
 //---------------------------------------------------------------------------------------------------------

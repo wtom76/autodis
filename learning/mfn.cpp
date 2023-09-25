@@ -15,11 +15,10 @@ learning::multilayer_feed_forward::outputs::outputs(config const& cfg, double in
 	{
 		layers_[i].resize(cfg.layer_sizes()[i] * hidden_func_count_, initial_value);
 		functions_[i - 1].resize(cfg.layer_sizes()[i] * hidden_func_count_, nullptr);
-		for (size_t aidx = 0; aidx < cfg.layer_sizes()[i]; ++aidx)
+		for (size_t aidx{0}; aidx < cfg.layer_sizes()[i]; ++aidx)
 		{
-			functions_[i - 1][aidx] = &identity_func_;
-			functions_[i - 1][aidx + cfg.layer_sizes()[i]] = &sigma_func_;
-			functions_[i - 1][aidx + (cfg.layer_sizes()[i] << 1)] = &gaussian_func_;
+			static_assert(hidden_func_count_ == 1);
+			functions_[i - 1][aidx] = &sigma_func_;
 		}
 	}
 }

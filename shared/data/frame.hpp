@@ -29,8 +29,9 @@ namespace shared::data
 	// methods
 	private:
 		void _shrink_to_fit();
-		template <class other_frame>
-		void _append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs);
+		//template <class other_frame>
+		//void _append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs);
+		void _append_series(frame const& other, std::vector<std::size_t> const& series_idxs);
 		void _left_join(frame const& other, std::size_t series_idx);
 		void _left_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
 		void _outer_join(frame const& other, std::vector<std::size_t> const& series_idxs = {});
@@ -56,6 +57,8 @@ namespace shared::data
 		[[nodiscard]] name_t& name(std::size_t idx) noexcept { return series_names_[idx]; }
 		[[nodiscard]] name_t const& name(std::size_t idx) const noexcept { return series_names_[idx]; }
 
+		[[nodiscard]] size_t series_idx(name_t const& name) const;
+
 		void clear() noexcept;
 		void reserve(std::size_t size);
 		void resize(size_t row_count);
@@ -79,15 +82,51 @@ namespace shared::data
 		void print_shape(std::ostream& strm) const;
 	};
 	//-----------------------------------------------------------------------------------------------------
+	////-----------------------------------------------------------------------------------------------------
+	//template <class other_frame>
+	//inline void frame::_append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
+	//{
+	//	assert(index_.empty() || std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()));
+
+	//	if (index_.empty())
+	//	{
+	//		index_ = std::forward<typename other_frame::index_t>(other.index_);
+	//		index_.shrink_to_fit();
+	//	}
+
+	//	if (series_idxs.empty())
+	//	{
+	//		data_.reserve(data_.size() + other.data_.size());
+	//		series_names_.reserve(series_names_.size() + other.series_names_.size());
+
+	//		auto data_i{other.data_.begin()};
+	//		auto const data_e{other.data_.cend()};
+	//		auto name_i{other.series_names_.begin()};
+	//		for (; data_i != data_e; ++data_i, ++name_i)
+	//		{
+	//			data_.emplace_back(std::forward<typename other_frame::series_t>(*data_i));
+	//			series_names_.emplace_back(std::forward<typename other_frame::name_t>(*name_i));
+	//		}
+	//	}
+	//	else
+	//	{
+	//		data_.reserve(data_.size() + series_idxs.size());
+	//		series_names_.reserve(series_names_.size() + series_idxs.size());
+	//		for (std::size_t idx_idx{0}; idx_idx < series_idxs.size(); ++idx_idx)
+	//		{
+	//			data_.emplace_back(std::forward<typename other_frame::series_t>(other.series(series_idxs[idx_idx])));
+	//			series_names_.emplace_back(std::forward<typename other_frame::name_t>(other.name(series_idxs[idx_idx])));
+	//		}
+	//	}
+	//}
 	//-----------------------------------------------------------------------------------------------------
-	template <class other_frame>
-	inline void frame::_append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs)
+	inline void frame::_append_series(frame const& other, std::vector<std::size_t> const& series_idxs)
 	{
 		assert(index_.empty() || std::equal(index_.cbegin(), index_.cend(), other.index_.cbegin(), other.index_.cend()));
 
 		if (index_.empty())
 		{
-			index_ = std::forward<typename other_frame::index_t>(other.index_);
+			index_ = other.index_;
 			index_.shrink_to_fit();
 		}
 
@@ -101,8 +140,8 @@ namespace shared::data
 			auto name_i{other.series_names_.begin()};
 			for (; data_i != data_e; ++data_i, ++name_i)
 			{
-				data_.emplace_back(std::forward<typename other_frame::series_t>(*data_i));
-				series_names_.emplace_back(std::forward<typename other_frame::name_t>(*name_i));
+				data_.emplace_back(*data_i);
+				series_names_.emplace_back(*name_i);
 			}
 		}
 		else
@@ -111,8 +150,8 @@ namespace shared::data
 			series_names_.reserve(series_names_.size() + series_idxs.size());
 			for (std::size_t idx_idx{0}; idx_idx < series_idxs.size(); ++idx_idx)
 			{
-				data_.emplace_back(std::forward<typename other_frame::series_t>(other.series(series_idxs[idx_idx])));
-				series_names_.emplace_back(std::forward<typename other_frame::name_t>(other.name(series_idxs[idx_idx])));
+				data_.emplace_back(other.series(series_idxs[idx_idx]));
+				series_names_.emplace_back(other.name(series_idxs[idx_idx]));
 			}
 		}
 	}

@@ -17,7 +17,7 @@ namespace learning
 		struct outputs
 		{
 		private:
-			static constexpr std::size_t hidden_func_count_{3};
+			static constexpr std::size_t hidden_func_count_{1};
 
 			activation::identity	identity_func_;
 			activation::sigma		sigma_func_;

@@ -15,36 +15,27 @@ void autodis::model::model_002::_load_data()
 		{
 			4,	// GAZP close
 			11,	// GOLD close
-			16	// IMOEX close
+			16,	// IMOEX close
+			// for chart
+			1,	// GAZP open
+			2,	// GAZP high
+			3	// GAZP low
 		},
 		df_
 	);
-	original_series_count_ = df_.col_count();
-	assert(original_series_count_ == 3);
-
-	dr.read(
-		{
-			4,	// GAZP close
-			8,	// GOLD open
-			9,	// GOLD high
-			10,	// GOLD low
-			11,	// GOLD close
-		},
-		df_chart_
-	);
+	feature_sources_count_ = 3;
 }
 //---------------------------------------------------------------------------------------------------------
 // add computed target to df_
 void autodis::model::model_002::_create_target()
 {
 	shared::math::target_delta(df_, 0, df_);
-	shared::math::target_delta(df_chart_, 0, df_chart_);
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_create_features()
 {
 	constexpr std::size_t track_depth{5};
-	for (size_t i{0}; i != original_series_count_; ++i)
+	for (size_t i{0}; i != feature_sources_count_; ++i)
 	{
 		shared::math::track(df_, i, track_depth);
 	}
@@ -69,10 +60,10 @@ void autodis::model::model_002::_normalize()
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_create_chart()
 {
-	chart_ = std::make_shared<autodis::visual::chart>(df_chart_);
-	chart_->add_candlesticks(0, {1, 2, 3, 4});		// gold candles (aka inputs)
-	chart_->add_line(1, 5, {0.f, 0.f, 1.f});		// target
-	chart_->add_line(1, 6, {0.f, .5f, .5f});		// predicted
+	chart_ = std::make_shared<autodis::visual::chart>(df_);
+	chart_->add_candlesticks(0, {3, 4, 5, 0});		// gazp candles
+	chart_->add_line(1, df_.series_idx(target_series_name_), {0.f, 0.f, 1.f});		// target
+	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_learn()
@@ -102,15 +93,13 @@ void autodis::model::model_002::_learn()
 	}};
 	learning::sample_filler const target_filler{dw,
 	{
-		"GAZP close_delta(t+1)"s
+		target_series_name_
 	}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
-	shared::data::view dw_vis{df_chart_};
-	auto predicted_series{dw_vis.series_view("predicted"s)};
+	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		mfn_cfg, mfn, teacher,
-		input_filler, predicted_series, norm_[dw.series_idx("GAZP close_delta(t+1)"s)],
-		*chart_};
+		input_filler, predicted_series, norm_[dw.series_idx(target_series_name_)], *chart_};
 	runner.wait();
 	best_err_ = runner.best_err();
 }
@@ -134,14 +123,12 @@ void autodis::model::model_002::run()
 	_clear_data();
 	_normalize();
 
-	_print_df(df_);
-
-	df_chart_.create_series("predicted"s);
-
-	_print_df(df_chart_);
+	df_.create_series(predicted_series_name_);
 
 	_create_chart();
 	chart_->show();
+
+	_print_df(df_);
 
 	_learn();
 }

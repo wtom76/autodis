@@ -66,12 +66,15 @@ void autodis::model::model_002::_create_chart()
 	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
+std::vector<std::size_t> autodis::model::model_002::_net_layer_sizes() const
+{
+	return {15, 30, 30, 1};
+}
+//---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_learn()
 {
-	std::vector<std::size_t> const layers_sizes{15, 30, 30, 1};
 	shared::data::view dw{df_};
-
-	learning::config mfn_cfg{layers_sizes};
+	learning::config mfn_cfg{_net_layer_sizes()};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	learning::sample_filler const input_filler{dw,
 	{
@@ -91,17 +94,54 @@ void autodis::model::model_002::_learn()
 		"IMOEX close_delta(t-4)"s,
 		"IMOEX close_delta(t-5)"s
 	}};
-	learning::sample_filler const target_filler{dw,
-	{
-		target_series_name_
-	}};
+	learning::sample_filler const target_filler{dw, {target_series_name_}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		mfn_cfg, mfn, teacher,
-		input_filler, predicted_series, norm_[dw.series_idx(target_series_name_)], *chart_};
+		input_filler, predicted_series, norm_[dw.series_idx(target_series_name_)], *chart_,
+		net_file_name_};
 	runner.wait();
 	best_err_ = runner.best_err();
+}
+//---------------------------------------------------------------------------------------------------------
+std::optional<autodis::model::model_002::prediction_result_t> autodis::model::model_002::_predict()
+{
+	if (!df_.row_count())
+	{
+		return {};
+	}
+	shared::data::view dw{df_};
+	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::multilayer_feed_forward mfn{mfn_cfg};
+	{
+		std::ifstream f(net_file_name_);
+		nlohmann::json j = nlohmann::json::parse(f);
+		j.get_to(mfn);
+	}
+	//nlohmann::json::parse(std::ifstream(net_file_name_)).get_to(mfn);
+	learning::sample_filler const input_filler{dw,
+	{
+		"GAZP close_delta(t-1)"s,
+		"GAZP close_delta(t-2)"s,
+		"GAZP close_delta(t-3)"s,
+		"GAZP close_delta(t-4)"s,
+		"GAZP close_delta(t-5)"s,
+		"GOLD close_delta(t-1)"s,
+		"GOLD close_delta(t-2)"s,
+		"GOLD close_delta(t-3)"s,
+		"GOLD close_delta(t-4)"s,
+		"GOLD close_delta(t-5)"s,
+		"IMOEX close_delta(t-1)"s,
+		"IMOEX close_delta(t-2)"s,
+		"IMOEX close_delta(t-3)"s,
+		"IMOEX close_delta(t-4)"s,
+		"IMOEX close_delta(t-5)"s
+	}};
+
+	input_filler.fill(dw.row_count() - 1, mfn.input_layer());
+	mfn.forward();
+	return prediction_result_t{dw.index_value(dw.row_count() - 1), mfn.omega_layer().front()};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_002::_print_df(frame_t const& df) const
@@ -112,14 +152,11 @@ void autodis::model::model_002::_print_df(frame_t const& df) const
 	df.print(f);
 }
 //---------------------------------------------------------------------------------------------------------
-// learn
-void autodis::model::model_002::run()
+void autodis::model::model_002::learn()
 {
 	_load_data();
-
 	_create_target();
 	_create_features();
-
 	_clear_data();
 	_normalize();
 
@@ -131,4 +168,15 @@ void autodis::model::model_002::run()
 	_print_df(df_);
 
 	_learn();
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_002::predict()
+{
+	_load_data();
+	_create_features();
+	_clear_data();
+	_normalize();
+
+	std::optional<prediction_result_t> const result{_predict()};
+	(result ? std::cout << result.value().first << ' ' << result.value().second : std::cout << "n/a") << std::endl;
 }

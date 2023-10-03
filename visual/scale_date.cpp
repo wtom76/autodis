@@ -32,7 +32,6 @@ void autodis::visual::scale_date::start_scroll() noexcept
 //---------------------------------------------------------------------------------------------------------
 bool autodis::visual::scale_date::scroll(float wnd_distance) noexcept
 {
-	std::cout << "scroll by " << wnd_distance << "\n";
 	ptrdiff_t const point_distance{static_cast<ptrdiff_t>(static_cast<float>(visible_count_default_) * wnd_distance)};
 	if (!point_distance)
 	{

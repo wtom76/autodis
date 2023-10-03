@@ -16,10 +16,12 @@ namespace autodis::model
 		using frame_t = shared::data::frame;
 		using norm_t = shared::math::tanh_normalization;
 		using norm_container_t = std::vector<norm_t>;
+		using prediction_result_t = std::pair<frame_t::index_value_t, frame_t::value_t>;
 	// data
 	private:
 		std::string const	target_series_name_{"GAZP close_delta(t+1)"s};
 		std::string const	predicted_series_name_{"predicted"s};
+		std::string const	net_file_name_{"model_002.net.json"s};
 		frame_t				df_;
 		norm_container_t	norm_;
 		double				best_err_{0};
@@ -28,6 +30,7 @@ namespace autodis::model
 
 	// methods
 	private:
+		std::vector<std::size_t> _net_layer_sizes() const;
 		void _print_df(frame_t const& df) const;
 		void _load_data();
 		void _create_target();
@@ -36,8 +39,10 @@ namespace autodis::model
 		void _normalize();
 		void _create_chart();
 		void _learn();
+		std::optional<prediction_result_t> _predict();
 
 	public:
-		void run();
+		void learn();
+		void predict();
 	};
 }

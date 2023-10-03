@@ -26,7 +26,9 @@ namespace autodis
 		target_normalization_t const	norm_;
 		chart_t*						chrt_{nullptr};
 
-		std::jthread					thread_;		// keep it last member
+		std::string const				file_name_;			// to store resulting network
+
+		std::jthread					thread_;			// keep it last member
 
 	private:
 		//----------------------------------------------------------------------------------------------------------
@@ -43,31 +45,12 @@ namespace autodis
 			{
 				inputs_filler_->fill(row++, network_.input_layer());
 				network_.forward();
-				//dest = norm_.restore(network_.omega_layer().front());
 				dest = network_.omega_layer().front();
 			}
 			chrt_->invalidate();
 		}
 
 	public:
-		//----------------------------------------------------------------------------------------------------------
-		learn_runner(typename net::config_t const& cfg, net& network, learning::rprop<net>& teacher)
-			: cfg_{cfg}
-			, network_{network}
-			, teacher_{teacher}
-			, thread_{
-				[this](std::stop_token stoken)
-				{
-					teacher_.teach(cfg_, network_, min_err_, *this, stoken);
-					if (stoken.stop_requested())
-					{
-						return;
-					}
-					teacher_.show_test(network_, *this, stoken);
-				}
-			}
-		{
-		}
 		//----------------------------------------------------------------------------------------------------------
 		learn_runner(
 			typename net::config_t const& cfg,
@@ -76,7 +59,8 @@ namespace autodis
 			learning::sample_filler const& inputs_filler,
 			series_view_t& prediction,
 			target_normalization_t const& norm,
-			chart_t& chrt)
+			chart_t& chrt,
+			std::string file_name)
 			: cfg_{cfg}
 			, network_{network}
 			, teacher_{teacher}
@@ -84,6 +68,7 @@ namespace autodis
 			, prediction_{&prediction}
 			, norm_{norm}
 			, chrt_{&chrt}
+			, file_name_{std::move(file_name)}
 			, thread_{
 				[this](std::stop_token stoken)
 				{
@@ -122,7 +107,12 @@ namespace autodis
 		void set_best(double min_err) override
 		{
 			learning::progress_view::set_best(min_err);
-			std::ofstream{"best.net"s} << network_;
+			if (!file_name_.empty())
+			{
+				nlohmann::json j = network_;
+				std::ofstream(file_name_) << j;
+			}
+			std::ofstream{"best_net.dump"s} << network_;
 			_update_chart();
 		}
 	};

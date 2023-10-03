@@ -404,7 +404,6 @@ void autodis::visual::chart::show()
 					case sf::Event::Resized:
 						window_size_.x_ = event.size.width;
 						window_size_.y_ = event.size.height;
-						std::cout << "Resized. {" << window_size_.x_ << ", " << window_size_.y_ << "}\n";
 						glViewport(0, 0, event.size.width, event.size.height);
 						need_redraw_.store(true);
 						break;
@@ -416,7 +415,6 @@ void autodis::visual::chart::show()
 							mouse_.current_point_.x_ = event.mouseButton.x;
 							mouse_.current_point_.y_ = event.mouseButton.y;
 							mouse_.start_point_ = mouse_.current_point_;
-							std::cout << "MouseButtonPressed. {" << mouse_.current_point_.x_ << ", " << mouse_.current_point_.y_ << "}\n";
 							scale_x_.start_scroll();
 							break;
 						default:
@@ -428,7 +426,6 @@ void autodis::visual::chart::show()
 						{
 						case sf::Mouse::Button::Left:
 							mouse_.active_ = false;
-							std::cout << "MouseButtonReleased. {" << mouse_.current_point_.x_ << ", " << mouse_.current_point_.y_ << "}\n";
 							break;
 						default:
 							break;
@@ -439,7 +436,6 @@ void autodis::visual::chart::show()
 						{
 							mouse_.current_point_.x_ = event.mouseMove.x;
 							mouse_.current_point_.y_ = event.mouseMove.y;
-							std::cout << "MouseMoved. {" << mouse_.current_point_.x_ << ", " << mouse_.current_point_.y_ << "}\n";
 							if (scale_x_.scroll(static_cast<float>(mouse_.current_point_.x_ - mouse_.start_point_.x_) / window_size_.x_))
 							{
 								need_recalc_.store(true);

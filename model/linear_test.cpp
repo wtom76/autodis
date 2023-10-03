@@ -51,14 +51,13 @@ void autodis::model::linear_test::_learn()
 	auto predicted_series{dw_vis.series_view("predicted"s)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		mfn_cfg, mfn, teacher,
-		input_filler, predicted_series, norm_[dw.series_idx("y"s)],
-		*chart_};
+		input_filler, predicted_series, norm_[dw.series_idx("y"s)], *chart_,
+		"linear_test.net.json"s};
 	runner.wait();
 	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
-// learn
-void autodis::model::linear_test::run()
+void autodis::model::linear_test::learn()
 {
 	_load_data();
 	_normalize();
@@ -66,4 +65,9 @@ void autodis::model::linear_test::run()
 	_create_chart();
 	chart_->show();
 	_learn();
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::linear_test::predict()
+{
+
 }

@@ -33,6 +33,7 @@ namespace autodis::model
 		void _learn();
 
 	public:
-		void run();
+		void learn();
+		void predict();
 	};
 }

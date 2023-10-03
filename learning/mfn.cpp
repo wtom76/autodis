@@ -168,8 +168,8 @@ void learning::to_json(nlohmann::json& j, const multilayer_feed_forward& src)
 //---------------------------------------------------------------------------------------------------------
 void learning::from_json(const nlohmann::json& j, multilayer_feed_forward& dst)
 {
-	dst.biases_.layers_ = j.get<decltype(dst.biases_.layers_)>();
-	dst.weights_.layers_ = j.get<decltype(dst.weights_.layers_)>();
+	j.at("biases").get_to(dst.biases_.layers_);
+	j.at("weights").get_to(dst.weights_.layers_);
 }
 //-----------------------------------------------------------------------------------------------------
 std::ostream& learning::operator << (std::ostream& strm, const multilayer_feed_forward& network)

@@ -5,3 +5,6 @@ data_source
 keeper.json
 df_norm.csv
 df.csv
+df_chart.csv
+model_002.net.json
+best_net.dump

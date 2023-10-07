@@ -52,7 +52,7 @@ void collector::feed::moex_rest::_parse_store()
 	}
 	result_.data_.clear();
 	result_.data_.reserve(feed_args_.size());
-	_parse_date(node_row.attribute("TRADEDATE").as_string());
+	_parse_date(node_row.attribute("SYSTIME").as_string());
 	for (auto const& arg : feed_args_)
 	{
 		result_.data_.emplace_back(node_row.attribute(arg.c_str()).as_double());

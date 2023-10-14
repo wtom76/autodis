@@ -2,9 +2,11 @@
 #include "linear_generator.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-std::size_t collector::feed::linear_generator::_index(std::vector<std::string> const& list, std::string const& value)
+std::size_t collector::feed::linear_generator::_index(std::span<keeper::feed_args_t const> list, std::string const& value)
 {
-	std::size_t const idx{static_cast<std::size_t>(std::distance(list.cbegin(), std::ranges::find(list, value)))};
+	std::size_t const idx{static_cast<std::size_t>(std::distance(list.begin(),
+		std::ranges::find_if(list, [&value](auto const &args){ return args.parts().back() == value; })
+	))};
 	if (idx >= list.size())
 	{
 		throw std::runtime_error("feed arguments for linear generator do not contain "s + value);
@@ -13,7 +15,7 @@ std::size_t collector::feed::linear_generator::_index(std::vector<std::string> c
 }
 
 //---------------------------------------------------------------------------------------------------------
-collector::feed::linear_generator::linear_generator(std::vector<std::string> const& feed_args)
+collector::feed::linear_generator::linear_generator(std::span<keeper::feed_args_t const> feed_args)
 	: dst_idx_x_{_index(feed_args, "x"s)}
 	, dst_idx_y_{_index(feed_args, "y"s)}
 {

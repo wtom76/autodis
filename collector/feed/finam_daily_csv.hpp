@@ -35,7 +35,7 @@ namespace collector::feed
 		void _send(row&& r);
 		
 	public:
-		finam_daily_csv(std::vector<std::string> const& feed_args);
+		finam_daily_csv(std::span<keeper::feed_args_t const> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

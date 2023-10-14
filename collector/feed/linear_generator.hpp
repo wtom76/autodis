@@ -18,10 +18,10 @@ namespace collector::feed
 		const std::size_t dst_idx_y_;
 
 	private:
-		static std::size_t _index(std::vector<std::string> const& list, std::string const& value);
+		static std::size_t _index(std::span<keeper::feed_args_t const> list, std::string const& value);
 		
 	public:
-		linear_generator(std::vector<std::string> const& feed_args);
+		linear_generator(std::span<keeper::feed_args_t const> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

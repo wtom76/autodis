@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <sstream>
 #include <string>

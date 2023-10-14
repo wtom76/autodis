@@ -7,10 +7,10 @@
 namespace autodis::model
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class model_002
-	// predict close_t1 - close_t0
+	// class model_003
+	// predict close_t1 - open_t1
 	//---------------------------------------------------------------------------------------------------------
-	class model_002
+	class model_003
 	{
 	// types
 	private:
@@ -20,9 +20,9 @@ namespace autodis::model
 		using prediction_result_t = std::pair<frame_t::index_value_t, frame_t::value_t>;
 	// data
 	private:
-		std::string const	target_series_name_{"GAZP close_delta(t+1)"s};
+		std::string const	target_series_name_{"GAZP close(t+1)-GAZP open(t+1)"s};
 		std::string const	predicted_series_name_{"predicted"s};
-		std::string const	net_file_name_{"model_002.net.json"s};
+		std::string const	net_file_name_{"model_003.net.json"s};
 		frame_t				df_;
 		norm_container_t	norm_;
 		double				best_err_{0};

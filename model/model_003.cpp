@@ -1,25 +1,25 @@
 #include "pch.hpp"
-#include "model_002.hpp"
+#include "model_003.hpp"
 #include "learn_runner.hpp"
 #include <shared/math/target_delta.hpp>
 #include <shared/math/track.hpp>
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
-void autodis::model::model_002::_load_data()
+void autodis::model::model_003::_load_data()
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::data_read dr{keeper_cfg};
 	dr.read(
 		{
-			4,	// GAZP close
-			11,	// GOLD close
-			16,	// IMOEX close
+			4,	// GAZP close, [0]
+			11,	// GOLD close, [1]
+			16,	// IMOEX close, [2]
 			// for chart
-			1,	// GAZP open
-			2,	// GAZP high
-			3	// GAZP low
+			1,	// GAZP open, [3]
+			2,	// GAZP high, [4]
+			3	// GAZP low, [5]
 		},
 		df_
 	);
@@ -27,12 +27,12 @@ void autodis::model::model_002::_load_data()
 }
 //---------------------------------------------------------------------------------------------------------
 // add computed target to df_
-void autodis::model::model_002::_create_target()
+void autodis::model::model_003::_create_target()
 {
-	shared::math::target_delta_t0_t1(df_, 0, df_);
+	shared::math::target_delta_t0_t0(df_, {3, 0}, df_);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::_create_features()
+void autodis::model::model_003::_create_features()
 {
 	constexpr std::size_t track_depth{5};
 	for (size_t i{0}; i != feature_sources_count_; ++i)
@@ -42,12 +42,12 @@ void autodis::model::model_002::_create_features()
 }
 //---------------------------------------------------------------------------------------------------------
 // delete rows contaning nans
-void autodis::model::model_002::_clear_data()
+void autodis::model::model_003::_clear_data()
 {
 	df_ = df_.clear_lacunas(); // normalize should be called on lacune free data, so should clear frame not view till normalize is applied to the former
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::_normalize()
+void autodis::model::model_003::_normalize()
 {
 	norm_.clear();
 	norm_.reserve(df_.col_count());
@@ -58,7 +58,7 @@ void autodis::model::model_002::_normalize()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::_create_chart()
+void autodis::model::model_003::_create_chart()
 {
 	chart_ = std::make_shared<autodis::visual::chart>(df_);
 	chart_->add_candlesticks(0, {3, 4, 5, 0});		// gazp candles
@@ -66,12 +66,12 @@ void autodis::model::model_002::_create_chart()
 	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<std::size_t> autodis::model::model_002::_net_layer_sizes() const
+std::vector<std::size_t> autodis::model::model_003::_net_layer_sizes() const
 {
 	return {15, 30, 30, 1};
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::_learn()
+void autodis::model::model_003::_learn()
 {
 	shared::data::view dw{df_};
 	learning::config mfn_cfg{_net_layer_sizes()};
@@ -105,7 +105,7 @@ void autodis::model::model_002::_learn()
 	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
-std::optional<autodis::model::model_002::prediction_result_t> autodis::model::model_002::_predict()
+std::optional<autodis::model::model_003::prediction_result_t> autodis::model::model_003::_predict()
 {
 	if (!df_.row_count())
 	{
@@ -144,7 +144,7 @@ std::optional<autodis::model::model_002::prediction_result_t> autodis::model::mo
 	return prediction_result_t{dw.index_value(dw.row_count() - 1), mfn.omega_layer().front()};
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::_print_df(frame_t const& df) const
+void autodis::model::model_003::_print_df(frame_t const& df) const
 {
 	df.print_shape(std::cout);
 	std::cout << "\n\n";
@@ -152,7 +152,7 @@ void autodis::model::model_002::_print_df(frame_t const& df) const
 	df.print(f);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::learn()
+void autodis::model::model_003::learn()
 {
 	_load_data();
 	_create_target();
@@ -170,7 +170,7 @@ void autodis::model::model_002::learn()
 	_learn();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::predict()
+void autodis::model::model_003::predict()
 {
 	_load_data();
 	_create_features();

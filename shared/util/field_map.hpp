@@ -31,12 +31,39 @@ namespace shared::util
 		std::vector<std::size_t>	src_idx_dst_idx_;						// can contain idx_null
 
 	private:
-		std::vector<name_idx> _build_src_name_dst_idx(std::vector<name_name> const& src_dest_names, std::vector<std::string> const& dest_names) const;
-	
-	public:
-		explicit field_map(std::vector<name_name> const& src_dest_names, std::vector<std::string> const& dest_names, std::string index_src_name);
-		void map_next_src_name(std::string const& src_name);
+		//---------------------------------------------------------------------------------------------------------
+		static std::vector<name_idx> _build_src_name_dst_idx(
+			std::vector<name_name> const& src_dest_names,
+			std::ranges::range auto const& dest_names)
+		{
+			std::vector<name_idx> src_name_dst_idx;
+			src_name_dst_idx.reserve(dest_names.size());
 
+			for (std::size_t dst_idx{0}; dst_idx != dest_names.size(); ++dst_idx)
+			{
+				auto const iter{std::ranges::find(src_dest_names, dest_names[dst_idx], [](auto const& pr) noexcept -> std::string const& { return pr.dst_; })};
+				if (iter != src_dest_names.cend())
+				{
+					src_name_dst_idx.emplace_back(iter->src_, dst_idx);
+				}
+				else
+				{
+					throw std::runtime_error("requested field is unknown: \""s + dest_names[dst_idx] + '\"');
+				}
+			}
+			return src_name_dst_idx;
+		}
+	public:
+		//---------------------------------------------------------------------------------------------------------
+		explicit field_map(
+			std::vector<name_name> const& src_dest_names,
+			std::ranges::range auto const& dest_names,
+			std::string index_src_name)
+			: src_name_dst_idx_{_build_src_name_dst_idx(src_dest_names, dest_names)}
+			, index_src_name_{std::move(index_src_name)}
+		{}
+
+		void map_next_src_name(std::string const& src_name);
 		void validate() const;
 
 		std::size_t field_num() const noexcept { return src_name_dst_idx_.size(); }	// without index

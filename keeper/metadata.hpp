@@ -7,6 +7,8 @@ namespace keeper
 {
 	class config;
 
+	using feed_args_t = shared::util::uri;
+
 	//---------------------------------------------------------------------------------------------------------
 	/// class metadata
 	//---------------------------------------------------------------------------------------------------------
@@ -19,7 +21,7 @@ namespace keeper
 		struct feed_info
 		{
 			std::string					feed_uri_;
-			std::vector<std::string>	feed_args_;
+			std::vector<feed_args_t>	feed_args_;
 			std::vector<data_uri>		data_uri_;
 		};
 		//---------------------------------------------------------------------------------------------------------

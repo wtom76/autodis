@@ -24,7 +24,7 @@ namespace collector::feed
 		};
 
 	private:
-		std::vector<std::string>			feed_args_;
+		std::vector<keeper::feed_args_t>	feed_args_;
 		std::unique_ptr<keeper::data_write>	dest_;
 		std::ptrdiff_t						field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
 		std::vector<char>					buffer_;
@@ -35,7 +35,7 @@ namespace collector::feed
 		void _parse_store();
 
 	public:
-		moex_rest(std::vector<std::string> feed_args);
+		moex_rest(std::span<keeper::feed_args_t const> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

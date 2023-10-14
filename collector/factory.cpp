@@ -19,7 +19,7 @@ std::unique_ptr<collector::source::feed> collector::factory::feed(keeper::metada
 	feed_uri const uri{info.feed_uri_};
 	if (uri.feed_name() == "finam_daily_csv")
 	{
-		return std::make_unique<feed::finam_daily_csv>(info.feed_args_);
+		return std::make_unique<feed::finam_daily_csv>(std::span<keeper::feed_args_t const>{info.feed_args_});
 	}
 	if (uri.feed_name() == "linear_generator")
 	{

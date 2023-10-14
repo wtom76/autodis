@@ -3,8 +3,8 @@
 #include <pugixml.hpp>
 
 //---------------------------------------------------------------------------------------------------------
-collector::feed::moex_rest::moex_rest(std::vector<std::string> feed_args)
-	: feed_args_{std::move(feed_args)}
+collector::feed::moex_rest::moex_rest(std::span<keeper::feed_args_t const> feed_args)
+	: feed_args_{feed_args.begin(), feed_args.end()}
 {}
 //---------------------------------------------------------------------------------------------------------
 // "2023-05-21..." -> "2023052121..." -> 20230521
@@ -33,29 +33,30 @@ void collector::feed::moex_rest::_parse_store()
 	{
 		throw std::runtime_error{result.description()};
 	}
-	auto node_data{doc.child("document").child("data")};
+	pugi::xml_node node_data{doc.child("document").child("data")};
 	for (; node_data && "marketdata"s != node_data.attribute("id").as_string(); node_data = node_data.next_sibling("data"))
 	{}
 	if (!node_data)
 	{
 		throw std::runtime_error{"can't find \"data\" node with id = \"marketdata\""s};
 	}
-	auto node_rows{node_data.child("rows")};
+	pugi::xml_node node_rows{node_data.child("rows")};
 	if (!node_rows)
 	{
 		throw std::runtime_error{"can't find \"rows\" node"s};
 	}
-	auto node_row{node_rows.child("row")};	// parsing first row only assuming that brimary_board is requested
-	if (!node_row)
-	{
-		throw std::runtime_error{"can't find any \"row\" node"s};
-	}
 	result_.data_.clear();
 	result_.data_.reserve(feed_args_.size());
-	_parse_date(node_row.attribute("SYSTIME").as_string());
-	for (auto const& arg : feed_args_)
+	for (pugi::xml_node node_row{node_rows.child("row")}; node_row; node_row = node_row.next_sibling("row"))
 	{
-		result_.data_.emplace_back(node_row.attribute(arg.c_str()).as_double());
+		_parse_date(node_row.attribute("SYSTIME").as_string());
+		for (auto const& arg : feed_args_)
+		{
+			if (node_row.attribute("BOARDID").as_string() == arg.part(0))
+			{
+				result_.data_.emplace_back(node_row.attribute(arg.parts().back().c_str()).as_double());
+			}
+		}
 	}
 }
 //---------------------------------------------------------------------------------------------------------
@@ -78,6 +79,11 @@ void collector::feed::moex_rest::finish(std::span<const char> chunk)
 	{
 		read(chunk);
 		_parse_store();
+		if (result_.data_.size() != feed_args_.size())
+		{
+			throw std::runtime_error{"number of fields found differs from requested number "s +
+				std::to_string(result_.data_.size()) + " != "s + std::to_string(feed_args_.size())};
+		}
 		dest_->add(std::make_pair(result_.date_, std::move(result_.data_)));
 		dest_->finish();
 	}

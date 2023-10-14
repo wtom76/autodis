@@ -6,5 +6,5 @@ keeper.json
 df_norm.csv
 df.csv
 df_chart.csv
-model_002.net.json
+*.net.json
 best_net.dump

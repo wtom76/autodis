@@ -14,7 +14,7 @@ namespace collector::feed
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-collector::feed::finam_daily_csv::finam_daily_csv(std::vector<std::string> const& feed_args)
+collector::feed::finam_daily_csv::finam_daily_csv(std::span<keeper::feed_args_t const> feed_args)
 	: field_map_{
 		{
 			{"<OPEN>"s, "open"s},
@@ -23,7 +23,8 @@ collector::feed::finam_daily_csv::finam_daily_csv(std::vector<std::string> const
 			{"<CLOSE>"s, "close"s},
 			{"<VOL>"s, "vol"s}
 		},
-		feed_args, "<DATE>"s}
+		feed_args | std::views::transform([](keeper::feed_args_t const& args){ return args.parts().back(); }),
+		"<DATE>"s}
 {}
 //---------------------------------------------------------------------------------------------------------
 char collector::feed::finam_daily_csv::_determine_separator(auto header_begin, auto header_end) noexcept

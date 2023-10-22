@@ -20,6 +20,7 @@ namespace shared::util
 		bool console = false);
 
 	std::shared_ptr<spdlog::logger> create_console_logger();
+	void introduce(spdlog::logger* log);
 
 	//---------------------------------------------------------------------------------------------------------
 	// An object should exist while logger lib is used
@@ -110,12 +111,6 @@ inline std::shared_ptr<spdlog::logger> shared::util::create_logger(std::string c
 
 		log->set_level(spdlog::level::trace);
 
-		SPDLOG_LOGGER_INFO(log, "~~~~~~~~~~~~~~~~~~~~~~~~");
-		SPDLOG_LOGGER_INFO(log, "logger \"{}\" is created", log->name());
-		SPDLOG_LOGGER_TRACE(log, "SPDLOG_LEVEL_TRACE");
-		SPDLOG_LOGGER_DEBUG(log, "SPDLOG_LEVEL_DEBUG");
-		SPDLOG_LOGGER_INFO(log, "SPDLOG_LEVEL_INFO");
-
 		return log;
 	}
 	catch (std::exception const& ex)
@@ -135,4 +130,14 @@ inline std::shared_ptr<spdlog::logger> shared::util::create_console_logger()
 	log = create_logger(default_log_name, "%^%L %D %H:%M:%S:%e %v%$"s, 8 * 1024 * 1024, 12, true);
 
 	return log;
+}
+//---------------------------------------------------------------------------------------------------------7
+// write an introduction banner to log
+inline void shared::util::introduce(spdlog::logger* log)
+{
+	SPDLOG_LOGGER_INFO(log, "~~~~~~~~~~~~~~~~~~~~~~~~");
+	SPDLOG_LOGGER_INFO(log, "logger \"{}\" is created", log->name());
+	SPDLOG_LOGGER_TRACE(log, "SPDLOG_LEVEL_TRACE");
+	SPDLOG_LOGGER_DEBUG(log, "SPDLOG_LEVEL_DEBUG");
+	SPDLOG_LOGGER_INFO(log, "SPDLOG_LEVEL_INFO");
 }

@@ -5,6 +5,7 @@ add_library(util OBJECT
 	field_map.cpp
 	file_system.cpp
 	logger.cpp
+	time.cpp
 )
 
 target_include_directories(util PRIVATE

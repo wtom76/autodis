@@ -7,22 +7,31 @@ collector::feed::moex_rest::moex_rest(std::span<keeper::feed_args_t const> feed_
 	: feed_args_{feed_args.begin(), feed_args.end()}
 {}
 //---------------------------------------------------------------------------------------------------------
+// 2023-10-30 23:27:11
 // "2023-05-21..." -> "2023052121..." -> 20230521
+// 1. MOEX puts next day in SYSTIME field at midnight even though the record represents previous day
+// so if time is less than 1 hour (heuristic threshold), take previous date.
 void collector::feed::moex_rest::_parse_date(std::string dt_str)
 {
 	if (dt_str.size() < 10)
 	{
 		throw std::runtime_error{"unknown SYSTIME format: \""s + dt_str + "\""};
 	}
-	dt_str[4] = dt_str[5];
-	dt_str[5] = dt_str[6];
-	dt_str[6] = dt_str[8];
-	dt_str[7] = dt_str[9];
-	std::from_chars_result res{std::from_chars(dt_str.data(), dt_str.data() + 8, result_.date_)};
-	if (res.ec != std::errc{})
+
+	std::tm const tm_val{shared::util::time::tm_from_postgre(dt_str)};
+	std::chrono::system_clock::time_point const tp{shared::util::time::to_time(tm_val)};
+	std::chrono::sys_days const sdays{std::chrono::time_point_cast<std::chrono::days>(tp)};
+	std::chrono::year_month_day ymd{sdays};
+	if (!ymd.ok())
 	{
-		throw std::runtime_error{"failed to parse SYSTIME: \""s + dt_str + "\""};
+		throw std::runtime_error{"unknown SYSTIME format: \""s + dt_str + "\""};
 	}
+	// 1.
+	if (std::chrono::hh_mm_ss{tp - static_cast<std::chrono::sys_days>(ymd)}.hours() <= 1h)
+	{
+		ymd = sdays - std::chrono::days{1};
+	}
+	result_.date_ = shared::util::time::yyyymmdd(ymd);
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::moex_rest::_parse_store()

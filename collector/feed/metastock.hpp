@@ -5,37 +5,19 @@
 #include <keeper/keeper.hpp>
 #include <collector/source/base.hpp>
 
-namespace collector::feed
+namespace collector::feed::metastock
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class moex_rest
+	// class metastock
 	//---------------------------------------------------------------------------------------------------------
-	class moex_rest
+	class metastock
 		: public source::feed
 	{
-	private:
-		struct row
-		{
-			int					date_{0};
-			std::vector<double>	data_;
-
-			row() = default;
-			row(std::size_t fields_num) : data_(fields_num, 0.) {}
-		};
-
-	private:
-		std::vector<keeper::feed_args_t>	feed_args_;
+		shared::util::field_map				field_map_;							// maps file fields to dest fields by indexes. can contain row_idx_null_
 		std::unique_ptr<keeper::data_write>	dest_;
-		std::ptrdiff_t						field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
-		std::vector<char>					buffer_;
-		row									result_;
-
-	private:
-		void _parse_date(std::string dt_str);
-		void _parse_store();
 
 	public:
-		moex_rest(std::span<keeper::feed_args_t const> feed_args);
+		metastock(std::span<keeper::feed_args_t const> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

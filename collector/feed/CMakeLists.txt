@@ -4,6 +4,7 @@ add_library(feed OBJECT
 	finam_daily_csv.cpp
 	linear_generator.cpp
 	moex_rest.cpp
+	metastock.cpp
 )
 
 target_include_directories(feed PRIVATE

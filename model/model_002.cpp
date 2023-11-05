@@ -105,7 +105,7 @@ void autodis::model::model_002::_learn()
 	best_err_ = runner.best_err();
 }
 //---------------------------------------------------------------------------------------------------------
-std::optional<autodis::model::model_002::prediction_result_t> autodis::model::model_002::_predict()
+std::optional<autodis::model::prediction_result_t> autodis::model::model_002::_predict()
 {
 	if (!df_.row_count())
 	{
@@ -170,13 +170,11 @@ void autodis::model::model_002::learn()
 	_learn();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_002::predict()
+std::optional<autodis::model::prediction_result_t> autodis::model::model_002::predict()
 {
 	_load_data();
 	_create_features();
 	_clear_data();
 	_normalize();
-
-	std::optional<prediction_result_t> const result{_predict()};
-	(result ? std::cout << result.value().first << ' ' << result.value().second : std::cout << "n/a") << std::endl;
+	return _predict();
 }

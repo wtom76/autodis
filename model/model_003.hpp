@@ -3,6 +3,7 @@
 #include <shared/math/normalization.hpp>
 #include <keeper/keeper.hpp>
 #include "framework.hpp"
+#include "common.hpp"
 
 namespace autodis::model
 {
@@ -17,7 +18,7 @@ namespace autodis::model
 		using frame_t = shared::data::frame;
 		using norm_t = shared::math::tanh_normalization;
 		using norm_container_t = std::vector<norm_t>;
-		using prediction_result_t = std::pair<frame_t::index_value_t, frame_t::value_t>;
+
 	// data
 	private:
 		std::string const	target_series_name_{"GAZP close(t+1)-GAZP open(t+1)"s};
@@ -44,6 +45,6 @@ namespace autodis::model
 
 	public:
 		void learn();
-		void predict();
+		std::optional<prediction_result_t> predict();
 	};
 }

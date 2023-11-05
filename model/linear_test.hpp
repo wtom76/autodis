@@ -2,6 +2,7 @@
 
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
+#include "common.hpp"
 
 namespace autodis::model
 {
@@ -34,6 +35,6 @@ namespace autodis::model
 
 	public:
 		void learn();
-		void predict();
+		std::optional<prediction_result_t> predict();
 	};
 }

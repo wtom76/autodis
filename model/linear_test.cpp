@@ -67,7 +67,7 @@ void autodis::model::linear_test::learn()
 	_learn();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::linear_test::predict()
+std::optional<autodis::model::prediction_result_t> autodis::model::linear_test::predict()
 {
-
+	return {};
 }

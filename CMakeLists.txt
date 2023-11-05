@@ -26,6 +26,8 @@ add_subdirectory(model)
 add_subdirectory(visual)
 
 add_executable(autodis
+	config.cpp
+	application.cpp
 	main.cpp
 )
 

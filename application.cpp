@@ -14,7 +14,7 @@ void autodis::application::_store_prediction(int64_t model_id, model::prediction
 	{
 		pqxx::connection con{cfg().db_connection_};
 		pqxx::work t{con};
-		t.exec_params("call \"data\".store_prediction($1, $2, $3);", model_id, result.first, result.second);
+		t.exec_params("call "s + cfg().store_prediction_ + "($1, $2, $3);"s, model_id, result.first, result.second);
 		t.commit();
 	}
 	catch ([[maybe_unused]] std::exception const& ex)

@@ -4,6 +4,7 @@ add_library(model OBJECT
 	linear_test.cpp
 	model_002.cpp
 	model_003.cpp
+	model_004.cpp
 )
 
 target_include_directories(model PRIVATE

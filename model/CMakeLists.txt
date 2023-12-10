@@ -5,6 +5,7 @@ add_library(model OBJECT
 	model_002.cpp
 	model_003.cpp
 	model_004.cpp
+	model_005.cpp
 )
 
 target_include_directories(model PRIVATE

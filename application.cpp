@@ -3,6 +3,7 @@
 #include "model/model_002.hpp"
 #include "model/model_003.hpp"
 #include "model/model_004.hpp"
+#include "model/model_005.hpp"
 #include "config.hpp"
 #include "learn_runner.hpp"
 #include "application.hpp"
@@ -42,6 +43,10 @@ void autodis::application::learn(std::string const& model_name)
 	{
 		autodis::model::model_004{}.learn();
 	}
+	else if ("model_005"s == model_name)
+	{
+		autodis::model::model_005{}.learn();
+	}
 }
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::predict(std::string const& model_name)
@@ -68,6 +73,11 @@ void autodis::application::predict(std::string const& model_name)
 	{
 		model_id = 4;
 		result = autodis::model::model_004{}.predict();
+	}
+	else if ("model_005"s == model_name)
+	{
+		model_id = 5;
+		result = autodis::model::model_005{}.predict();
 	}
 	if (result)
 	{

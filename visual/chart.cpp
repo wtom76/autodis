@@ -235,6 +235,24 @@ void autodis::visual::chart::_fill_ctx(gl_context& ctx) const
 {
 	ctx.clear();
 
+	// add y0-line
+	{
+		assert(!scales_y_.empty());
+		assert(df_.row_count() > 0);
+		float const y0{scales_y_.back().position(0.)};
+		ctx.vertices().emplace_back(scale_x_.position(scale_x_.first_visible_idx()));
+		ctx.vertices().emplace_back(y0);
+		ctx.vertices().emplace_back(scale_x_.position(df_.row_count() - 1));
+		ctx.vertices().emplace_back(y0);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.color_buffer().emplace_back(0.2f);
+		ctx.add_line(2);
+	}
+
 	for (auto const& candles : candlesticks_)
 	{
 		ctx.add_candles(_add_candles(candles, ctx.vertices(), ctx.color_buffer()));

@@ -91,7 +91,8 @@ std::vector<keeper::metadata::data_info> keeper::metadata::load_data_meta(std::v
 	result.reserve(reg_data_ids.size());
 	for (long long requested_id : reg_data_ids)
 	{
-		result.emplace_back(std::move(all_data_map[requested_id]));
+		//result.emplace_back(std::move(all_data_map[requested_id]));
+		result.emplace_back(all_data_map[requested_id]);
 	}
 	return result;
 }

@@ -3,18 +3,19 @@
 #include <cassert>
 #include <cstdlib>
 #include <exception>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <span>
-#include <string>
 #include <stdexcept>
+#include <string>
 #include <thread>
-#include <vector>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 using namespace std::literals;
 

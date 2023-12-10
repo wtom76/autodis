@@ -54,5 +54,6 @@ namespace autodis::model
 	public:
 		void learn();
 		std::optional<prediction_result_t> predict();
+		void show();
 	};
 }

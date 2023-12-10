@@ -19,5 +19,6 @@ namespace autodis
 	public:
 		void learn(std::string const& model_name);
 		void predict(std::string const& model_name);
+		void show(std::string const& model_name);
 	};
 }

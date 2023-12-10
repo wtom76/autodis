@@ -89,3 +89,11 @@ void autodis::application::predict(std::string const& model_name)
 		SPDLOG_LOGGER_INFO(log(), "{} n/a", model_name);
 	}
 }
+//----------------------------------------------------------------------------------------------------------
+void autodis::application::show(std::string const& model_name)
+{
+	if ("model_005"s == model_name)
+	{
+		autodis::model::model_005{}.show();
+	}
+}

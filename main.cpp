@@ -20,6 +20,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 		{
 			app.predict(argv[2]);
 		}
+		else if (argc == 3 && "show"s == argv[1])
+		{
+			app.show(argv[2]);
+		}
 		else
 		{
 			std::cout << "usage:\n" << "autodis learn <model_name>\n" << "autodis predict <model_name>\n";

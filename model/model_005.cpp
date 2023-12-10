@@ -202,3 +202,15 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_005::pr
 	_normalize();
 	return _predict();
 }
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_005::show()
+{
+	_load_data();
+	_create_target();
+	_create_features();
+	_clear_data();
+	_normalize();
+	df_.create_series(predicted_series_name_);
+	_create_chart();
+	chart_->show();
+}

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "model_005.hpp"
 #include "learn_runner.hpp"
+#include "prediction_view.hpp"
 #include <shared/math/target_delta.hpp>
 #include <shared/math/track.hpp>
 
@@ -78,35 +79,7 @@ void autodis::model::model_005::_learn()
 	shared::data::view dw{df_};
 	learning::config mfn_cfg{_net_layer_sizes()};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler const input_filler{dw, input_series_names_
-		//{
-			//"SBER close_delta(t-1)"s,
-			//"SBER close_delta(t-2)"s,
-			//"SBER close_delta(t-3)"s,
-			//"SBER close_delta(t-4)"s,
-			//"SBER close_delta(t-5)"s,
-			//"SBER high_delta(t-1)"s,
-			//"SBER high_delta(t-2)"s,
-			//"SBER high_delta(t-3)"s,
-			//"SBER high_delta(t-4)"s,
-			//"SBER high_delta(t-5)"s,
-			//"SBER low_delta(t-1)"s,
-			//"SBER low_delta(t-2)"s,
-			//"SBER low_delta(t-3)"s,
-			//"SBER low_delta(t-4)"s,
-			//"SBER low_delta(t-5)"s,
-			//"GOLD close_delta(t-1)"s,
-			//"GOLD close_delta(t-2)"s,
-			//"GOLD close_delta(t-3)"s,
-			//"GOLD close_delta(t-4)"s,
-			//"GOLD close_delta(t-5)"s,
-			//"IMOEX close_delta(t-1)"s,
-			//"IMOEX close_delta(t-2)"s,
-			//"IMOEX close_delta(t-3)"s,
-			//"IMOEX close_delta(t-4)"s,
-			//"IMOEX close_delta(t-5)"s
-		//}
-	};
+	learning::sample_filler const input_filler{dw, input_series_names_};
 	learning::sample_filler const target_filler{dw, {target_series_name_}};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
@@ -132,40 +105,30 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_005::_p
 		nlohmann::json j = nlohmann::json::parse(f);
 		j.get_to(mfn);
 	}
-	//nlohmann::json::parse(std::ifstream(net_file_name_)).get_to(mfn);
-	learning::sample_filler const input_filler{dw, input_series_names_
-		//{
-		//	"SBER close_delta(t-1)"s,
-		//	"SBER close_delta(t-2)"s,
-		//	"SBER close_delta(t-3)"s,
-		//	"SBER close_delta(t-4)"s,
-		//	"SBER close_delta(t-5)"s,
-		//	"SBER high_delta(t-1)"s,
-		//	"SBER high_delta(t-2)"s,
-		//	"SBER high_delta(t-3)"s,
-		//	"SBER high_delta(t-4)"s,
-		//	"SBER high_delta(t-5)"s,
-		//	"SBER low_delta(t-1)"s,
-		//	"SBER low_delta(t-2)"s,
-		//	"SBER low_delta(t-3)"s,
-		//	"SBER low_delta(t-4)"s,
-		//	"SBER low_delta(t-5)"s,
-		//	"GOLD close_delta(t-1)"s,
-		//	"GOLD close_delta(t-2)"s,
-		//	"GOLD close_delta(t-3)"s,
-		//	"GOLD close_delta(t-4)"s,
-		//	"GOLD close_delta(t-5)"s,
-		//	"IMOEX close_delta(t-1)"s,
-		//	"IMOEX close_delta(t-2)"s,
-		//	"IMOEX close_delta(t-3)"s,
-		//	"IMOEX close_delta(t-4)"s,
-		//	"IMOEX close_delta(t-5)"s
-		//}
-	};
+	learning::sample_filler const input_filler{dw, input_series_names_};
 
 	input_filler.fill(dw.row_count() - 1, mfn.input_layer());
 	mfn.forward();
 	return prediction_result_t{dw.index_value(dw.row_count() - 1), mfn.omega_layer().front()};
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_005::_show()
+{
+	shared::data::view dw{df_};
+	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::multilayer_feed_forward mfn{mfn_cfg};
+	{
+		std::ifstream f(net_file_name_);
+		nlohmann::json j = nlohmann::json::parse(f);
+		j.get_to(mfn);
+	}
+	learning::sample_filler const input_filler{dw, input_series_names_};
+	learning::sample_filler const target_filler{dw, {target_series_name_}};
+	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
+	auto predicted_series{dw.series_view(predicted_series_name_)};
+	autodis::prediction_view<learning::multilayer_feed_forward, norm_t> view{
+		mfn, input_filler, predicted_series, norm_[dw.series_idx(target_series_name_)], *chart_};
+	view.update_chart();
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_005::_print_df(frame_t const& df) const
@@ -213,4 +176,5 @@ void autodis::model::model_005::show()
 	df_.create_series(predicted_series_name_);
 	_create_chart();
 	chart_->show();
+	_show();
 }

@@ -50,6 +50,7 @@ namespace autodis::model
 		void _create_chart();
 		void _learn();
 		std::optional<prediction_result_t> _predict();
+		void _show();
 
 	public:
 		void learn();

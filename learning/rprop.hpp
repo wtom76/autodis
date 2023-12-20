@@ -368,7 +368,6 @@ namespace learning
 			for (auto omega : network.omega_layer())
 			{
 				pview.add_sample_result(omega, *target_i);
-				//if (omega * *target_i > 0. || omega == 0. && *target_i == 0.)
 				if (omega * *target_i > 0.)
 				{
 					++true_count;

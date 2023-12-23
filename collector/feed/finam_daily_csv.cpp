@@ -72,6 +72,10 @@ collector::feed::finam_daily_csv::row collector::feed::finam_daily_csv::_read_ro
 		if (src_idx == field_map_.index_field_src_idx())
 		{
 			read_field(field, result.date_);
+			if (result.date_ < 19000000 || result.date_ > 30000000)
+			{
+				throw std::runtime_error("date field should be in 'yyyymmdd' format"s);
+			}
 		}
 		else if (field_map_.dst_idx(src_idx) != field_map_.null())
 		{

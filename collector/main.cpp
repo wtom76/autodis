@@ -8,15 +8,11 @@
 //---------------------------------------------------------------------------------------------------------
 void process_source(keeper::metadata::source_info const& info, keeper::config const& keeper_cfg)
 {
-	SPDLOG_LOGGER_INFO(shared::util::log(), "processing source '{}' ({})...", info.source_uri_, info.source_args_);
-
 	assert(info.pending_);
 	auto src{collector::factory::source(info.source_uri_, info.source_args_)};
 	auto feed{collector::factory::feed(info.dest_)};
 	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
 	src->fetch_to(*feed);
-
-	SPDLOG_LOGGER_INFO(shared::util::log(), "...done");
 }
 //---------------------------------------------------------------------------------------------------------
 void collect()
@@ -33,12 +29,14 @@ void collect()
 		}
 		try
 		{
+			SPDLOG_LOGGER_INFO(shared::util::log(), "processing source '{}' ({})...", source_info.source_uri_, source_info.source_args_);
 			process_source(source_info, keeper_cfg);
+			SPDLOG_LOGGER_INFO(shared::util::log(), "...done");
 			metadata.drop_pending_flag(source_info.source_id_);
 		}
 		catch (std::exception const& ex)
 		{
-			SPDLOG_LOGGER_ERROR(shared::util::log(), ex.what());
+			SPDLOG_LOGGER_ERROR(shared::util::log(), "...error: {}", ex.what());
 		}
 	}
 }

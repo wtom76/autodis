@@ -25,4 +25,6 @@ endif()
 target_precompile_headers(model PRIVATE pch.hpp)
 
 find_package(nlohmann_json CONFIG REQUIRED)
-target_link_libraries(model PRIVATE nlohmann_json::nlohmann_json)
+find_package(spdlog CONFIG REQUIRED)
+
+target_link_libraries(model PRIVATE nlohmann_json::nlohmann_json spdlog::spdlog)

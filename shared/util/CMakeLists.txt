@@ -24,6 +24,5 @@ endif()
 target_precompile_headers(util PRIVATE pch.hpp)
 
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(util PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
-
+target_link_libraries(util PRIVATE spdlog::spdlog)
 find_package(nlohmann_json CONFIG REQUIRED)

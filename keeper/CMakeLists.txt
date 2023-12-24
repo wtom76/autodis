@@ -30,8 +30,8 @@ target_link_libraries(keeper PRIVATE shared)
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(keeper PRIVATE libpqxx::pqxx)
 
-#find_package(spdlog CONFIG REQUIRED)
-#target_link_libraries(keeper PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(keeper PRIVATE spdlog::spdlog)
 
-find_package(nlohmann_json CONFIG REQUIRED)
+#find_package(nlohmann_json CONFIG REQUIRED)
 #target_link_libraries(keeper PRIVATE nlohmann_json::nlohmann_json)

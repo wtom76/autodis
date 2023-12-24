@@ -47,12 +47,13 @@ target_link_libraries(autodis PRIVATE learning)
 target_link_libraries(autodis PRIVATE model)
 target_link_libraries(autodis PRIVATE visual)
 
-#find_package(spdlog CONFIG REQUIRED)
-#target_link_libraries(autodis PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
-
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(autodis PRIVATE nlohmann_json::nlohmann_json)
 
-target_include_directories(autodis PRIVATE
-	${CMAKE_SOURCE_DIR}
-)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(autodis PRIVATE spdlog::spdlog)
+
+find_package(libpqxx CONFIG REQUIRED)
+target_link_libraries(autodis PRIVATE libpqxx::pqxx)
+
+target_include_directories(autodis PRIVATE ${CMAKE_SOURCE_DIR})

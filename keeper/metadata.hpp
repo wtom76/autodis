@@ -1,5 +1,4 @@
 #pragma once
-#include <pqxx/pqxx>
 #include "framework.hpp"
 #include "data_uri.hpp"
 

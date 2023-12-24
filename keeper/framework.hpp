@@ -17,3 +17,5 @@
 using namespace std::literals;
 
 #include <shared/shared.hpp>
+#include <pqxx/pqxx>
+#include <nlohmann/json.hpp>

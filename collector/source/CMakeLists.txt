@@ -25,8 +25,12 @@ target_precompile_headers(source PRIVATE pch.hpp)
 
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(source PRIVATE libpqxx::pqxx)
+
 find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(source PRIVATE libpqxx::pqxx)
+
 find_package(nlohmann_json CONFIG REQUIRED)
 # curl is for MOEX ISS
+
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(source PRIVATE CURL::libcurl)

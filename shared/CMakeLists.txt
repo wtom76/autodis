@@ -12,6 +12,9 @@ add_library(shared STATIC
 target_link_libraries(shared PRIVATE data)
 target_link_libraries(shared PRIVATE util)
 
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(shared PRIVATE spdlog::spdlog)
+
 target_include_directories(shared PRIVATE
 	"./"
 	${CMAKE_SOURCE_DIR}

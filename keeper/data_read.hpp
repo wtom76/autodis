@@ -4,8 +4,6 @@
 #include "data_uri.hpp"
 #include "config.hpp"
 
-#include <pqxx/pqxx>
-
 namespace keeper
 {
 	//---------------------------------------------------------------------------------------------------------

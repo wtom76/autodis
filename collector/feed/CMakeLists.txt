@@ -26,6 +26,7 @@ find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(feed PRIVATE libpqxx::pqxx)
 
 find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(feed PRIVATE libpqxx::pqxx)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 

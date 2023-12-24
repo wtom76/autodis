@@ -20,5 +20,6 @@ endif()
 
 target_precompile_headers(data PRIVATE pch.hpp)
 
-#find_package(spdlog CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(data PRIVATE spdlog::spdlog)
 find_package(nlohmann_json CONFIG REQUIRED)

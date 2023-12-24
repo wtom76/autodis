@@ -23,3 +23,4 @@ using namespace std::literals;
 #include <keeper/keeper.hpp>
 #include <learning/learning.hpp>
 #include <visual/chart.hpp>
+#include <pqxx/pqxx>

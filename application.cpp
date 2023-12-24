@@ -8,7 +8,6 @@
 #include "config.hpp"
 #include "learn_runner.hpp"
 #include "application.hpp"
-#include <pqxx/pqxx>
 
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::_store_prediction(int64_t model_id, model::prediction_result_t const& result)

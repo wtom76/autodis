@@ -20,7 +20,7 @@ namespace autodis
 		learning::sample_filler const*	inputs_filler_;
 		series_view_t*					prediction_;
 		target_normalization_t const	norm_;
-		chart_t*						chrt_{nullptr};
+		chart_t*						chart_{nullptr};
 
 	public:
 		//----------------------------------------------------------------------------------------------------------
@@ -29,12 +29,12 @@ namespace autodis
 			learning::sample_filler const& inputs_filler,
 			series_view_t& prediction,
 			target_normalization_t const& norm,
-			chart_t& chrt)
+			chart_t& chart)
 			: network_{network}
 			, inputs_filler_{&inputs_filler}
 			, prediction_{&prediction}
 			, norm_{norm}
-			, chrt_{&chrt}
+			, chart_{&chart}
 		{
 		}
 		//----------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ namespace autodis
 		//----------------------------------------------------------------------------------------------------------
 		void update_chart()
 		{
-			if (!chrt_)
+			if (!chart_)
 			{
 				return;
 			}
@@ -56,7 +56,7 @@ namespace autodis
 				network_.forward();
 				dest = network_.omega_layer().front();
 			}
-			chrt_->invalidate();
+			chart_->invalidate();
 		}
 	};
 }

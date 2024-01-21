@@ -25,7 +25,7 @@ void autodis::model::linear_test::_normalize()
 	norm_.reserve(df_.col_count());
 	for (std::size_t i{0}; i != df_.col_count(); ++i)
 	{
-		norm_.emplace_back(shared::math::range_normalization{{-1, 1}});
+		norm_.emplace_back(norm_t{shared::math::min_max{df_.series(i)}});
 		norm_.back().normalize(df_.series(i));
 	}
 }

@@ -15,8 +15,9 @@ namespace autodis::model
 	// types
 	private:
 		using frame_t = shared::data::frame;
-		using norm_t = shared::math::range_normalization;
+		using norm_t = shared::math::tanh_normalization;
 		using norm_container_t = std::vector<norm_t>;
+	
 	// data
 	private:
 		frame_t				df_;

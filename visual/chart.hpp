@@ -60,11 +60,11 @@ namespace autodis::visual
 	
 	private:
 		void _wait();
-		shared::math::range _min_max(std::array<size_t, 4> const& ohlc_idc) const noexcept;
+		shared::math::min_max _min_max(std::array<size_t, 4> const& ohlc_idc) const noexcept;
 
 		std::unique_ptr<gl_context> _create_ctx() const;
 		void _fill_ctx(gl_context& ctx) const;
-		void _add_scale_y(size_t scale_y_idx, shared::math::range rng);
+		void _add_scale_y(size_t scale_y_idx, shared::math::min_max rng);
 		size_t _add_line(line const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const;
 		size_t _add_candles(candles const& src, std::vector<float>& dst_verices, std::vector<float>& dst_colors) const;
 

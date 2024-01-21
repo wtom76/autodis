@@ -218,9 +218,9 @@ void autodis::visual::chart::_wait()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-shared::math::range autodis::visual::chart::_min_max(std::array<size_t, 4> const& ohlc_idc) const noexcept
+shared::math::min_max autodis::visual::chart::_min_max(std::array<size_t, 4> const& ohlc_idc) const noexcept
 {
-	return {
+	return shared::math::min_max{
 		shared::math::min(df_.series(ohlc_idc[2])),
 		shared::math::max(df_.series(ohlc_idc[1]))
 	};
@@ -316,6 +316,8 @@ size_t autodis::visual::chart::_add_candles(candles const& src, std::vector<floa
 		float const y_low  {scl_y.position(low_s[row])};
 		float const y_close{scl_y.position(close_s[row])};
 
+		assert(y_high >= y_low);
+
 		// wick top
 		dst_verices.emplace_back(x);
 		dst_verices.emplace_back(y_high);
@@ -354,7 +356,7 @@ size_t autodis::visual::chart::_add_candles(candles const& src, std::vector<floa
 	return (df_.row_count() - scale_x_.first_visible_idx()) * 6;
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::visual::chart::_add_scale_y(size_t scale_y_idx, shared::math::range rng)
+void autodis::visual::chart::_add_scale_y(size_t scale_y_idx, shared::math::min_max rng)
 {
 	if (scale_y_idx >= max_scales_y_)
 	{
@@ -370,7 +372,7 @@ void autodis::visual::chart::_add_scale_y(size_t scale_y_idx, shared::math::rang
 //---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::add_line(size_t scale_y_idx, size_t series_idx, color_t color)
 {
-	_add_scale_y(scale_y_idx, shared::math::range::min_max(df_.series(series_idx)));
+	_add_scale_y(scale_y_idx, shared::math::min_max(df_.series(series_idx)));
 	lines_.emplace_back(series_idx, scale_y_idx, std::move(color));
 }
 //---------------------------------------------------------------------------------------------------------

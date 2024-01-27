@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.22.0)
 add_library(model OBJECT
 	linear_test.cpp
 	model_008.cpp
+	model_009.cpp
 )
 
 target_include_directories(model PRIVATE

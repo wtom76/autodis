@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.22.0)
 project(shared VERSION 0.1.0)
 
 add_subdirectory(data)
+add_subdirectory(math)
 add_subdirectory(util)
 
 add_library(shared STATIC
@@ -10,6 +11,7 @@ add_library(shared STATIC
 )
 
 target_link_libraries(shared PRIVATE data)
+target_link_libraries(shared PRIVATE math)
 target_link_libraries(shared PRIVATE util)
 
 find_package(spdlog CONFIG REQUIRED)

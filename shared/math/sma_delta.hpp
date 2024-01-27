@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework.hpp"
+#include "../data/frame.hpp"
 
 namespace shared::data
 {
@@ -10,10 +11,9 @@ namespace shared::data
 namespace shared::math
 {
 	//---------------------------------------------------------------------------------------------------------
-	// track
-	// creates x(t-1) - x(t), ..., x(t-n) - x(t)
-	// n = depth
+	// sma_delta
+	// creates sma(period_short) - sma(period_long)
 	//---------------------------------------------------------------------------------------------------------
 	//[[nodiscard]]
-	std::vector<std::string> track(data::frame& df, std::size_t src_idx, std::size_t depth);
+	std::string sma_delta(data::frame& df, std::size_t src_idx, std::size_t period_short, std::size_t period_long);
 }

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "model/linear_test.hpp"
 #include "model/model_008.hpp"
+#include "model/model_009.hpp"
 #include "config.hpp"
 #include "learn_runner.hpp"
 #include "application.hpp"
@@ -31,6 +32,10 @@ void autodis::application::learn(std::string const& model_name)
 	{
 		autodis::model::model_008{}.learn();
 	}
+	else if ("model_009"s == model_name)
+	{
+		autodis::model::model_009{}.learn();
+	}
 }
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::predict(std::string const& model_name)
@@ -48,6 +53,11 @@ void autodis::application::predict(std::string const& model_name)
 		model_id = 8;
 		result = autodis::model::model_008{}.predict();
 	}
+	else if ("model_009"s == model_name)
+	{
+		model_id = 9;
+		result = autodis::model::model_009{}.predict();
+	}
 	if (result)
 	{
 		SPDLOG_LOGGER_INFO(log(), "{} {} {}", model_name, result.value().first, result.value().second);
@@ -64,5 +74,9 @@ void autodis::application::show(std::string const& model_name)
 	if ("model_008"s == model_name)
 	{
 		autodis::model::model_008{}.show();
+	}
+	else if ("model_009"s == model_name)
+	{
+		autodis::model::model_009{}.show();
 	}
 }

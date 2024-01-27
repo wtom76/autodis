@@ -49,6 +49,9 @@ namespace shared::data
 		[[nodiscard]] series_t& series(std::size_t idx);
 		[[nodiscard]] series_t const& series(std::size_t idx) const;
 
+		[[nodiscard]] series_t& back_series() { return data_.back(); }
+		[[nodiscard]] series_t const& back_series() const { return data_.back(); }
+
 		[[nodiscard]] names_t& names() noexcept { return series_names_; }
 		[[nodiscard]] names_t const& names() const noexcept { return series_names_; }
 

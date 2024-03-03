@@ -27,3 +27,5 @@ using namespace std::literals;
 #include <shared/shared.hpp>
 #include <GL/glew.h>
 #include <SFML/Window.hpp>
+
+#include <matplot/matplot.h>

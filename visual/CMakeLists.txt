@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.22.0)
 
 add_library(visual OBJECT
+	util.cpp
 	scale_date.cpp
 	scale_y.cpp
 	chart.cpp
 	shader.cpp
+	heatmap.cpp
 )
 
 target_include_directories(visual PRIVATE

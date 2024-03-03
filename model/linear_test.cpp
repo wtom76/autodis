@@ -52,7 +52,7 @@ void autodis::model::linear_test::_learn()
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		mfn_cfg, mfn, teacher,
 		input_filler, predicted_series, norm_[dw.series_idx("y"s)], *chart_,
-		"linear_test.net.json"s};
+		[](nlohmann::json&& j){ std::ofstream("linear_test.net.json"s) << j; }};
 	runner.wait();
 	best_err_ = runner.best_err();
 }

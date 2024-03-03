@@ -5,15 +5,49 @@
 #include "framework.hpp"
 #include "common.hpp"
 #include "abstract.hpp"
+#include "file.hpp"
 
 namespace autodis::model
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class model_009
+	// class config_010
+	// model config
+	//---------------------------------------------------------------------------------------------------------
+	class config_010
+	{
+	// types
+	public:
+		//---------------------------------------------------------------------------------------------------------
+		class target
+		{
+		public:
+			long long	reg_id_open_{0};
+			long long	reg_id_high_{0};
+			long long	reg_id_low_{0};
+			long long	reg_id_close_{0};
+			long long	reg_id_vol_{0};
+		};
+		//---------------------------------------------------------------------------------------------------------
+		using ids_t = std::vector<long long>;
+
+	// data
+	public:
+		target		target_;
+		ids_t		other_reg_ids_;
+		std::string	target_series_name_{"<symbol> close_delta(t+1)"s};
+
+	// methods
+	public:
+		std::size_t source_num() const noexcept { return sizeof(target) / sizeof(long long) + other_reg_ids_.size(); }
+		ids_t all_reg_ids() const;
+	};
+	//---------------------------------------------------------------------------------------------------------
+	// class model_010
 	// predict close_t1 - close_t0
 	//---------------------------------------------------------------------------------------------------------
-	class model_009
+	class model_010
 		: public abstract
+		, private shared::util::logged
 	{
 	// types
 	private:
@@ -29,28 +63,21 @@ namespace autodis::model
 			imoex
 		};
 
+		using ids_t = std::vector<long long>;
 		using norm_map_t = std::vector<norm_origin>;
 		using norm_container_t = std::vector<norm_t>;
 
 	// data
 	private:
-		static constexpr long long		target_reg_id_open_{18};
-		static constexpr long long		target_reg_id_high_{19};
-		static constexpr long long		target_reg_id_low_{20};
-		static constexpr long long		target_reg_id_close_{21};
-		static constexpr long long		target_reg_id_vol_{22};
-		static constexpr long long		gold_reg_id_close_{11};
-		static constexpr long long		imoex_reg_id_close_{16};
-		static constexpr std::size_t	feature_sources_count_{7};	// number of source series that features will be created from
-
-		static constexpr std::size_t	target_source_df_idx_{3};	// an index of target source series in df_ (SBER close)
+		static constexpr std::size_t	target_source_df_idx_{3};	// an index of source series in df_ target will be made from (close price)
 		static constexpr std::size_t	track_depth_{20};
 		static constexpr std::size_t	sma_period_short_{20};
 		static constexpr std::size_t	sma_period_long_{50};
 
-		std::string const	target_series_name_{"SBER close_delta(t+1)"s};
 		std::string const	predicted_series_name_{"predicted"s};
-		std::string const	net_file_name_{"model_009.net.json"s};
+
+		file				model_file_;
+		config_010			cfg_;
 		frame_t				df_;
 		norm_container_t	norm_;
 		norm_map_t			norm_map_;
@@ -76,9 +103,14 @@ namespace autodis::model
 		void _verify_df() const;
 
 	public:
-		model_009();
+		model_010(file&& model_file);
 
-		std::int64_t id() override { return 9; }
+		static void create_model_file(
+			std::string type_name,
+			std::int64_t model_id,
+			std::filesystem::path file_path);
+
+		std::int64_t id() override { return model_file_.model_id(); }
 		void learn() override;
 		std::optional<prediction_result_t> predict() override;
 		void show() override;

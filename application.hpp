@@ -17,8 +17,10 @@ namespace autodis
 	private:
 		void _store_prediction(int64_t model_id, model::prediction_result_t const& result);
 	public:
+		void create_model_file(std::string const& model_type, std::string const& model_name);
 		void learn(std::string const& model_name);
 		void predict(std::string const& model_name);
 		void show(std::string const& model_name);
+		void show_analysis(std::string const& model_name);
 	};
 }

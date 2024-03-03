@@ -3,6 +3,7 @@
 #include <shared/math/normalization.hpp>
 #include "framework.hpp"
 #include "common.hpp"
+#include "abstract.hpp"
 
 namespace autodis::model
 {
@@ -11,6 +12,7 @@ namespace autodis::model
 	// testing model
 	//---------------------------------------------------------------------------------------------------------
 	class linear_test
+		: public abstract
 	{
 	// types
 	private:
@@ -35,7 +37,10 @@ namespace autodis::model
 		void _learn();
 
 	public:
-		void learn();
-		std::optional<prediction_result_t> predict();
+		std::int64_t id() override { return 1; }
+		void learn() override;
+		std::optional<prediction_result_t> predict() override;
+		void show() override {}
+		void show_analysis() override {}
 	};
 }

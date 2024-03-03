@@ -56,4 +56,7 @@ target_link_libraries(autodis PRIVATE spdlog::spdlog)
 find_package(libpqxx CONFIG REQUIRED)
 target_link_libraries(autodis PRIVATE libpqxx::pqxx)
 
+find_package(matplot++ CONFIG REQUIRED)
+target_link_libraries(autodis PRIVATE Matplot++::cimg std::filesystem Matplot++::matplot Matplot++::nodesoup)
+
 target_include_directories(autodis PRIVATE ${CMAKE_SOURCE_DIR})

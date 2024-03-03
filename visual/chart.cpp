@@ -1,20 +1,10 @@
 #include "pch.hpp"
 #include "chart.hpp"
 #include "shader.hpp"
+#include "util.hpp"
 
 // TODO: use buffers swaping
 
-namespace autodis::visual
-{
-	//---------------------------------------------------------------------------------------------------------
-	void throw_on_fail(GLenum err)
-	{
-		if (err != GLEW_OK)
-		{
-			throw std::runtime_error{"OpenGL error"};
-		}
-	}
-}
 //---------------------------------------------------------------------------------------------------------
 class autodis::visual::chart::chart::gl_context
 {
@@ -381,14 +371,6 @@ void autodis::visual::chart::add_candlesticks(size_t scale_y_idx, std::array<siz
 	_add_scale_y(scale_y_idx, _min_max(ohlc_idc));
 	candlesticks_.emplace_back(ohlc_idc, scale_y_idx);
 }
-//---------------------------------------------------------------------------------------------------------
-// DEBUG
-void _dump_df(shared::data::frame const& df)
-{
-	std::ofstream f{"df_chart.csv"s};
-	df.print(f);
-}
-//~DEBUG
 //---------------------------------------------------------------------------------------------------------
 void autodis::visual::chart::invalidate() noexcept
 {

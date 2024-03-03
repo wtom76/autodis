@@ -14,6 +14,7 @@ namespace autodis
 		using series_view_t = shared::data::view::series_view_t;
 		using target_normalization_t = target_normalization;
 		using chart_t = autodis::visual::chart;
+		using store_result_network_t = std::function<void(nlohmann::json&&)>;
 	
 	private:
 		double							min_err_{0.001};	// TODO: pass as arg or config
@@ -26,7 +27,7 @@ namespace autodis
 		target_normalization_t const	norm_;
 		chart_t*						chrt_{nullptr};
 
-		std::string const				file_name_;			// to store resulting network
+		store_result_network_t			store_result_network_;
 
 		std::jthread					thread_;			// keep it last member
 
@@ -60,7 +61,7 @@ namespace autodis
 			series_view_t& prediction,
 			target_normalization_t const& norm,
 			chart_t& chrt,
-			std::string file_name)
+			store_result_network_t&& store_result_network)
 			: cfg_{cfg}
 			, network_{network}
 			, teacher_{teacher}
@@ -68,7 +69,7 @@ namespace autodis
 			, prediction_{&prediction}
 			, norm_{norm}
 			, chrt_{&chrt}
-			, file_name_{std::move(file_name)}
+			, store_result_network_{std::move(store_result_network)}
 			, thread_{
 				[this](std::stop_token stoken)
 				{
@@ -107,12 +108,9 @@ namespace autodis
 		void set_best(double min_err) override
 		{
 			learning::progress_view::set_best(min_err);
-			if (!file_name_.empty())
-			{
-				nlohmann::json j = network_;
-				std::ofstream(file_name_) << j;
-			}
-			std::ofstream{"best_net.dump"s} << network_;
+			nlohmann::json j = network_;
+			store_result_network_(std::move(network_));
+			//std::ofstream{"best_net.dump"s} << network_;
 			_update_chart();
 		}
 	};

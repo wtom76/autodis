@@ -1,7 +1,6 @@
 #include "pch.hpp"
-#include "model/linear_test.hpp"
-#include "model/model_008.hpp"
-#include "model/model_009.hpp"
+#include "model/abstract.hpp"
+#include "model/factory.hpp"
 #include "config.hpp"
 #include "learn_runner.hpp"
 #include "application.hpp"
@@ -22,19 +21,17 @@ void autodis::application::_store_prediction(int64_t model_id, model::prediction
 	}
 }
 //----------------------------------------------------------------------------------------------------------
+void autodis::application::create_model_file(std::string const& model_type, std::string const& model_name)
+{
+	model::factory::create_model_file(model_type, model_name);
+}
+//----------------------------------------------------------------------------------------------------------
 void autodis::application::learn(std::string const& model_name)
 {
-	if ("linear_test"s == model_name)
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	if (model)
 	{
-		autodis::model::linear_test{}.learn();
-	}
-	else if ("model_008"s == model_name)
-	{
-		autodis::model::model_008{}.learn();
-	}
-	else if ("model_009"s == model_name)
-	{
-		autodis::model::model_009{}.learn();
+		model->learn();
 	}
 }
 //----------------------------------------------------------------------------------------------------------
@@ -42,21 +39,11 @@ void autodis::application::predict(std::string const& model_name)
 {
 	int64_t model_id{0};
 	std::optional<model::prediction_result_t> result{};
-
-	if ("linear_test"s == model_name)
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	if (model)
 	{
-		model_id = 1;
-		result = autodis::model::linear_test{}.predict();
-	}
-	else if ("model_008"s == model_name)
-	{
-		model_id = 8;
-		result = autodis::model::model_008{}.predict();
-	}
-	else if ("model_009"s == model_name)
-	{
-		model_id = 9;
-		result = autodis::model::model_009{}.predict();
+		model_id = model->id();
+		result = model->predict();
 	}
 	if (result)
 	{
@@ -71,12 +58,18 @@ void autodis::application::predict(std::string const& model_name)
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::show(std::string const& model_name)
 {
-	if ("model_008"s == model_name)
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	if (model)
 	{
-		autodis::model::model_008{}.show();
+		model->show();
 	}
-	else if ("model_009"s == model_name)
+}
+//----------------------------------------------------------------------------------------------------------
+void autodis::application::show_analysis(std::string const& model_name)
+{
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	if (model)
 	{
-		autodis::model::model_009{}.show();
+		model->show_analysis();
 	}
 }

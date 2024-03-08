@@ -38,6 +38,8 @@ namespace autodis::model
 
 	// methods
 	public:
+		std::size_t target_source_num() const noexcept { return sizeof(target) / sizeof(long long); }
+		std::size_t other_source_num() const noexcept { return other_reg_ids_.size(); }
 		std::size_t source_num() const noexcept { return sizeof(target) / sizeof(long long) + other_reg_ids_.size(); }
 		ids_t all_reg_ids() const;
 	};
@@ -54,17 +56,16 @@ namespace autodis::model
 		using frame_t = shared::data::frame;
 		using norm_t = shared::math::tanh_normalization;
 
-		enum class norm_origin : int
+		enum class norm_origin : std::size_t
 		{
 			null = 0,
-			sber,
-			sber_volume,
-			gold,
-			imoex
+			target,
+			target_volume,
+			other_first
 		};
 
 		using ids_t = std::vector<long long>;
-		using norm_map_t = std::vector<norm_origin>;
+		using norm_map_t = std::vector<std::underlying_type_t<norm_origin>>;
 		using norm_container_t = std::vector<norm_t>;
 
 	// data

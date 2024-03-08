@@ -68,9 +68,7 @@ autodis::model::config_010::ids_t autodis::model::config_010::all_reg_ids() cons
 autodis::model::model_010::model_010(file&& model_file)
 	: model_file_{std::move(model_file)}
 	, cfg_{model_file_.config().get<config_010>()}
-{
-	norm_map_.reserve(cfg_.source_num() * track_depth_ + 1/*target*/);
-}
+{}
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_verify_df() const
 {
@@ -89,7 +87,7 @@ void autodis::model::model_010::_load_data()
 	keeper::data_read dr{keeper_cfg};
 	dr.read(cfg_.all_reg_ids(), df_);
 	assert(df_.col_count() == cfg_.source_num());
-	norm_map_.resize(cfg_.source_num(), norm_origin::null); 	// absolute values aren't used in learning so don't need normalization (set to 1)
+	norm_map_.resize(cfg_.source_num(), std::to_underlying(norm_origin::null)); 	// absolute values aren't used in learning so don't need normalization (set to null)
 	assert(norm_.empty());
 }
 //---------------------------------------------------------------------------------------------------------
@@ -97,7 +95,7 @@ void autodis::model::model_010::_load_data()
 void autodis::model::model_010::_create_target()
 {
 	shared::math::target_delta_t0_t1(df_, target_source_df_idx_, df_);
-	norm_map_.emplace_back(norm_origin::sber);
+	norm_map_.emplace_back(std::to_underlying(norm_origin::target));
 	assert(df_.col_count() == cfg_.source_num() + 1);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -111,20 +109,17 @@ void autodis::model::model_010::_create_features()
 		std::ranges::move(generated_names, std::back_inserter(input_series_names_));
  	}
 
-	assert(df_.col_count() == cfg_.source_num() + 1 + cfg_.source_num() * track_depth_);
-
 	input_series_names_.emplace_back(
 		shared::math::sma_delta(df_, target_source_df_idx_, sma_period_short_, sma_period_long_));
 
-	assert(df_.col_count() == cfg_.source_num() + 1 + cfg_.source_num() * track_depth_ + 1);
-
 	// map normalizers for series of track features
-	norm_map_.resize(norm_map_.size() + 4 * track_depth_, norm_origin::sber);		// track derived from sber ohlc
-	norm_map_.resize(norm_map_.size() + track_depth_, norm_origin::sber_volume);	// track derived from sber volume
-	norm_map_.resize(norm_map_.size() + track_depth_, norm_origin::gold);			// track derived from gold close
-	norm_map_.resize(norm_map_.size() + track_depth_, norm_origin::imoex);			// track derived from imoex close
-
-	norm_map_.resize(norm_map_.size() + 1, norm_origin::sber);						// sma_delta derived from sber close
+	norm_map_.resize(norm_map_.size() + (cfg_.target_source_num() - 1) * track_depth_, std::to_underlying(norm_origin::target));	// track derived from target ohlc
+	norm_map_.resize(norm_map_.size() + track_depth_, std::to_underlying(norm_origin::target_volume));								// track derived from target volume
+	for (size_t i{0}; i != cfg_.other_source_num(); ++i)
+	{
+		norm_map_.resize(norm_map_.size() + track_depth_, std::to_underlying(norm_origin::other_first) + i);						// track derived from other sources
+	}
+	norm_map_.resize(norm_map_.size() + 1, std::to_underlying(norm_origin::target));												// sma_delta derived from target close
 
 	assert(norm_.empty());
 }
@@ -137,28 +132,25 @@ void autodis::model::model_010::_heal_data()
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_normalize()
 {
-	shared::math::min_max min_max_sber;
-	shared::math::min_max min_max_sber_volume;
-	shared::math::min_max min_max_gold;
-	shared::math::min_max min_max_imoex;
+	shared::math::min_max min_max_target;
+	shared::math::min_max min_max_target_vol;
+	std::vector<shared::math::min_max> min_max_other(cfg_.other_source_num());
 
 	for (std::size_t i{0}; i != df_.col_count(); ++i)
 	{
 		switch (norm_map_[i])
 		{
-		case norm_origin::null:			
+		case std::to_underlying(norm_origin::null):			
 			break;
-		case norm_origin::sber:			
-			min_max_sber += shared::math::min_max{df_.series(i)};
+		case std::to_underlying(norm_origin::target):			
+			min_max_target += shared::math::min_max{df_.series(i)};
 			break;
-		case norm_origin::sber_volume:
-			min_max_sber_volume += shared::math::min_max{df_.series(i)};
+		case std::to_underlying(norm_origin::target_volume):
+			min_max_target_vol += shared::math::min_max{df_.series(i)};
 			break;
-		case norm_origin::gold:			
-			min_max_gold += shared::math::min_max{df_.series(i)};
-			break;
-		case norm_origin::imoex:			
-			min_max_imoex += shared::math::min_max{df_.series(i)};
+		default:
+			assert(norm_map_[i] - std::to_underlying(norm_origin::other_first) < min_max_other.size());
+			min_max_other[norm_map_[i] - std::to_underlying(norm_origin::other_first)] += shared::math::min_max{df_.series(i)};
 			break;
 		}
 	}
@@ -170,20 +162,17 @@ void autodis::model::model_010::_normalize()
 	{
 		switch (norm_map_[i])
 		{
-		case norm_origin::null:			
+		case std::to_underlying(norm_origin::null):
 			norm_.emplace_back(norm_t{});
 			break;
-		case norm_origin::sber:			
-			norm_.emplace_back(norm_t{min_max_sber});
+		case std::to_underlying(norm_origin::target):
+			norm_.emplace_back(norm_t{min_max_target});
 			break;
-		case norm_origin::sber_volume:
-			norm_.emplace_back(norm_t{min_max_sber_volume});
+		case std::to_underlying(norm_origin::target_volume):
+			norm_.emplace_back(norm_t{min_max_target_vol});
 			break;
-		case norm_origin::gold:			
-			norm_.emplace_back(norm_t{min_max_gold});
-			break;
-		case norm_origin::imoex:			
-			norm_.emplace_back(norm_t{min_max_imoex});
+		default:
+			norm_.emplace_back(norm_t{min_max_other[norm_map_[i] - std::to_underlying(norm_origin::other_first)]});
 			break;
 		}
 	}

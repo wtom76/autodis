@@ -347,7 +347,7 @@ void autodis::model::model_010::_show_analysis()
 		out << std::sqrt(sum_sqr / source_to_dest_matrix.size()) << "\n";
 	}
 
-	visual::heatmap hm{weights[0], input_series_names_};
+	visual::heatmap hm{weights[0], input_series_names_, model_file_.path().filename()};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::show_analysis()

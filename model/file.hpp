@@ -14,7 +14,7 @@ namespace autodis::model
 	private:
 		struct section_name;
 
-	public:
+	private:
 		std::filesystem::path	file_path_;
 		nlohmann::json			j_;
 
@@ -28,6 +28,7 @@ namespace autodis::model
 
 		[[nodiscard]] std::string type_name() const;	// type name or exception
 		[[nodiscard]] std::int64_t model_id() const;	// model id in DB or exception
+		std::filesystem::path const& path() const noexcept { return file_path_; }
 		nlohmann::json& config();						// config part of JSON
 		nlohmann::json& network();						// network part of JSON file
 

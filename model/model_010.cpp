@@ -231,7 +231,8 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_010::_p
 
 	input_filler.fill(dw.row_count() - 1, mfn.input_layer());
 	mfn.forward();
-	return prediction_result_t{dw.index_value(dw.row_count() - 1), mfn.omega_layer().front()};
+	assert(norm_map_[cfg_.source_num()] == std::to_underlying(norm_origin::target));
+	return prediction_result_t{dw.index_value(dw.row_count() - 1), norm_[cfg_.source_num()].restore(mfn.omega_layer().front())};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_show()

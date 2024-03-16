@@ -101,8 +101,6 @@ namespace autodis::model
 		void _show();
 		void _show_analysis();
 
-		void _verify_df() const;
-
 	public:
 		model_010(file&& model_file);
 

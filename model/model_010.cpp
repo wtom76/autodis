@@ -69,14 +69,6 @@ autodis::model::model_010::model_010(file&& model_file)
 	: model_file_{std::move(model_file)}
 	, cfg_{model_file_.config().get<config_010>()}
 {}
-//---------------------------------------------------------------------------------------------------------
-void autodis::model::model_010::_verify_df() const
-{
-	for (size_t i{0}; i != df_.row_count(); ++i)
-	{
-		assert(std::isnan(df_.data()[1][i]) || df_.data()[1][i] >= df_.data()[2][i]);
-	}
-}
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
@@ -252,6 +244,39 @@ void autodis::model::model_010::_show()
 	view.update_chart();
 }
 //---------------------------------------------------------------------------------------------------------
+void autodis::model::model_010::_show_analysis()
+{
+	assert(!model_file_.network().empty());
+
+	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::multilayer_feed_forward mfn{mfn_cfg};
+	model_file_.network().get_to(mfn);
+
+	auto const& weights{mfn.weight_layers()};
+
+	if (weights.empty())
+	{
+		return;
+	}
+
+	std::ofstream out("network.txt", std::ios::trunc);
+	auto const& source_to_dest_matrix{weights[0]};
+	auto input_name_i{std::begin(input_series_names_)};
+	for (std::vector<double> const& one_src_many_dst : source_to_dest_matrix)
+	{
+		out << *input_name_i++ << ", ";
+		double sum_sqr{0};
+		for (double weight : one_src_many_dst)
+		{
+			out << weight << ", ";
+			sum_sqr += weight * weight;
+		}
+		out << std::sqrt(sum_sqr / source_to_dest_matrix.size()) << "\n";
+	}
+
+	visual::heatmap hm{weights[0], input_series_names_, model_file_.path().filename()};
+}
+//---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_print_df(frame_t const& df) const
 {
 	df.print_shape(std::cout);
@@ -301,68 +326,23 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_010::pr
 void autodis::model::model_010::show()
 {
 	_load_data();
-	_verify_df();
 	_create_target();
-	_verify_df();
 	_create_features();
-	_verify_df();
 	_heal_data();
-	_verify_df();
 	_normalize();
-	_verify_df();
 	df_.create_series(predicted_series_name_);
-	_verify_df();
 	_create_chart();
 	chart_->show();
 	_show();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_010::_show_analysis()
-{
-	assert(!model_file_.network().empty());
-
-	learning::config mfn_cfg{_net_layer_sizes()};
-	learning::multilayer_feed_forward mfn{mfn_cfg};
-	model_file_.network().get_to(mfn);
-
-	auto const& weights{mfn.weight_layers()};
-
-	if (weights.empty())
-	{
-		return;
-	}
-
-	std::ofstream out("network.txt", std::ios::trunc);
-	auto const& source_to_dest_matrix{weights[0]};
-	auto input_name_i{std::begin(input_series_names_)};
-	for (std::vector<double> const& one_src_many_dst : source_to_dest_matrix)
-	{
-		out << *input_name_i++ << ", ";
-		double sum_sqr{0};
-		for (double weight : one_src_many_dst)
-		{
-			out << weight << ", ";
-			sum_sqr += weight * weight;
-		}
-		out << std::sqrt(sum_sqr / source_to_dest_matrix.size()) << "\n";
-	}
-
-	visual::heatmap hm{weights[0], input_series_names_, model_file_.path().filename()};
-}
-//---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::show_analysis()
 {
 	_load_data();
-	_verify_df();
 	_create_target();
-	_verify_df();
 	_create_features();
-	_verify_df();
 	_heal_data();
-	_verify_df();
 	_normalize();
-	_verify_df();
 	df_.create_series(predicted_series_name_);
-	_verify_df();
 	_show_analysis();
 }

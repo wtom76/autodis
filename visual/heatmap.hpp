@@ -13,7 +13,7 @@ namespace autodis::visual
 	
 	private:
 		//---------------------------------------------------------------------------------------------------------
-		std::vector<std::size_t> _sorted_page(std::vector<std::vector<double>> const& data) const;
+		std::vector<std::size_t> _select_by_minmax(std::vector<std::vector<double>> const& data) const;
 		//---------------------------------------------------------------------------------------------------------
 		void _draw(std::vector<std::vector<double>>&& data, std::vector<std::string>&& names, std::string caption);
 	public:

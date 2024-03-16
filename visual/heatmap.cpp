@@ -2,7 +2,7 @@
 #include "heatmap.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-std::vector<std::size_t> autodis::visual::heatmap::_sorted_page(std::vector<std::vector<double>> const& data) const
+std::vector<std::size_t> autodis::visual::heatmap::_select_by_minmax(std::vector<std::vector<double>> const& data) const
 {
 	std::vector<double> extremum(data.size());
 	std::ranges::transform(data, std::begin(extremum),
@@ -42,7 +42,7 @@ autodis::visual::heatmap::heatmap(std::vector<std::vector<double>> const& data, 
 {
 	assert(data.size() == names.size());
 
-	std::vector<std::size_t> indexes{_sorted_page(data)};
+	std::vector<std::size_t> indexes{_select_by_minmax(data)};
 	std::vector<std::vector<double>> page_data;
 	std::vector<std::string> page_names;
 	page_data.reserve(indexes.size());

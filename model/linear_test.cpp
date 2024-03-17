@@ -44,8 +44,8 @@ void autodis::model::linear_test::_learn()
 
 	learning::config mfn_cfg{layers_sizes};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler const input_filler{dw, {"x"s}};
-	learning::sample_filler const target_filler{dw, {"y"s}};
+	learning::sample_filler input_filler{dw, {"x"s}, &mfn.input_layer()};
+	learning::sample_filler target_filler{dw, {"y"s}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	shared::data::view dw_vis{df_chart_};
 	auto predicted_series{dw_vis.series_view("predicted"s)};

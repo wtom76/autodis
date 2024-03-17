@@ -52,7 +52,7 @@ namespace autodis
 			size_t row{0};
 			for (double& dest : *prediction_)
 			{
-				inputs_filler_->fill(row++, network_.input_layer());
+				inputs_filler_->fill(row++);
 				network_.forward();
 				dest = network_.omega_layer().front();
 			}

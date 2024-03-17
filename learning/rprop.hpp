@@ -44,9 +44,9 @@ namespace learning
 		size_t const						src_row_count_;
 		std::vector<std::ptrdiff_t>			teaching_set_;
 		std::vector<std::ptrdiff_t>			test_set_;
-		sample_filler const&				input_filler_;
-		sample_filler const&				target_filler_;
 		std::vector<double>					sample_targets_;
+		sample_filler&						input_filler_;
+		sample_filler&						target_filler_;
 
 	// methods
 	private:
@@ -57,13 +57,15 @@ namespace learning
 		void _split_data();
 		double _mean_sqr_error(net& network);
 	public:
-		rprop(sample_filler const& input_filler, sample_filler const& target_filler)
+		rprop(sample_filler& input_filler, sample_filler& target_filler)
 			: rand_{rd_()}
 			, src_row_count_{input_filler.row_count()}
+			, sample_targets_(target_filler.col_count(), 0.)
 			, input_filler_{input_filler}
 			, target_filler_{target_filler}
-			, sample_targets_(target_filler.col_count(), 0.)
-		{}
+		{
+			target_filler_.set_dest(sample_targets_);
+		}
 
 		double teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token);
 		void show_test(net& network, progress_view& pview, std::stop_token stop_token);
@@ -279,8 +281,8 @@ namespace learning
 		double sqr_err_sum{0.};
 		for (const size_t row : test_set_)
 		{
-			input_filler_.fill(row, network.input_layer());
-			target_filler_.fill(row, sample_targets_);
+			input_filler_.fill(row);
+			target_filler_.fill(row);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())
@@ -319,8 +321,8 @@ namespace learning
 
 			for (size_t row_idx : teaching_set_)
 			{
-				input_filler_.fill(row_idx, network.input_layer());
-				target_filler_.fill(row_idx, sample_targets_);
+				input_filler_.fill(row_idx);
+				target_filler_.fill(row_idx);
 				network.forward();
 				_updateGradients(network, sample_targets_);
 			}
@@ -361,8 +363,8 @@ namespace learning
 			{
 				return;
 			}
-			input_filler_.fill(row, network.input_layer());
-			target_filler_.fill(row, sample_targets_);
+			input_filler_.fill(row);
+			target_filler_.fill(row);
 			network.forward();
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())

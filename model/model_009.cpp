@@ -12,14 +12,6 @@ autodis::model::model_009::model_009()
 {
 	norm_map_.reserve(feature_sources_count_ * track_depth_ + 1/*target*/);
 }
-//---------------------------------------------------------------------------------------------------------
-void autodis::model::model_009::_verify_df() const
-{
-	for (size_t i{0}; i != df_.row_count(); ++i)
-	{
-		assert(std::isnan(df_.data()[1][i]) || df_.data()[1][i] >= df_.data()[2][i]);
-	}
-}
 
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
@@ -167,8 +159,8 @@ void autodis::model::model_009::_learn()
 	shared::data::view dw{df_};
 	learning::config mfn_cfg{_net_layer_sizes()};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler const input_filler{dw, input_series_names_};
-	learning::sample_filler const target_filler{dw, {target_series_name_}};
+	learning::sample_filler input_filler{dw, input_series_names_, &mfn.input_layer()};
+	learning::sample_filler target_filler{dw, {target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
@@ -193,9 +185,9 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_009::_p
 		nlohmann::json j = nlohmann::json::parse(f);
 		j.get_to(mfn);
 	}
-	learning::sample_filler const input_filler{dw, input_series_names_};
+	learning::sample_filler const input_filler{dw, input_series_names_, &mfn.input_layer()};
 
-	input_filler.fill(dw.row_count() - 1, mfn.input_layer());
+	input_filler.fill_last();
 	mfn.forward();
 	return prediction_result_t{dw.index_value(dw.row_count() - 1), mfn.omega_layer().front()};
 }
@@ -210,8 +202,8 @@ void autodis::model::model_009::_show()
 		nlohmann::json j = nlohmann::json::parse(f);
 		j.get_to(mfn);
 	}
-	learning::sample_filler const input_filler{dw, input_series_names_};
-	learning::sample_filler const target_filler{dw, {target_series_name_}};
+	learning::sample_filler input_filler{dw, input_series_names_, &mfn.input_layer()};
+	learning::sample_filler target_filler{dw, {target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::prediction_view<learning::multilayer_feed_forward, norm_t> view{
@@ -257,17 +249,11 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_009::pr
 void autodis::model::model_009::show()
 {
 	_load_data();
-	_verify_df();
 	_create_target();
-	_verify_df();
 	_create_features();
-	_verify_df();
 	_heal_data();
-	_verify_df();
 	_normalize();
-	_verify_df();
 	df_.create_series(predicted_series_name_);
-	_verify_df();
 	_create_chart();
 	chart_->show();
 	_show();
@@ -311,16 +297,10 @@ void autodis::model::model_009::_show_analysis()
 void autodis::model::model_009::show_analysis()
 {
 	_load_data();
-	_verify_df();
 	_create_target();
-	_verify_df();
 	_create_features();
-	_verify_df();
 	_heal_data();
-	_verify_df();
 	_normalize();
-	_verify_df();
 	df_.create_series(predicted_series_name_);
-	_verify_df();
 	_show_analysis();
 }

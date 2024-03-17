@@ -29,12 +29,14 @@ namespace autodis::model
 		};
 		//---------------------------------------------------------------------------------------------------------
 		using ids_t = std::vector<long long>;
+		using layer_sizes_t = std::vector<std::size_t>;
 
 	// data
 	public:
-		target		target_;
-		ids_t		other_reg_ids_;
-		std::string	target_series_name_{"<symbol> close_delta(t+1)"s};
+		layer_sizes_t	layer_sizes_;
+		target			target_;
+		ids_t			other_reg_ids_;
+		std::string		target_series_name_{"<symbol> close_delta(t+1)"s};
 
 	// methods
 	public:
@@ -88,7 +90,7 @@ namespace autodis::model
 
 	// methods
 	private:
-		std::vector<std::size_t> _net_layer_sizes() const;
+		static void _set_layer_sizes_default(config_010& cfg);
 		void _print_df(frame_t const& df) const;
 		void _load_data();
 		void _create_target();

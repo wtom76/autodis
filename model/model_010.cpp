@@ -15,37 +15,39 @@ namespace autodis::model
 	void to_json(nlohmann::json& j, config_010::target const& src)
 	{
 		j = nlohmann::json{
-			{ "reg_id_open",	src.reg_id_open_ },
-			{ "reg_id_high",	src.reg_id_high_ },
-			{ "reg_id_low",		src.reg_id_low_ },
-			{ "reg_id_close",	src.reg_id_close_ },
-			{ "reg_id_vol",		src.reg_id_vol_ }
+			{ "open",	src.reg_id_open_ },
+			{ "high",	src.reg_id_high_ },
+			{ "low",	src.reg_id_low_ },
+			{ "close",	src.reg_id_close_ },
+			{ "vol",	src.reg_id_vol_ }
 		};
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void from_json(nlohmann::json const& j, config_010::target& dst)
 	{
-		j.at("reg_id_open").get_to(dst.reg_id_open_);
-		j.at("reg_id_high").get_to(dst.reg_id_high_);
-		j.at("reg_id_low").get_to(dst.reg_id_low_);
-		j.at("reg_id_close").get_to(dst.reg_id_close_);
-		j.at("reg_id_vol").get_to(dst.reg_id_vol_);
+		j.at("open").get_to(dst.reg_id_open_);
+		j.at("high").get_to(dst.reg_id_high_);
+		j.at("low").get_to(dst.reg_id_low_);
+		j.at("close").get_to(dst.reg_id_close_);
+		j.at("vol").get_to(dst.reg_id_vol_);
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void to_json(nlohmann::json& j, config_010 const& src)
 	{
 		j = nlohmann::json{
-			{ "target_series_name",	src.target_series_name_ },
-			{ "target",	src.target_ },
-			{ "other_reg_ids",	src.other_reg_ids_ }
+			{ "layer_sizes",		src.layer_sizes_ },
+			{ "target_reg_ids",		src.target_ },
+			{ "other_reg_ids",		src.other_reg_ids_ },
+			{ "target_series_name",	src.target_series_name_ }
 		};
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void from_json(nlohmann::json const& j, config_010& dst)
 	{
-		j.at("target_series_name").get_to(dst.target_series_name_);
-		j.at("target").get_to(dst.target_);
+		j.at("layer_sizes").get_to(dst.layer_sizes_);
+		j.at("target_reg_ids").get_to(dst.target_);
 		j.at("other_reg_ids").get_to(dst.other_reg_ids_);
+		j.at("target_series_name").get_to(dst.target_series_name_);
 	}
 }
 //---------------------------------------------------------------------------------------------------------
@@ -183,20 +185,19 @@ void autodis::model::model_010::_create_chart()
 	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<std::size_t> autodis::model::model_010::_net_layer_sizes() const
+void autodis::model::model_010::_set_layer_sizes_default(config_010& cfg)
 {
-	std::size_t input_size{cfg_.source_num() * track_depth_ + 1/*sma_delta*/};
-//	assert(df_.col_count() == cfg_.source_num() + 1/*target*/ + input_size + 1/*predicted*/);
-	return {input_size, 42, 42, 1};
+	std::size_t const input_size{cfg.source_num() * track_depth_ + 1/*sma_delta*/};
+	cfg.layer_sizes_ = {input_size, 42, 42, 1};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_learn()
 {
 	shared::data::view dw{df_};
-	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::config mfn_cfg{cfg_.layer_sizes_};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler const input_filler{dw, input_series_names_};
-	learning::sample_filler const target_filler{dw, {cfg_.target_series_name_}};
+	learning::sample_filler input_filler{dw, input_series_names_, &mfn.input_layer()};
+	learning::sample_filler target_filler{dw, {cfg_.target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
@@ -210,20 +211,20 @@ void autodis::model::model_010::_learn()
 std::optional<autodis::model::prediction_result_t> autodis::model::model_010::_predict()
 {
 	assert(!model_file_.network().empty());
+	assert(norm_map_[cfg_.source_num()] == std::to_underlying(norm_origin::target));
 
 	if (!df_.row_count())
 	{
 		return {};
 	}
 	shared::data::view dw{df_};
-	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::config mfn_cfg{cfg_.layer_sizes_};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	model_file_.network().get_to(mfn);
-	learning::sample_filler const input_filler{dw, input_series_names_};
+	learning::sample_filler const input_filler{dw, input_series_names_, &mfn.input_layer()};
 
-	input_filler.fill(dw.row_count() - 1, mfn.input_layer());
+	input_filler.fill_last();
 	mfn.forward();
-	assert(norm_map_[cfg_.source_num()] == std::to_underlying(norm_origin::target));
 	return prediction_result_t{dw.index_value(dw.row_count() - 1), norm_[cfg_.source_num()].restore(mfn.omega_layer().front())};
 }
 //---------------------------------------------------------------------------------------------------------
@@ -232,11 +233,11 @@ void autodis::model::model_010::_show()
 	assert(!model_file_.network().empty());
 
 	shared::data::view dw{df_};
-	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::config mfn_cfg{cfg_.layer_sizes_};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	model_file_.network().get_to(mfn);
-	learning::sample_filler const input_filler{dw, input_series_names_};
-	learning::sample_filler const target_filler{dw, {cfg_.target_series_name_}};
+	learning::sample_filler input_filler{dw, input_series_names_, &mfn.input_layer()};
+	learning::sample_filler target_filler{dw, {cfg_.target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
 	auto predicted_series{dw.series_view(predicted_series_name_)};
 	autodis::prediction_view<learning::multilayer_feed_forward, norm_t> view{
@@ -248,7 +249,7 @@ void autodis::model::model_010::_show_analysis()
 {
 	assert(!model_file_.network().empty());
 
-	learning::config mfn_cfg{_net_layer_sizes()};
+	learning::config mfn_cfg{cfg_.layer_sizes_};
 	learning::multilayer_feed_forward mfn{mfn_cfg};
 	model_file_.network().get_to(mfn);
 
@@ -292,7 +293,11 @@ void autodis::model::model_010::create_model_file(
 	std::filesystem::path file_path)
 {
 	file f{type_name, model_id, file_path};
-	f.config() = config_010{};
+	{
+		config_010 default_cfg{};
+		_set_layer_sizes_default(default_cfg);
+		f.config() = default_cfg;
+	}
 	f.store();
 }
 //---------------------------------------------------------------------------------------------------------

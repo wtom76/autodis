@@ -3,6 +3,7 @@
 #include "framework.hpp"
 #include "data_uri.hpp"
 #include "config.hpp"
+#include "metadata.hpp"
 
 namespace keeper
 {
@@ -11,10 +12,14 @@ namespace keeper
 	//---------------------------------------------------------------------------------------------------------
 	class data_read
 	{
+	// data
 	private:
 		config const		cfg_;
 		pqxx::connection	con_;
 
+	// methods
+	private:
+		void _read(metadata::data_info const& mf, shared::data::frame& dst);
 	public:
 		data_read(config const& cfg);
 

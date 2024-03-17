@@ -1,6 +1,5 @@
 #include "pch.hpp"
 #include "data_read.hpp"
-#include "metadata.hpp"
 
 namespace
 {
@@ -78,32 +77,45 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 	}
 }
 //---------------------------------------------------------------------------------------------------------
+void keeper::data_read::_read(metadata::data_info const& mf, shared::data::frame& dst)
+{
+	assert(dst.col_count() == 0);
+
+	pqxx::work t{con_};
+	const pqxx::result r{t.exec_params(
+		"select \"idx\","s + mf.data_uri_.field_name() + " from \"data\".\""s + mf.data_uri_.table_name() + "\" order by idx asc"s)
+	};
+
+	dst.resize(r.size());
+	dst.create_series(mf.description_);
+	
+	static_assert(std::numeric_limits<double>::has_signaling_NaN);
+
+	std::size_t row_idx{0};
+	for (pqxx::row const& rec : r)
+	{
+		rec[0].to(dst.index()[row_idx]);
+		rec[1].to(dst.series(0)[row_idx], shared::data::nan);
+		++row_idx;
+	}
+}
+//---------------------------------------------------------------------------------------------------------
 void keeper::data_read::read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest)
 {
 	std::vector<metadata::data_info> const metainfo{metadata{cfg_}.load_data_meta(data_reg_ids)};
 
+	shared::data::frame one_table_df;
 	for (metadata::data_info const& mf : metainfo)
 	{
-		pqxx::work t{con_};
-		const pqxx::result r{t.exec_params(
-			"select \"idx\","s + mf.data_uri_.field_name() + " from \"data\".\""s + mf.data_uri_.table_name() + "\" order by idx asc"s)
-		};
-
-		shared::data::frame one_table_df;
-		one_table_df.clear();
-		one_table_df.resize(r.size());
-		one_table_df.create_series(mf.description_);
-		
-		static_assert(std::numeric_limits<double>::has_signaling_NaN);
-
-		std::size_t row_idx{0};
-		for (pqxx::row const& rec : r)
+		try
 		{
-			rec[0].to(one_table_df.index()[row_idx]);
-			rec[1].to(one_table_df.series(0)[row_idx], shared::data::nan);
-			++row_idx;
+			_read(mf, one_table_df);
+			dest.outer_join(std::move(one_table_df));
+			one_table_df.clear();
 		}
-
-		dest.outer_join(std::move(one_table_df));
+		catch (std::exception const& ex)
+		{
+			throw std::runtime_error{"failed to load data (data_id = "s + std::to_string(mf.data_id_) + "). " + ex.what()};
+		}
 	}
 }

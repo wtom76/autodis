@@ -9,11 +9,11 @@ namespace keeper
 	public:
 		using shared::util::uri::uri;
 
-		const std::string& table_name() const noexcept
+		const std::string& table_name() const
 		{
 			return part(0);
 		}
-		const std::string& field_name() const noexcept
+		const std::string& field_name() const
 		{
 			return part(1);
 		}

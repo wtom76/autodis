@@ -41,7 +41,7 @@ std::string const& shared::util::uri::part(std::size_t idx) const
 {
 	if (idx >= parts_.size())
 	{
-		throw std::runtime_error("part index ("s + std::to_string(idx) + ") is out of uri range "s + to_string());
+		throw std::runtime_error("part index ("s + std::to_string(idx) + ") is out of uri range. uri: '"s + to_string() + '\'');
 	}
 	return parts_[idx];
 }

@@ -46,6 +46,32 @@ namespace autodis::model
 		ids_t all_reg_ids() const;
 	};
 	//---------------------------------------------------------------------------------------------------------
+	// class prediction_context
+	//---------------------------------------------------------------------------------------------------------
+	class prediction_context
+	{
+	// data
+	private:
+		shared::data::view					dw_;
+		learning::config					mfn_cfg_;
+		learning::multilayer_feed_forward	mfn_;
+		learning::sample_filler				input_filler_;
+	public:
+		explicit prediction_context(
+			shared::data::frame& df,
+			config_010 const& cfg,
+			std::vector<std::string> const& input_series_names)
+			: dw_{df}
+			, mfn_cfg_{cfg.layer_sizes_}
+			, mfn_{mfn_cfg_}
+			, input_filler_{dw_, input_series_names, &mfn_.input_layer()}
+		{}
+		learning::config const& cfg() const noexcept { return mfn_cfg_; }
+		shared::data::view& data_view() noexcept { return dw_; }
+		learning::sample_filler& input_filler() noexcept { return input_filler_; }
+		learning::multilayer_feed_forward& network() noexcept { return mfn_; }
+	};
+	//---------------------------------------------------------------------------------------------------------
 	// class model_010
 	// predict close_t1 - close_t0
 	//---------------------------------------------------------------------------------------------------------
@@ -116,5 +142,6 @@ namespace autodis::model
 		std::optional<prediction_result_t> predict() override;
 		void show() override;
 		void show_analysis() override;
+		void show_partial_dependence() override;
 	};
 }

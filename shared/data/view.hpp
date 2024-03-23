@@ -15,6 +15,8 @@ namespace shared::data
 		using index_t = std::vector<size_t>;
 		using index_value_t	= frame::index_value_t;
 		using value_t = frame::value_t;
+	public:
+		using name_t = frame::name_t;
 
 	public:
 		//-----------------------------------------------------------------------------------------------------
@@ -87,6 +89,7 @@ namespace shared::data
 		[[nodiscard]] series_view_t series_view(size_t idx) const noexcept { return series_view_t{frame_.series(idx), row_index_}; }
 		[[nodiscard]] series_view_t series_view(frame::name_t const& name) const;
 		[[nodiscard]] size_t series_idx(frame::name_t const& name) const;
+		[[nodiscard]] name_t const& name(std::size_t idx) const noexcept { return frame_.name(idx); }
 		void delete_column(size_t idx) noexcept;
 		void clear_lacunas() noexcept;
 

@@ -7,6 +7,7 @@ add_library(visual OBJECT
 	chart.cpp
 	shader.cpp
 	heatmap.cpp
+	partial_dependence_view.cpp
 )
 
 target_include_directories(visual PRIVATE

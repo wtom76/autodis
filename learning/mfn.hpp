@@ -76,14 +76,10 @@ namespace learning
 
 		void forward();
 
-		friend std::ostream& operator <<(std::ostream& strm, multilayer_feed_forward const& network);
-		friend std::istream& operator >>(std::istream& strm, multilayer_feed_forward& network);
 		friend void to_json(nlohmann::json& j, const multilayer_feed_forward& src);
 		friend void from_json(const nlohmann::json& j, multilayer_feed_forward& dst);
 	};
 	
-	std::ostream& operator <<(std::ostream& strm, multilayer_feed_forward const& network);
-	std::istream& operator >>(std::istream& strm, multilayer_feed_forward& network);
 	void to_json(nlohmann::json& j, const multilayer_feed_forward& src);
 	void from_json(const nlohmann::json& j, multilayer_feed_forward& dst);
 }

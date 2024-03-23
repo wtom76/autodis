@@ -70,6 +70,7 @@ void autodis::application::show_analysis(std::string const& model_name)
 	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
 	if (model)
 	{
-		model->show_analysis();
+		model->show_partial_dependence();
+		//model->show_analysis();
 	}
 }

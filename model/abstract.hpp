@@ -13,5 +13,6 @@ namespace autodis::model
 		virtual std::optional<prediction_result_t> predict() = 0;
 		virtual void show() = 0;
 		virtual void show_analysis() = 0;
+		virtual void show_partial_dependence() = 0;
 	};
 }

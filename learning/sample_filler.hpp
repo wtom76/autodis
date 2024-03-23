@@ -60,13 +60,12 @@ namespace learning
 			fill(view_.row_count() - 1);
 		}
 		//-----------------------------------------------------------------------------------------------------
-		// a couple fill_last_to & fill_from is used in special tasks to alter input data
+		// fill_to, fill_from are used in special tasks to alter input data
 		//-----------------------------------------------------------------------------------------------------
-		void fill_last_to(std::vector<double>& dst_row) const noexcept
+		void fill_to(std::size_t row, std::vector<double>& dst_row) const noexcept
 		{
 			dst_row.resize(src_.size());
 
-			std::size_t const row{view_.row_count() - 1};
 			auto dst_i{std::begin(dst_row)};
 			for (auto const& src : src_)
 			{

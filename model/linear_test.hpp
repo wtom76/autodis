@@ -42,5 +42,6 @@ namespace autodis::model
 		std::optional<prediction_result_t> predict() override;
 		void show() override {}
 		void show_analysis() override {}
+		void show_partial_dependence() override {}
 	};
 }

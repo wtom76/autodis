@@ -2,7 +2,6 @@
 #include "factory.hpp"
 #include "file.hpp"
 #include "linear_test.hpp"
-#include "model_009.hpp"
 #include "model_010.hpp"
 
 //---------------------------------------------------------------------------------------------------------
@@ -24,7 +23,11 @@ void autodis::model::factory::create_model_file(std::string const& model_type, s
 		SPDLOG_LOGGER_ERROR(shared::util::log(), "can't create '{}'. file already exists", file_path.native());
 		return;
 	}
-	if ("model_010"s == model_type)
+	if ("linear_test"s == model_type)
+	{
+		autodis::model::linear_test::create_model_file(model_type, 0, file_path);
+	}
+	else if ("model_010"s == model_type)
 	{
 		autodis::model::model_010::create_model_file(model_type, 0, file_path);
 	}
@@ -37,11 +40,7 @@ std::unique_ptr<autodis::model::abstract> autodis::model::factory::make_unique(s
 
 	if ("linear_test"s == model_type)
 	{
-		return std::make_unique<autodis::model::linear_test>();
-	}
-	else if ("model_009"s == model_type)
-	{
-		return std::make_unique<autodis::model::model_009>();
+		return std::make_unique<autodis::model::linear_test>(std::move(f));
 	}
 	else if ("model_010"s == model_type)
 	{

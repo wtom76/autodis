@@ -9,11 +9,11 @@
 #include <visual/heatmap.hpp>
 #include <visual/partial_dependence_view.hpp>
 
-//---------------------------------------------------------------------------------------------------------
-// config_010
-//---------------------------------------------------------------------------------------------------------
 namespace autodis::model
 {
+	//---------------------------------------------------------------------------------------------------------
+	// config_010
+	//---------------------------------------------------------------------------------------------------------
 	void to_json(nlohmann::json& j, config_010::target const& src)
 	{
 		j = nlohmann::json{
@@ -65,7 +65,32 @@ autodis::model::config_010::ids_t autodis::model::config_010::all_reg_ids() cons
 	std::ranges::copy(other_reg_ids_, std::back_inserter(result));
 	return result;
 }
-
+//---------------------------------------------------------------------------------------------------------
+// class prediction_context
+//---------------------------------------------------------------------------------------------------------
+class autodis::model::model_010::prediction_context
+{
+// data
+private:
+	shared::data::view					dw_;
+	learning::config					mfn_cfg_;
+	learning::multilayer_feed_forward	mfn_;
+	learning::sample_filler				input_filler_;
+public:
+	explicit prediction_context(
+		shared::data::frame& df,
+		config_010 const& cfg,
+		std::vector<std::string> const& input_series_names)
+		: dw_{df}
+		, mfn_cfg_{cfg.layer_sizes_}
+		, mfn_{mfn_cfg_}
+		, input_filler_{dw_, input_series_names, &mfn_.input_layer()}
+	{}
+	learning::config const& cfg() const noexcept { return mfn_cfg_; }
+	shared::data::view& data_view() noexcept { return dw_; }
+	learning::sample_filler& input_filler() noexcept { return input_filler_; }
+	learning::multilayer_feed_forward& network() noexcept { return mfn_; }
+};
 //---------------------------------------------------------------------------------------------------------
 // model_010
 //---------------------------------------------------------------------------------------------------------
@@ -73,7 +98,25 @@ autodis::model::model_010::model_010(file&& model_file)
 	: model_file_{std::move(model_file)}
 	, cfg_{model_file_.config().get<config_010>()}
 {}
-
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_010::_set_layer_sizes_default(config_010& cfg)
+{
+	cfg.layer_sizes_ = {0, 16, 8, 1};
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_010::_adjust_cfg_input_size()
+{
+	assert(!cfg_.layer_sizes_.empty());
+	cfg_.layer_sizes_[0] = input_series_names_.size();
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_010::_print_df(frame_t const& df) const
+{
+	df.print_shape(std::cout);
+	std::cout << "\n\n";
+	std::ofstream f{"df.csv"s};
+	df.print(f);
+}
 //---------------------------------------------------------------------------------------------------------
 // load initial (raw) data from DB
 void autodis::model::model_010::_load_data()
@@ -187,16 +230,10 @@ void autodis::model::model_010::_create_chart()
 	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_010::_set_layer_sizes_default(config_010& cfg)
-{
-	std::size_t const input_size{cfg.source_num() * track_depth_ + 1/*sma_delta*/};
-	cfg.layer_sizes_ = {input_size, 42, 42, 1};
-}
-//---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_learn()
 {
+	_adjust_cfg_input_size();
 	prediction_context ctx{df_, cfg_, input_series_names_};
-
 	learning::sample_filler target_filler{ctx.data_view(), {cfg_.target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{ctx.input_filler(), target_filler};
 	auto predicted_series{ctx.data_view().series_view(predicted_series_name_)};
@@ -218,33 +255,29 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_010::_p
 		return {};
 	}
 
-	shared::data::view dw{df_};
-	learning::config mfn_cfg{cfg_.layer_sizes_};
-	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler const input_filler{dw, input_series_names_, &mfn.input_layer()};
-	
-	model_file_.network().get_to(mfn);
-
-	input_filler.fill_last();
-	mfn.forward();
-	return prediction_result_t{dw.index_value(dw.row_count() - 1), norm_[cfg_.source_num()].restore(mfn.omega_layer().front())};
+	_adjust_cfg_input_size();
+	prediction_context ctx{df_, cfg_, input_series_names_};
+	model_file_.network().get_to(ctx.network());
+	ctx.input_filler().fill_last();
+	ctx.network().forward();
+	return prediction_result_t{
+		ctx.data_view().index_value(ctx.data_view().row_count() - 1),
+		norm_[cfg_.source_num()].restore(ctx.network().omega_layer().front())};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_010::_show()
 {
 	assert(!model_file_.network().empty());
 
-	shared::data::view dw{df_};
-	learning::config mfn_cfg{cfg_.layer_sizes_};
-	learning::multilayer_feed_forward mfn{mfn_cfg};
-	learning::sample_filler input_filler{dw, input_series_names_, &mfn.input_layer()};
-
-	model_file_.network().get_to(mfn);
-	learning::sample_filler target_filler{dw, {cfg_.target_series_name_}, nullptr};
-	learning::rprop<learning::multilayer_feed_forward> teacher{input_filler, target_filler};
-	auto predicted_series{dw.series_view(predicted_series_name_)};
+	_adjust_cfg_input_size();
+	prediction_context ctx{df_, cfg_, input_series_names_};
+	model_file_.network().get_to(ctx.network());
+	learning::sample_filler target_filler{ctx.data_view(), {cfg_.target_series_name_}, nullptr};
+	learning::rprop<learning::multilayer_feed_forward> teacher{ctx.input_filler(), target_filler};
+	assert(norm_map_[ctx.data_view().series_idx(cfg_.target_series_name_)] == std::to_underlying(norm_origin::target));
+	auto predicted_series{ctx.data_view().series_view(predicted_series_name_)};
 	autodis::prediction_view<learning::multilayer_feed_forward, norm_t> view{
-		mfn, input_filler, predicted_series, norm_[dw.series_idx(cfg_.target_series_name_)], *chart_};
+		ctx.network(), ctx.input_filler(), predicted_series, norm_[ctx.data_view().series_idx(cfg_.target_series_name_)], *chart_};
 	view.update_chart();
 }
 //---------------------------------------------------------------------------------------------------------
@@ -252,11 +285,11 @@ void autodis::model::model_010::_show_analysis()
 {
 	assert(!model_file_.network().empty());
 
-	learning::config mfn_cfg{cfg_.layer_sizes_};
-	learning::multilayer_feed_forward mfn{mfn_cfg};
-	model_file_.network().get_to(mfn);
+	_adjust_cfg_input_size();
+	prediction_context ctx{df_, cfg_, input_series_names_};
+	model_file_.network().get_to(ctx.network());
 
-	auto const& weights{mfn.weight_layers()};
+	auto const& weights{ctx.network().weight_layers()};
 
 	if (weights.empty())
 	{
@@ -279,14 +312,6 @@ void autodis::model::model_010::_show_analysis()
 	}
 
 	visual::heatmap hm{weights[0], input_series_names_, model_file_.path().filename()};
-}
-//---------------------------------------------------------------------------------------------------------
-void autodis::model::model_010::_print_df(frame_t const& df) const
-{
-	df.print_shape(std::cout);
-	std::cout << "\n\n";
-	std::ofstream f{"df.csv"s};
-	df.print(f);
 }
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
@@ -361,19 +386,23 @@ void autodis::model::model_010::show_partial_dependence()
 	_create_features();
 	_heal_data();
 	_normalize();
+	_adjust_cfg_input_size();
 	prediction_context ctx{df_, cfg_, input_series_names_};
+	model_file_.network().get_to(ctx.network());
 	partial_dependence<prediction_context> pd;
-	pd.run(ctx, 10);
+	pd.run(ctx, 100);
 
 	{
-		std::ofstream f{"pd.csv"};
+		std::filesystem::path out_path{model_file_.path()};
+		out_path.replace_extension("pd.csv");
+		std::ofstream f{std::filesystem::path{out_path}};
 		f << "series"sv << ';' << "min"sv << ';' << "max"sv << '\n';
 		for (std::size_t col{0}; col != pd.result().size(); ++col)
 		{
 			auto const mm_pr{std::ranges::minmax(pd.result()[col])};
 			f << input_series_names_[col] << ';' << mm_pr.min << ';' << mm_pr.max << '\n';
 		}
-		SPDLOG_LOGGER_INFO(log(), "result is written in pd.csv");
+		SPDLOG_LOGGER_INFO(log(), "result is written in {}", out_path.native());
 	}
 	visual::partial_dependence_view pdw{pd.result(), input_series_names_, "partial dependence"};
 }

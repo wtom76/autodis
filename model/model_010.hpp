@@ -46,32 +46,6 @@ namespace autodis::model
 		ids_t all_reg_ids() const;
 	};
 	//---------------------------------------------------------------------------------------------------------
-	// class prediction_context
-	//---------------------------------------------------------------------------------------------------------
-	class prediction_context
-	{
-	// data
-	private:
-		shared::data::view					dw_;
-		learning::config					mfn_cfg_;
-		learning::multilayer_feed_forward	mfn_;
-		learning::sample_filler				input_filler_;
-	public:
-		explicit prediction_context(
-			shared::data::frame& df,
-			config_010 const& cfg,
-			std::vector<std::string> const& input_series_names)
-			: dw_{df}
-			, mfn_cfg_{cfg.layer_sizes_}
-			, mfn_{mfn_cfg_}
-			, input_filler_{dw_, input_series_names, &mfn_.input_layer()}
-		{}
-		learning::config const& cfg() const noexcept { return mfn_cfg_; }
-		shared::data::view& data_view() noexcept { return dw_; }
-		learning::sample_filler& input_filler() noexcept { return input_filler_; }
-		learning::multilayer_feed_forward& network() noexcept { return mfn_; }
-	};
-	//---------------------------------------------------------------------------------------------------------
 	// class model_010
 	// predict close_t1 - close_t0
 	//---------------------------------------------------------------------------------------------------------
@@ -96,6 +70,8 @@ namespace autodis::model
 		using norm_map_t = std::vector<std::underlying_type_t<norm_origin>>;
 		using norm_container_t = std::vector<norm_t>;
 
+		class prediction_context;
+
 	// data
 	private:
 		static constexpr std::size_t	target_source_df_idx_{3};	// an index of source series in df_ target will be made from (close price)
@@ -117,6 +93,7 @@ namespace autodis::model
 	// methods
 	private:
 		static void _set_layer_sizes_default(config_010& cfg);
+		void _adjust_cfg_input_size();
 		void _print_df(frame_t const& df) const;
 		void _load_data();
 		void _create_target();

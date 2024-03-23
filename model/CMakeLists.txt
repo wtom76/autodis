@@ -4,7 +4,6 @@ add_library(model OBJECT
 	file.cpp
 	factory.cpp
 	linear_test.cpp
-	model_009.cpp
 	model_010.cpp
 )
 

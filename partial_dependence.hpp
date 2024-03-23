@@ -32,8 +32,9 @@ namespace autodis
 
 	private:
 		//---------------------------------------------------------------------------------------------------------
-		void _run_row(std::size_t row, std::vector<std::vector<double>>& result)
+		void _run_row(std::size_t row, col_scatter_t& result)
 		{
+			result.clear();
 			result.resize(ctx_->input_filler().col_count());
 			ctx_->input_filler().fill_to(row, input_);
 			for (std::size_t col{0}; col != ctx_->input_filler().col_count(); ++col)
@@ -61,23 +62,29 @@ namespace autodis
 		}
 	public:
 		//---------------------------------------------------------------------------------------------------------
-		void run(prediction_context_t& ctx, size_t row_step)
+		void run(prediction_context_t& ctx, std::size_t max_rows_to_use)
 		{
 			ctx_ = &ctx;
 			result_.clear();
 			result_.resize(ctx_->input_filler().col_count());
-			col_scatter_t cell_scatter;
-			for (std::size_t row{0}; row < ctx_->input_filler().row_count(); row += row_step)
+			double const rows_available{static_cast<double>(ctx_->input_filler().row_count())};
+			double const row_step{max_rows_to_use < rows_available ? static_cast<double>(rows_available) / max_rows_to_use : 1.};
+			col_scatter_t col_scatter;
+			for (double row{0.}; row < rows_available; row += row_step)
 			{
-				_run_row(row, cell_scatter);
+				std::size_t row_idx{static_cast<std::size_t>(row)};
+				assert(row_idx < ctx_->input_filler().row_count());
+
+				_run_row(row_idx, col_scatter);
+				
 				for (std::size_t col{0}; col != ctx_->input_filler().col_count(); ++col)
 				{
-					for (double point : cell_scatter[col])
+					for (double point : col_scatter[col])
 					{
 						result_[col].emplace_back(point);
 					}
 				}
-				SPDLOG_LOGGER_INFO(log(), "building partial_dependence... row {}", row);
+				SPDLOG_LOGGER_INFO(log(), "building partial_dependence... row {}", row_idx);
 			}
 		}
 		//---------------------------------------------------------------------------------------------------------

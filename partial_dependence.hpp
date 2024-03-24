@@ -32,6 +32,13 @@ namespace autodis
 
 	private:
 		//---------------------------------------------------------------------------------------------------------
+		static void _center(std::vector<double>& scatter) noexcept
+		{
+			auto const mm{std::ranges::minmax(scatter)};
+			double const shift{-(mm.max + mm.min) / 2};
+			std::ranges::transform(scatter, std::begin(scatter), [shift](double val){ return val + shift; });
+		}
+		//---------------------------------------------------------------------------------------------------------
 		void _run_row(std::size_t row, col_scatter_t& result)
 		{
 			result.clear();
@@ -79,6 +86,7 @@ namespace autodis
 				
 				for (std::size_t col{0}; col != ctx_->input_filler().col_count(); ++col)
 				{
+					_center(col_scatter[col]);
 					for (double point : col_scatter[col])
 					{
 						result_[col].emplace_back(point);

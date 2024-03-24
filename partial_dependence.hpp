@@ -29,7 +29,6 @@ namespace autodis
 		std::vector<double>		input_;
 		col_scatter_t			result_;
 
-
 	private:
 		//---------------------------------------------------------------------------------------------------------
 		static void _center(std::vector<double>& scatter) noexcept
@@ -99,5 +98,30 @@ namespace autodis
 		col_scatter_t const& result() const noexcept { return result_; }
 		//---------------------------------------------------------------------------------------------------------
 		prediction_context_t const& context() const noexcept { assert(ctx_); return *ctx_; }
+		//---------------------------------------------------------------------------------------------------------
+		void write_sorted_result(std::ostream& dst, std::vector<std::string> const& names)
+		{
+			std::vector<double> ranges(result_.size());
+			std::ranges::transform(result_, std::begin(ranges),
+				[](std::vector<double> const& scatter) constexpr
+				{
+					auto const minmax{std::ranges::minmax(scatter)};
+					return minmax.max - minmax.min;
+				});
+			std::vector<std::size_t> indexes(ranges.size());
+			std::iota(std::begin(indexes), std::end(indexes), 0);
+			std::ranges::sort(indexes,
+				[&ranges](std::size_t left, std::size_t right) constexpr
+				{
+					return ranges[left] < ranges[right];
+				});
+
+			dst << "series"sv << ';' << "range"sv << '\n';
+			for (std::size_t col : indexes)
+			{
+				auto const mm_pr{std::ranges::minmax(result_[col])};
+				dst << names[col] << ';' << (mm_pr.max - mm_pr.min) << '\n';
+			}
+		}
 	};
 }

@@ -162,13 +162,8 @@ void autodis::model::linear_test::show_partial_dependence()
 	{
 		std::filesystem::path out_path{model_file_.path()};
 		out_path.replace_extension("pd.csv");
-		std::ofstream f{std::filesystem::path{out_path}};
-		f << "series"sv << ';' << "min"sv << ';' << "max"sv << '\n';
-		for (std::size_t col{0}; col != pd.result().size(); ++col)
-		{
-			auto const mm_pr{std::ranges::minmax(pd.result()[col])};
-			f << input_series_names_[col] << ';' << mm_pr.min << ';' << mm_pr.max << '\n';
-		}
+		std::ofstream f{out_path};
+		pd.write_sorted_result(f, input_series_names_);
 		SPDLOG_LOGGER_INFO(log(), "result is written in {}", out_path.native());
 	}
 	visual::partial_dependence_view pdw{pd.result(), input_series_names_, "partial dependence"};

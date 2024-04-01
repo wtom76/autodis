@@ -1,7 +1,7 @@
 #pragma once
 
 #include "framework.hpp"
-#include "../data/frame.hpp"
+#include <shared/data/frame.hpp>
 
 namespace shared::data
 {

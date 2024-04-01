@@ -119,3 +119,32 @@ void keeper::data_read::read(std::vector<long long> const& data_reg_ids, shared:
 		}
 	}
 }
+//---------------------------------------------------------------------------------------------------------
+keeper::data_read::index_bounds_t keeper::data_read::read_index_bounds(long long data_reg_id)
+{
+	std::vector<metadata::data_info> const metainfo{metadata{cfg_}.load_data_meta({data_reg_id})};
+	if (metainfo.empty())
+	{
+		throw std::runtime_error{"failed to load metadata (data_id = "s + std::to_string(data_reg_id) + ')'};
+	}
+	index_bounds_t result{};
+	try
+	{
+		pqxx::work t{con_};
+		const pqxx::result r{t.exec_params(
+			"select min(\"idx\"), max(\"idx\") from \"data\".\""s + metainfo.front().data_uri_.table_name() + '\"')
+		};
+		if (r.empty())
+		{
+			throw std::runtime_error{"failed to load data (data_id = "s + std::to_string(data_reg_id) + ')'};
+		}
+		pqxx::row const& rec{r.front()};
+		rec[0].to(result.first);
+		rec[1].to(result.second);
+	}
+	catch (std::exception const& ex)
+	{
+		throw std::runtime_error{"failed to load data (data_id = "s + std::to_string(data_reg_id) + "). "s + ex.what()};
+	}
+	return result;
+}

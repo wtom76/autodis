@@ -15,7 +15,14 @@ namespace keeper
 	// types
 	public:
 		using index_value_t = shared::data::frame::index_value_t;
-		using index_bounds_t = std::pair<index_value_t, index_value_t>;
+		using value_t = shared::data::frame::value_t;
+		struct bounds
+		{
+			index_value_t index_min_;
+			index_value_t index_max_;
+			value_t value_min_;
+			value_t value_max_;
+		};
 	// data
 	private:
 		config const		cfg_;
@@ -29,6 +36,6 @@ namespace keeper
 
 		void read(std::vector<data_uri> const& src_uri, shared::data::frame& dest);
 		void read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest);
-		index_bounds_t read_index_bounds(long long data_reg_id);
+		bounds read_bounds(long long data_reg_id);
 	};
 }

@@ -82,7 +82,7 @@ namespace shared::math
 	{
 		// data
 	private:
-		double const factor_{1.};
+		double factor_{1.};
 
 		// methods
 	private:
@@ -102,7 +102,11 @@ namespace shared::math
 		}
 	public:
 		//-----------------------------------------------------------------------------------------------------
-		tanh_normalization() = default;
+		tanh_normalization() noexcept = default;
+		tanh_normalization(tanh_normalization const&) noexcept = default;
+		tanh_normalization& operator = (tanh_normalization const&) noexcept = default;
+		tanh_normalization(tanh_normalization&&) noexcept = default;
+		tanh_normalization& operator = (tanh_normalization&&) noexcept = default;
 		//-----------------------------------------------------------------------------------------------------
 		explicit tanh_normalization(min_max original_range) noexcept
 			: factor_{_factor(original_range)}

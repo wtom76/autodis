@@ -2,7 +2,7 @@
 #include "stored.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-feature::impl::stored::value_t feature::impl::stored::_evaluate(index_value_t idx_val)
+feature::abstract::value_t feature::impl::stored::_evaluate(index_value_t idx_val)
 {
 	if (!bounds_.test(idx_val))
 	{
@@ -22,7 +22,9 @@ feature::impl::stored::value_t feature::impl::stored::_evaluate(index_value_t id
 }
 //---------------------------------------------------------------------------------------------------------
 feature::impl::stored::stored(nlohmann::json cfg, std::shared_ptr<keeper::data_read> keeper_dr)
-	: abstract{std::move(cfg), keeper_dr->read_index_bounds(cfg.at("data_reg_id").get<long long>())}
-	, data_reg_id_{cfg.at("data_reg_id").get<long long>()}
+	: abstract{std::move(cfg)}
+	, data_reg_id_{cfg_.at("data_reg_id").get<long long>()}
 	, keeper_dr_{std::move(keeper_dr)}
-{}
+{
+	_set_bounds(keeper_dr->read_bounds(cfg.at("data_reg_id").get<long long>()));
+}

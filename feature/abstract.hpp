@@ -13,8 +13,9 @@ namespace feature
 	{
 	// types
 	public:
-		using index_value_t = shared::data::frame::index_value_t;
-		using value_t = shared::data::frame::value_t;
+		using index_value_t		= shared::data::frame::index_value_t;
+		using value_t			= shared::data::frame::value_t;
+		using normalization_t	= shared::math::tanh_normalization;
 
 		struct bounds
 		{
@@ -40,12 +41,12 @@ namespace feature
 
 	// data
 	private:
-		std::shared_mutex mtx_;
+		std::shared_mutex		mtx_;
 	protected:
-		nlohmann::json const cfg_;
-		bounds bounds_;
-		shared::math::tanh_normalization norm_;
-		data_t data_;
+		nlohmann::json const	cfg_;
+		bounds					bounds_;
+		normalization_t			norm_;
+		data_t					data_;
 
 	// methods
 	private:
@@ -86,6 +87,8 @@ namespace feature
 		//---------------------------------------------------------------------------------------------------------
 		bounds const& bounds() const noexcept { return bounds_; };
 		//---------------------------------------------------------------------------------------------------------
+		normalization_t const& norm() const noexcept { return norm_; }
+		//---------------------------------------------------------------------------------------------------------
 		// 1. return value if exists
 		// 2. or ask impl to evaluate requested value and return it.
 		[[nodiscard]] value_t value(index_value_t idx_val)
@@ -102,18 +105,6 @@ namespace feature
 			}
 			// 2.
 			return _call_evaluate(idx_val);
-		}
-		//---------------------------------------------------------------------------------------------------------
-		// return normalized value()
-		[[nodiscard]] value_t normalized_value(index_value_t idx_val)
-		{
-			return norm_.normalize(value(idx_val));
-		}
-		//---------------------------------------------------------------------------------------------------------
-		// return denormalized value
-		[[nodiscard]] value_t restore_value(value_t val)
-		{
-			return norm_.restore(val);
 		}
 	};
 }

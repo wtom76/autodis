@@ -26,6 +26,7 @@ namespace keeper
 	// data
 	private:
 		config const		cfg_;
+		std::mutex			con_mtx_;
 		pqxx::connection	con_;
 
 	// methods

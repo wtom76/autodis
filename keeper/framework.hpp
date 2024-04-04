@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <limits>
+#include <mutex>
 #include <span>
 #include <string>
 #include <stdexcept>

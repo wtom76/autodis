@@ -10,6 +10,7 @@ namespace feature
 	// shop
 	//---------------------------------------------------------------------------------------------------------
 	class shop
+		: private shared::util::logged
 	{
 	// types
 	private:

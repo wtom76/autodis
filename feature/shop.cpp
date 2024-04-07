@@ -1,6 +1,8 @@
 #include "pch.hpp"
 #include "shop.hpp"
 #include "impl/stored.hpp"
+#include "impl/track.hpp"
+#include "impl/sma.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 feature::shop::shop()
@@ -11,8 +13,7 @@ feature::shop::shop()
 			return std::make_shared<keeper::data_read>(keeper_cfg);
 		}()}
 	, master_index_{*keeper_dr_}
-{
-}
+{}
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::_create_feature(nlohmann::json cfg)
 {
@@ -23,7 +24,15 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(nlohmann::json
 	{
 		return std::make_shared<impl::stored>(std::move(cfg), keeper_dr_);
 	}
-	throw std::runtime_error("failed to create feature from "s + cfg.dump());
+	else if (feature_type == "track"sv)
+	{
+		return std::make_shared<impl::track>(std::move(cfg), *this);
+	}
+	else if (feature_type == "sma"sv)
+	{
+		return std::make_shared<impl::track>(std::move(cfg), *this);
+	}
+	throw std::runtime_error("unknown feature type: "s + cfg.dump());
 }
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json cfg)
@@ -34,5 +43,13 @@ std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json cfg)
 	{
 		return feature_map_i->second;
 	}
-	return feature_map_.emplace(cfg_str, _create_feature(cfg)).first->second;
+	try
+	{
+		return feature_map_.emplace(cfg_str, _create_feature(cfg)).first->second;
+	}
+	catch (std::exception const& ex)
+	{
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", cfg.dump(), ex.what());
+		throw;
+	}
 }

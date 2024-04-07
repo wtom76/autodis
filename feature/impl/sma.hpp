@@ -12,19 +12,23 @@ namespace feature
 namespace feature::impl
 {
 	//---------------------------------------------------------------------------------------------------------
-	// track
-	// val(t) - val(t-depth)
+	// sma
+	// simple moving average
 	//---------------------------------------------------------------------------------------------------------
-	class track
+	class sma
 		: public abstract
 	{
+	// data
 	private:
 		shop& shop_;
-		std::ptrdiff_t const depth_;
+		std::ptrdiff_t const period_;
 		std::shared_ptr<abstract> underlying_;
+	// methods
 	private:
+		value_t _calc_from_scratch(index_value_t idx_val) const;
+		value_t _calc(index_value_t idx_val) const;
 		value_t _evaluate(index_value_t idx_val) override;
 	public:
-		explicit track(nlohmann::json cfg, shop& shop);
+		explicit sma(nlohmann::json cfg, shop& shop);
 	};
 }

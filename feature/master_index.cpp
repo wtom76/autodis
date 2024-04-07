@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "master_index.hpp"
+#include "error.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 feature::master_index::master_index(keeper::data_read& dr)
@@ -8,24 +9,33 @@ feature::master_index::master_index(keeper::data_read& dr)
 	assert(std::ranges::is_sorted(index_));
 
 	map_.reserve(index_.size());
-	std::ptrdiff_t i{0};
+	index_pos_t i{0};
 	for (index_value_t v : index_)
 	{
 		map_.emplace(v, i++);
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-feature::master_index::index_value_t feature::master_index::next(index_value_t start, std::ptrdiff_t distance) const
+feature::master_index::index_pos_t feature::master_index::pos(index_value_t index_val) const
 {
-	auto const map_i{map_.find(start)};
+	auto const map_i{map_.find(index_val)};
 	if (map_i == std::cend(map_))
 	{
-		throw missing_index_value{};
+		throw master_missing_index_value{index_val};
 	}
-	std::ptrdiff_t const result_pos{map_i->second + distance};
-	if (result_pos < 0 || static_cast<std::size_t>(result_pos) >= index_.size())
+	return map_i->second;
+}
+//---------------------------------------------------------------------------------------------------------
+feature::master_index::index_value_t feature::master_index::val(index_pos_t pos) const
+{
+	if (pos < 0 || static_cast<std::size_t>(pos) >= index_.size())
 	{
-		throw out_of_bounds{};
+		throw master_out_of_bounds{pos};
 	}
-	return index_[result_pos];
+	return index_[pos];
+}
+//---------------------------------------------------------------------------------------------------------
+feature::master_index::index_value_t feature::master_index::next(index_value_t start, std::ptrdiff_t distance) const
+{
+	return val(pos(start) + distance);
 }

@@ -1,5 +1,6 @@
 #include "../pch.hpp"
 #include "stored.hpp"
+#include "error.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 // 1. until we implement partial load, nonempty data indicates that requested idx_val doesn't exist
@@ -8,7 +9,7 @@ feature::abstract::value_t feature::impl::stored::_evaluate(index_value_t idx_va
 {
 	if (!bounds_.test(idx_val))
 	{
-		throw std::runtime_error("an index out of bounds"s);
+		throw feature_out_of_bounds{idx_val};
 	}
 	// 1.
 	if (!data_.empty())

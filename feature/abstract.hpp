@@ -17,15 +17,15 @@ namespace feature
 		using value_t			= shared::data::frame::value_t;
 		using normalization_t	= shared::math::tanh_normalization;
 
-		struct bounds
+		struct bounds_data
 		{
 			index_value_t index_min_{1};	// 1 is to make default range empty
 			index_value_t index_max_{0};	// inclusive
 			value_t value_min_{};
 			value_t value_max_{};
 
-			bounds() noexcept = default;
-			bounds(keeper::data_read::bounds const& src) noexcept
+			bounds_data() noexcept = default;
+			bounds_data(keeper::data_read::bounds const& src) noexcept
 				: index_min_{src.index_min_}
 				, index_max_{src.index_max_}
 				, value_min_{src.value_min_}
@@ -44,7 +44,7 @@ namespace feature
 		std::shared_mutex		mtx_;
 	protected:
 		nlohmann::json const	cfg_;
-		bounds					bounds_;
+		bounds_data				bounds_;
 		normalization_t			norm_;
 		data_t					data_;
 
@@ -70,7 +70,7 @@ namespace feature
 		}
 	protected:
 		//---------------------------------------------------------------------------------------------------------
-		void _set_bounds(bounds b)
+		void _set_bounds(bounds_data b)
 		{
 			bounds_ = b;
 			norm_ = shared::math::tanh_normalization{shared::math::min_max{bounds_.value_min_, bounds_.value_max_}};
@@ -85,7 +85,7 @@ namespace feature
 		//---------------------------------------------------------------------------------------------------------
 		nlohmann::json const& cfg() const noexcept { return cfg_; }
 		//---------------------------------------------------------------------------------------------------------
-		bounds const& bounds() const noexcept { return bounds_; };
+		bounds_data const& bounds() const noexcept { return bounds_; }
 		//---------------------------------------------------------------------------------------------------------
 		normalization_t const& norm() const noexcept { return norm_; }
 		//---------------------------------------------------------------------------------------------------------

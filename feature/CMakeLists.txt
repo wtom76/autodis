@@ -4,6 +4,7 @@ add_library(feature OBJECT
 	impl/stored.cpp
 	impl/track.cpp
 	shop.cpp
+	master_index.cpp
 )
 
 target_include_directories(feature PRIVATE

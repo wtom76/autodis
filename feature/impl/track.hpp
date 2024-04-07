@@ -4,6 +4,11 @@
 #include <feature/abstract.hpp>
 #include <feature/shop.hpp>
 
+namespace feature
+{
+	class shop;
+}
+
 namespace feature::impl
 {
 	//---------------------------------------------------------------------------------------------------------
@@ -14,6 +19,7 @@ namespace feature::impl
 		: public abstract
 	{
 	private:
+		shop& shop_;
 		std::size_t const depth_;
 		std::shared_ptr<abstract> underlying_;
 	private:

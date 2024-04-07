@@ -16,6 +16,7 @@ namespace keeper
 	public:
 		using index_value_t = shared::data::frame::index_value_t;
 		using value_t = shared::data::frame::value_t;
+		using index_t = shared::data::frame::index_t;
 		struct bounds
 		{
 			index_value_t index_min_;
@@ -35,6 +36,7 @@ namespace keeper
 	public:
 		data_read(config const& cfg);
 
+		void read_master_index(index_t& dest);
 		void read(std::vector<data_uri> const& src_uri, shared::data::frame& dest);
 		void read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest);
 		bounds read_bounds(long long data_reg_id);

@@ -10,7 +10,9 @@ feature::shop::shop()
 			keeper_cfg.load();
 			return std::make_shared<keeper::data_read>(keeper_cfg);
 		}()}
-{}
+	, master_index_{*keeper_dr_}
+{
+}
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::_create_feature(nlohmann::json cfg)
 {

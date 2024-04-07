@@ -37,7 +37,21 @@ namespace
 keeper::data_read::data_read(config const& cfg)
 	: cfg_{cfg}
 	, con_{cfg.db_connection_}
+{}
+//---------------------------------------------------------------------------------------------------------
+void keeper::data_read::read_master_index(index_t& dest)
 {
+	std::unique_lock const lock{con_mtx_};
+	pqxx::work t{con_};
+	pqxx::result const r{t.exec("select idx from data.master_index order by idx asc"s)};
+
+	dest.clear();
+	dest.resize(r.size());
+	std::size_t i{0};
+	for (auto const& row : r)
+	{
+		row[0].to(dest[i++]);
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data::frame& dest)

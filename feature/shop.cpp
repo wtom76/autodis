@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "shop.hpp"
 #include "impl/stored.hpp"
-#include "impl/track.hpp"
+#include "impl/delta.hpp"
 #include "impl/sma.hpp"
 
 //---------------------------------------------------------------------------------------------------------
@@ -24,13 +24,13 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(nlohmann::json
 	{
 		return std::make_shared<impl::stored>(std::move(cfg), keeper_dr_);
 	}
-	else if (feature_type == "track"sv)
+	else if (feature_type == "delta"sv)
 	{
-		return std::make_shared<impl::track>(std::move(cfg), *this);
+		return std::make_shared<impl::delta>(std::move(cfg), *this);
 	}
 	else if (feature_type == "sma"sv)
 	{
-		return std::make_shared<impl::track>(std::move(cfg), *this);
+		return std::make_shared<impl::sma>(std::move(cfg), *this);
 	}
 	throw std::runtime_error("unknown feature type: "s + cfg.dump());
 }

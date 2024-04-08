@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22.0)
 
 add_library(feature OBJECT
 	impl/stored.cpp
-	impl/track.cpp
 	impl/sma.cpp
+	impl/delta.cpp
 	shop.cpp
 	master_index.cpp
 )

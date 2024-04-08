@@ -12,19 +12,20 @@ namespace feature
 namespace feature::impl
 {
 	//---------------------------------------------------------------------------------------------------------
-	// track
-	// val(t) - val(t-depth)
+	// delta
+	// underlying_second->value(t + shift_second) - underlying_first->value(t + shift_first)
+	// since peeking into future is forbidden, shift can be negatve only
 	//---------------------------------------------------------------------------------------------------------
-	class track
+	class delta
 		: public abstract
 	{
 	private:
 		shop& shop_;
-		std::ptrdiff_t const depth_;
-		std::shared_ptr<abstract> underlying_;
+		std::pair<std::ptrdiff_t, std::ptrdiff_t> const shift_;
+		std::pair<std::shared_ptr<abstract>, std::shared_ptr<abstract>> underlying_;
 	private:
 		value_t _evaluate(index_value_t idx_val) override;
 	public:
-		explicit track(nlohmann::json cfg, shop& shop);
+		explicit delta(nlohmann::json cfg, shop& shop);
 	};
 }

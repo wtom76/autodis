@@ -3,6 +3,7 @@
 #include "file.hpp"
 #include "linear_test.hpp"
 #include "model_010.hpp"
+#include "model_011.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 static std::filesystem::path _model_file_path(std::string const& model_name)
@@ -31,6 +32,10 @@ void autodis::model::factory::create_model_file(std::string const& model_type, s
 	{
 		autodis::model::model_010::create_model_file(model_type, 0, file_path);
 	}
+	else if ("model_011"s == model_type)
+	{
+		autodis::model::model_011::create_model_file(model_type, 0, file_path);
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 std::unique_ptr<autodis::model::abstract> autodis::model::factory::make_unique(std::string const& model_name)
@@ -45,6 +50,10 @@ std::unique_ptr<autodis::model::abstract> autodis::model::factory::make_unique(s
 	else if ("model_010"s == model_type)
 	{
 		return std::make_unique<autodis::model::model_010>(std::move(f));
+	} 
+	else if ("model_011"s == model_type)
+	{
+		return std::make_unique<autodis::model::model_011>(std::move(f));
 	}
 	return {};
 }

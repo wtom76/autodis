@@ -30,6 +30,8 @@ namespace autodis::model
 		[[nodiscard]] std::int64_t model_id() const;	// model id in DB or exception
 		std::filesystem::path const& path() const noexcept { return file_path_; }
 		nlohmann::json& config();						// config part of JSON
+		nlohmann::json& features();						// for feature shop
+		nlohmann::json& target();						// for feature shop
 		nlohmann::json& network();						// network part of JSON file
 
 		void store() const;								// stores JSON file or throws an exception

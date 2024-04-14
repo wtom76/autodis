@@ -47,7 +47,7 @@ feature::impl::sma::sma(nlohmann::json cfg, shop& shop)
 	: abstract{std::move(cfg)}
 	, shop_{shop}
 	, period_{cfg_.at("period").get<decltype(period_)>()}
-	, underlying_{shop_.feature(cfg.at("underlying"))}
+	, underlying_{shop_.feature(cfg_.at("underlying"))}
 {
 	if (period_ <= 0)
 	{

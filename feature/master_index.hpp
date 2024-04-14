@@ -27,6 +27,9 @@ namespace feature
 
 		[[nodiscard]] index_pos_t pos(index_value_t index_val) const;
 		[[nodiscard]] index_value_t val(index_pos_t pos) const;
+		[[nodiscard]] index_value_t min() const;
+		[[nodiscard]] index_value_t max() const;
 		[[nodiscard]] index_value_t next(index_value_t start, std::ptrdiff_t distance) const;
+		[[nodiscard]] index_value_t safe_next(index_value_t start, std::ptrdiff_t max_distance) const;
 	};
 }

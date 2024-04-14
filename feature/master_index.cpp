@@ -35,7 +35,39 @@ feature::master_index::index_value_t feature::master_index::val(index_pos_t pos)
 	return index_[pos];
 }
 //---------------------------------------------------------------------------------------------------------
+feature::master_index::index_value_t feature::master_index::min() const
+{
+	if (index_.empty())
+	{
+		throw master_empty{};
+	}
+	return index_.front();
+}
+//---------------------------------------------------------------------------------------------------------
+feature::master_index::index_value_t feature::master_index::max() const
+{
+	if (index_.empty())
+	{
+		throw master_empty{};
+	}
+	return index_.back();
+}
+//---------------------------------------------------------------------------------------------------------
 feature::master_index::index_value_t feature::master_index::next(index_value_t start, std::ptrdiff_t distance) const
 {
 	return val(pos(start) + distance);
+}
+//---------------------------------------------------------------------------------------------------------
+feature::master_index::index_value_t feature::master_index::safe_next(index_value_t start, std::ptrdiff_t max_distance) const
+{
+	index_pos_t unsafe_pos{pos(start) + max_distance};
+	if (unsafe_pos < 0)
+	{
+		unsafe_pos = 0;
+	}
+	if (static_cast<std::size_t>(unsafe_pos) >= index_.size())
+	{
+		unsafe_pos = index_.size() - 1;
+	}
+	return val(unsafe_pos);
 }

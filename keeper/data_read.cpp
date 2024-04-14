@@ -149,8 +149,8 @@ keeper::data_read::bounds keeper::data_read::read_bounds(long long data_reg_id)
 		std::unique_lock const lock{con_mtx_};
 		pqxx::work t{con_};
 		metadata::data_info const& mf{metainfo.front()};
-		const pqxx::result r{t.exec_params(
-			"select min(idx), max(idx), min(\""s + mf.data_uri_.field_name() + "\"), max(\""s + mf.data_uri_.field_name() + "\") + from \"data\".\""s + mf.data_uri_.table_name() + '\"')
+		pqxx::result const r{t.exec(
+			"select min(idx), max(idx), min(\""s + mf.data_uri_.field_name() + "\"), max(\""s + mf.data_uri_.field_name() + "\") from \"data\".\""s + mf.data_uri_.table_name() + '\"')
 		};
 		if (r.empty())
 		{

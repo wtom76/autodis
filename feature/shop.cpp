@@ -45,11 +45,11 @@ std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json cfg)
 	}
 	try
 	{
-		return feature_map_.emplace(cfg_str, _create_feature(cfg)).first->second;
+		return feature_map_.emplace(cfg_str, _create_feature(std::move(cfg))).first->second;
 	}
 	catch (std::exception const& ex)
 	{
-		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", cfg.dump(), ex.what());
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", cfg_str, ex.what());
 		throw;
 	}
 }

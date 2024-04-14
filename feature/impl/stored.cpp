@@ -44,5 +44,5 @@ feature::impl::stored::stored(nlohmann::json cfg, std::shared_ptr<keeper::data_r
 	, data_reg_id_{cfg_.at("data_reg_id").get<long long>()}
 	, keeper_dr_{std::move(keeper_dr)}
 {
-	_set_bounds(keeper_dr->read_bounds(cfg.at("data_reg_id").get<long long>()));
+	_set_bounds(keeper_dr_->read_bounds(cfg_.at("data_reg_id").get<long long>()));
 }

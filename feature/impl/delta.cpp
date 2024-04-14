@@ -31,11 +31,11 @@ feature::impl::delta::delta(nlohmann::json cfg, shop& shop)
 				std::max(bounds.first.index_min_, bounds.second.index_min_)));
 
 	bounds.first.index_max_ = shop_.index().safe_next(bounds.first.index_max_, -shift_.first);
-	bounds.second.index_max_ = shop_.index().safe_next(bounds.second.index_min_, -shift_.second);
+	bounds.second.index_max_ = shop_.index().safe_next(bounds.second.index_max_, -shift_.second);
 	bounds.first.index_max_ =
 		std::min(shop_.index().max(),
 			std::max(shop_.index().min(),
-				std::max(bounds.first.index_max_, bounds.second.index_max_)));
+				std::min(bounds.first.index_max_, bounds.second.index_max_)));
 
 	bounds.first.value_min_ = bounds.second.value_min_ - bounds.first.value_max_;
 	bounds.first.value_max_ = bounds.second.value_max_ - bounds.first.value_min_;

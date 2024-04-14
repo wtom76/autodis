@@ -112,6 +112,10 @@ void autodis::model::model_011::_create_features()
 	// 2.
 	for (nlohmann::json const& fj : model_file_.features())
 	{
+		if (!fj.is_object())
+		{
+			continue;
+		}
 		std::shared_ptr<feature::abstract> feature{shop_->feature(fj)};
 		shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->name())};
 		if (!df_series_ptr)

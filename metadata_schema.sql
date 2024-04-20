@@ -11,6 +11,13 @@ CREATE TYPE metadata.data_registry AS (
 	field_description text,
 	uri text);
 
+-- DROP TYPE metadata.feature;
+
+CREATE TYPE metadata.feature AS (
+	id int8,
+	"label" text,
+	formula json);
+
 -- DROP TYPE metadata.feed_registry;
 
 CREATE TYPE metadata.feed_registry AS (
@@ -20,6 +27,7 @@ CREATE TYPE metadata.feed_registry AS (
 -- DROP TYPE metadata.human_metadata_view;
 
 CREATE TYPE metadata.human_metadata_view AS (
+	id int8,
 	"always" bool,
 	pending bool,
 	field_description text,
@@ -81,6 +89,20 @@ CREATE TYPE metadata."_data_registry" (
 	STORAGE = any,
 	CATEGORY = A,
 	ELEMENT = metadata.data_registry,
+	DELIMITER = ',');
+
+-- DROP TYPE metadata."_feature";
+
+CREATE TYPE metadata."_feature" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = metadata.feature,
 	DELIMITER = ',');
 
 -- DROP TYPE metadata."_feed_registry";
@@ -227,6 +249,20 @@ CREATE TABLE metadata.data_registry (
 CREATE UNIQUE INDEX data_registry_id_idx ON metadata.data_registry USING btree (id);
 
 
+-- metadata.feature definition
+
+-- Drop table
+
+-- DROP TABLE metadata.feature;
+
+CREATE TABLE metadata.feature (
+	id int8 NOT NULL,
+	"label" text NULL,
+	formula json NULL,
+	CONSTRAINT feature_pk PRIMARY KEY (id)
+);
+
+
 -- metadata.feed_registry definition
 
 -- Drop table
@@ -265,7 +301,7 @@ CREATE TABLE metadata.source_registry (
 	id serial4 NOT NULL,
 	uri text NOT NULL,
 	args text NULL,
-	pending bool NOT NULL DEFAULT false,
+	pending bool DEFAULT false NOT NULL,
 	feed_id int4 NULL,
 	"always" bool NULL, -- always penging. pending flag is not dropped
 	CONSTRAINT sr_always_pending CHECK ((((always = true) AND (pending = true)) OR (always = false)))
@@ -284,7 +320,7 @@ COMMENT ON COLUMN metadata.source_registry."always" IS 'always penging. pending 
 -- DROP TABLE metadata.type_registry;
 
 CREATE TABLE metadata.type_registry (
-	id int4 NOT NULL DEFAULT nextval('metadata.index_type_id_seq'::regclass),
+	id int4 DEFAULT nextval('metadata.index_type_id_seq'::regclass) NOT NULL,
 	"name" text NOT NULL,
 	description text NULL
 );
@@ -293,7 +329,8 @@ CREATE TABLE metadata.type_registry (
 -- metadata.human_metadata_view source
 
 CREATE OR REPLACE VIEW metadata.human_metadata_view
-AS SELECT sr.always,
+AS SELECT dr.id,
+    sr.always,
     sr.pending,
     dr.field_description,
     tr.name AS type,
@@ -330,6 +367,8 @@ AS SELECT dr.id AS data_id,
   ORDER BY dr.uri;
 
 
+
+-- DROP PROCEDURE metadata.drop_pending_flag(int4);
 
 CREATE OR REPLACE PROCEDURE metadata.drop_pending_flag(IN source_registry_id integer)
  LANGUAGE sql

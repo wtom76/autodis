@@ -17,6 +17,7 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load_source_meta()
 		std::unordered_map<long long/*source id*/, source_info> source_map;
 
 		{
+			std::unique_lock const lock{con_mtx_};
 			pqxx::work t{con_};
 			const pqxx::result r{t.exec_params("select source_id, source_uri, source_args, feed_uri, feed_args, data_uri, pending from metadata.metadata_view")};
 			if (r.empty())
@@ -48,6 +49,7 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load_source_meta()
 				feed.data_uri_.emplace_back(std::move(duri));
 			}
 		}
+
 		result.reserve(source_map.size());
 		for (auto& source_pr : source_map)
 		{
@@ -61,6 +63,7 @@ std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_meta()
 {
 	std::vector<data_info> result;
 	{
+		std::unique_lock const lock{con_mtx_};
 		pqxx::work t{con_};
 		const pqxx::result r{t.exec_params("select data_id, data_uri, data_description from metadata.metadata_view")};
 		if (r.empty())
@@ -99,7 +102,30 @@ std::vector<keeper::metadata::data_info> keeper::metadata::load_data_meta(std::v
 //---------------------------------------------------------------------------------------------------------
 void keeper::metadata::drop_pending_flag(long long series_id)
 {
+	std::unique_lock const lock{con_mtx_};
 	pqxx::work t{con_};
 	t.exec_prepared("dpf", series_id);
 	t.commit();
+}
+//---------------------------------------------------------------------------------------------------------
+std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(std::vector<std::int64_t> const& feature_ids)
+{
+	std::vector<keeper::metadata::feature_info> result;
+	pqxx::params p;
+	p.append_multi(feature_ids);
+	{
+		std::unique_lock const lock{con_mtx_};
+		pqxx::work t{con_};
+		const pqxx::result r{t.exec_params("select id, label, formula from metadata.feature where id in ($1)", p)};
+		result.reserve(r.size());
+		for (auto const& rec : r)
+		{
+			result.emplace_back(
+				rec[0].as<std::int64_t>(),
+				rec[1].as<std::string>(),
+				nlohmann::json::parse(rec[2].as<std::string>())
+			);
+		}
+	}
+	return result;
 }

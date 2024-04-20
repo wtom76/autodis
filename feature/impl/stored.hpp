@@ -19,6 +19,6 @@ namespace feature::impl
 	private:
 		value_t _evaluate(index_value_t idx_val) override;
 	public:
-		explicit stored(nlohmann::json cfg, std::shared_ptr<keeper::data_read> keeper_dr);
+		explicit stored(feature_info_t&& info, std::shared_ptr<keeper::data_read> keeper_dr);
 	};
 }

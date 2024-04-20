@@ -39,10 +39,10 @@ feature::abstract::value_t feature::impl::stored::_evaluate(index_value_t idx_va
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-feature::impl::stored::stored(nlohmann::json cfg, std::shared_ptr<keeper::data_read> keeper_dr)
-	: abstract{std::move(cfg)}
-	, data_reg_id_{cfg_.at("data_reg_id").get<long long>()}
+feature::impl::stored::stored(feature_info_t&& info, std::shared_ptr<keeper::data_read> keeper_dr)
+	: abstract{std::move(info)}
+	, data_reg_id_{cfg().at("data_reg_id").get<long long>()}
 	, keeper_dr_{std::move(keeper_dr)}
 {
-	_set_bounds(keeper_dr_->read_bounds(cfg_.at("data_reg_id").get<long long>()));
+	_set_bounds(keeper_dr_->read_bounds(cfg().at("data_reg_id").get<long long>()));
 }

@@ -23,7 +23,7 @@ namespace feature
 		map_t	map_;
 	// methods
 	public:
-		explicit master_index(keeper::data_read& dr);
+		void load(keeper::data_read& dr);
 
 		[[nodiscard]] index_pos_t pos(index_value_t index_val) const;
 		[[nodiscard]] index_value_t val(index_pos_t pos) const;

@@ -26,6 +26,6 @@ namespace feature::impl
 	private:
 		value_t _evaluate(index_value_t idx_val) override;
 	public:
-		explicit delta(nlohmann::json cfg, shop& shop);
+		explicit delta(feature_info_t&& info, shop& shop);
 	};
 }

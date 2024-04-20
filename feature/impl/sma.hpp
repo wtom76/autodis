@@ -29,6 +29,6 @@ namespace feature::impl
 		value_t _calc(index_value_t idx_val) const;
 		value_t _evaluate(index_value_t idx_val) override;
 	public:
-		explicit sma(nlohmann::json cfg, shop& shop);
+		explicit sma(feature_info_t&& info, shop& shop);
 	};
 }

@@ -15,11 +15,11 @@ feature::abstract::value_t feature::impl::delta::_evaluate(index_value_t idx_val
 		underlying_.first->value(shop_.index().next(idx_val, shift_.first));
 }
 //---------------------------------------------------------------------------------------------------------
-feature::impl::delta::delta(nlohmann::json cfg, shop& shop)
-	: abstract{std::move(cfg)}
+feature::impl::delta::delta(feature_info_t&& info, shop& shop)
+	: abstract{std::move(info)}
 	, shop_{shop}
-	, shift_{cfg_.at("shift_first").get<std::ptrdiff_t>(), cfg_.at("shift_second").get<std::ptrdiff_t>()}
-	, underlying_{shop_.feature(cfg_.at("underlying_first")), shop_.feature(cfg_.at("underlying_second"))}
+	, shift_{cfg().at("shift_first").get<std::ptrdiff_t>(), cfg().at("shift_second").get<std::ptrdiff_t>()}
+	, underlying_{shop_.feature(cfg().at("underlying_first")), shop_.feature(cfg().at("underlying_second"))}
 {
 	std::pair<abstract::bounds_data, abstract::bounds_data> bounds{underlying_.first->bounds(), underlying_.second->bounds()};
 

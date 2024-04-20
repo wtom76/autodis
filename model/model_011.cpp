@@ -90,10 +90,10 @@ void autodis::model::model_011::_create_features()
 	feature::master_index const& mi{shop_->index()};
 	// 1.
 	{
-		std::shared_ptr<feature::abstract> target{shop_->feature(model_file_.target())};
-		target_series_name_ = target->name();
+		std::shared_ptr<feature::abstract> target{shop_->feature(model_file_.target().get<std::int64_t>())};
+		target_series_name_ = target->label();
 		target_norm_ = target->norm();
-		shared::data::frame::series_t& df_series{*df_.create_series(target->name())};
+		shared::data::frame::series_t& df_series{*df_.create_series(target->label())};
 		shared::data::frame::index_t& df_index{df_.index()};
 		feature::master_index::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
 		feature::master_index::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
@@ -116,24 +116,26 @@ void autodis::model::model_011::_create_features()
 		{
 			continue;
 		}
-		std::shared_ptr<feature::abstract> feature{shop_->feature(fj)};
-		shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->name())};
+		std::shared_ptr<feature::abstract> feature{shop_->feature(fj.get<std::int64_t>())};
+		shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->label())};
 		if (!df_series_ptr)
 		{
-			SPDLOG_LOGGER_ERROR(log(), "failed to create series from '{}'", feature->name());
+			SPDLOG_LOGGER_ERROR(log(), "failed to create series from '{}'", feature->label());
 			continue;
 		}
+		input_series_names_.emplace_back(feature->label());
 		shared::data::frame::series_t& df_series{*df_series_ptr};
-		feature::master_index::index_pos_t mi_pos{mi.pos(
-			std::max(feature->bounds().index_min_, df_.index().front())
-		)};
-		feature::master_index::index_pos_t const mi_pos_max{mi.pos(
-			std::min(feature->bounds().index_max_, df_.index().back())
-		)};
-		for (std::size_t df_idx{0}; mi_pos <= mi_pos_max; ++mi_pos, ++df_idx)
+		for (std::size_t df_idx{0}; df_idx != df_.row_count(); ++df_idx)
 		{
-			feature::master_index::index_value_t mival{mi.val(mi_pos)};
-			df_series[df_idx] = feature->norm().normalize(feature->value(mival));
+			if (df_.index()[df_idx] < feature->bounds().index_min_)
+			{
+				continue;
+			}
+			if (df_.index()[df_idx] > feature->bounds().index_max_)
+			{
+				break;
+			}
+			df_series[df_idx] = feature->norm().normalize(feature->value(df_.index()[df_idx]));
 		}
 	}
 	// 3.

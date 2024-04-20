@@ -13,6 +13,7 @@ namespace feature
 	{
 	// types
 	public:
+		using feature_info_t	= keeper::metadata::feature_info;
 		using index_value_t		= shared::data::frame::index_value_t;
 		using value_t			= shared::data::frame::value_t;
 		using normalization_t	= shared::math::tanh_normalization;
@@ -43,7 +44,7 @@ namespace feature
 	private:
 		std::shared_mutex		mtx_;
 	protected:
-		nlohmann::json const	cfg_;
+		feature_info_t const	info_;
 		bounds_data				bounds_;
 		normalization_t			norm_;
 		data_t					data_;
@@ -76,16 +77,16 @@ namespace feature
 			norm_ = shared::math::tanh_normalization{shared::math::min_max{bounds_.value_min_, bounds_.value_max_}};
 		}
 		//---------------------------------------------------------------------------------------------------------
-		explicit abstract(nlohmann::json cfg)
-			: cfg_(std::move(cfg))
+		explicit abstract(feature_info_t&& info)
+			: info_{std::move(info)}
 		{}
 	public:
 		//---------------------------------------------------------------------------------------------------------
 		virtual ~abstract(){}
 		//---------------------------------------------------------------------------------------------------------
-		nlohmann::json const& cfg() const noexcept { return cfg_; }
+		nlohmann::json const& cfg() const noexcept { return info_.formula_; }
 		//---------------------------------------------------------------------------------------------------------
-		[[nodiscard]] std::string name() const { return cfg_.dump(); }
+		[[nodiscard]] std::string label() const noexcept { return info_.label_; }
 		//---------------------------------------------------------------------------------------------------------
 		bounds_data const& bounds() const noexcept { return bounds_; }
 		//---------------------------------------------------------------------------------------------------------

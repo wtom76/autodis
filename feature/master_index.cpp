@@ -3,7 +3,7 @@
 #include "error.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-feature::master_index::master_index(keeper::data_read& dr)
+void feature::master_index::load(keeper::data_read& dr)
 {
 	dr.read_master_index(index_);
 	assert(std::ranges::is_sorted(index_));

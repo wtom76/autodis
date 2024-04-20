@@ -44,8 +44,18 @@ namespace keeper
 			data_uri	data_uri_;
 			std::string	description_;
 		};
+		//---------------------------------------------------------------------------------------------------------
+		// struct feature_info
+		//---------------------------------------------------------------------------------------------------------
+		struct feature_info
+		{
+			std::int64_t	id_{0};
+			std::string		label_;
+			nlohmann::json	formula_;
+		};
 
 	private:
+		std::mutex con_mtx_;
 		pqxx::connection con_;
 
 	private:
@@ -55,5 +65,6 @@ namespace keeper
 		[[nodiscard]] std::vector<source_info> load_source_meta();
 		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
+		[[nodiscard]] std::vector<feature_info> load_feature_meta(std::vector<std::int64_t> const& feature_ids);
 	};
 }

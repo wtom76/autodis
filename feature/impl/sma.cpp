@@ -43,11 +43,11 @@ feature::abstract::value_t feature::impl::sma::_evaluate(index_value_t idx_val)
 	return _calc(idx_val);
 }
 //---------------------------------------------------------------------------------------------------------
-feature::impl::sma::sma(nlohmann::json cfg, shop& shop)
-	: abstract{std::move(cfg)}
+feature::impl::sma::sma(feature_info_t&& info, shop& shop)
+	: abstract{std::move(info)}
 	, shop_{shop}
-	, period_{cfg_.at("period").get<decltype(period_)>()}
-	, underlying_{shop_.feature(cfg_.at("underlying"))}
+	, period_{cfg().at("period").get<decltype(period_)>()}
+	, underlying_{shop_.feature(cfg().at("underlying"))}
 {
 	if (period_ <= 0)
 	{

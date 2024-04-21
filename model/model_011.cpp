@@ -13,16 +13,16 @@
 namespace autodis::model
 {
 	//---------------------------------------------------------------------------------------------------------
-	// config_011
+	// config
 	//---------------------------------------------------------------------------------------------------------
-	void to_json(nlohmann::json& j, config_011 const& src)
+	void to_json(nlohmann::json& j, model_011::config const& src)
 	{
 		j = nlohmann::json{
 			{ "layer_sizes", src.layer_sizes_ }
 		};
 	}
 	//---------------------------------------------------------------------------------------------------------
-	void from_json(nlohmann::json const& j, config_011& dst)
+	void from_json(nlohmann::json const& j, model_011::config& dst)
 	{
 		j.at("layer_sizes").get_to(dst.layer_sizes_);
 	}
@@ -41,7 +41,7 @@ private:
 public:
 	explicit prediction_context(
 		shared::data::frame& df,
-		config_011 const& cfg,
+		config const& cfg,
 		std::vector<std::string> const& input_series_names)
 		: dw_{df}
 		, mfn_cfg_{cfg.layer_sizes_}
@@ -59,10 +59,10 @@ public:
 autodis::model::model_011::model_011(file&& model_file)
 	: shop_{std::make_unique<feature::shop>()}
 	, model_file_{std::move(model_file)}
-	, cfg_{model_file_.config().get<config_011>()}
+	, cfg_{model_file_.config().get<config>()}
 {}
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::_set_layer_sizes_default(config_011& cfg)
+void autodis::model::model_011::_set_layer_sizes_default(config& cfg)
 {
 	cfg.layer_sizes_ = {0, 16, 8, 1};
 }
@@ -112,8 +112,9 @@ void autodis::model::model_011::_create_features()
 	// 2.
 	for (nlohmann::json const& fj : model_file_.features())
 	{
-		if (!fj.is_object())
+		if (!fj.is_number())
 		{
+			SPDLOG_LOGGER_ERROR(log(), "invalid feature id: {}", fj.dump());
 			continue;
 		}
 		std::shared_ptr<feature::abstract> feature{shop_->feature(fj.get<std::int64_t>())};
@@ -135,6 +136,10 @@ void autodis::model::model_011::_create_features()
 			{
 				break;
 			}
+
+// DEBUG
+			// df_series[df_idx] = feature->value(df_.index()[df_idx]);
+//~DEBUG
 			df_series[df_idx] = feature->norm().normalize(feature->value(df_.index()[df_idx]));
 		}
 	}
@@ -239,7 +244,7 @@ void autodis::model::model_011::create_model_file(
 {
 	file f{type_name, model_id, file_path};
 	{
-		config_011 default_cfg{};
+		config default_cfg{};
 		_set_layer_sizes_default(default_cfg);
 		f.config() = default_cfg;
 	}

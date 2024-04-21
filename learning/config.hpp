@@ -19,7 +19,10 @@ namespace learning
 		explicit config(std::vector<std::size_t> const& layers_sizes)
 			: layer_sizes_{layers_sizes}
 		{
-			assert(layer_sizes_.size() >= 3);
+			if (layer_sizes_.size() < 3)
+			{
+				throw std::runtime_error{"please configure at least one hidden layer"};
+			}
 		}
 
 		std::vector<std::size_t> const& layer_sizes() const noexcept { return layer_sizes_; }

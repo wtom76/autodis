@@ -25,6 +25,7 @@ add_subdirectory(collector)
 add_subdirectory(learning)
 add_subdirectory(model)
 add_subdirectory(visual)
+add_subdirectory(seriescfg)
 
 add_executable(autodis
 	config.cpp

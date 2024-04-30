@@ -73,11 +73,11 @@ void autodis::model::model_011::_adjust_cfg_input_size()
 	cfg_.layer_sizes_[0] = input_series_names_.size();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::_print_df(frame_t const& df) const
+void autodis::model::model_011::_print_df(frame_t const& df, std::filesystem::path const& path) const
 {
 	df.print_shape(std::cout);
 	std::cout << "\n\n";
-	std::ofstream f{"df.csv"s};
+	std::ofstream f{path};
 	df.print(f);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -102,6 +102,9 @@ void autodis::model::model_011::_create_features()
 		{
 			feature::master_index::index_value_t mival{mi.val(mi_pos)};
 			df_index.emplace_back(mival);
+// DEBUG
+			//df_series.emplace_back(target->value(mival));
+//~DEBUG
 			df_series.emplace_back(target_norm_.normalize(target->value(mival)));
 		}
 	}
@@ -143,6 +146,9 @@ void autodis::model::model_011::_create_features()
 			df_series[df_idx] = feature->norm().normalize(feature->value(df_.index()[df_idx]));
 		}
 	}
+// DEBUG
+	_print_df(df_, "df_raw.csv"sv);
+//~DEBUG
 	// 3.
 	df_ = df_.clear_lacunas(); // normalize should be called on lacune free data, so should clear frame not view till normalize is applied to the former
 }
@@ -260,7 +266,7 @@ void autodis::model::model_011::learn()
 	_create_chart();
 	chart_->show();
 
-	_print_df(df_);
+	_print_df(df_, "df.csv"sv);
 
 	_learn();
 }

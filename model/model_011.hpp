@@ -53,7 +53,7 @@ namespace autodis::model
 	private:
 		static void _set_layer_sizes_default(config& cfg);
 		void _adjust_cfg_input_size();
-		void _print_df(frame_t const& df) const;
+		void _print_df(frame_t const& df, std::filesystem::path const& path) const;
 		void _create_features();
 		void _create_chart();
 		void _learn();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framework.hpp"
 #include "abstract.hpp"
 #include "master_index.hpp"
 #include <keeper/keeper.hpp>

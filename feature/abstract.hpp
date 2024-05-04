@@ -63,11 +63,9 @@ namespace feature
 		{
 			std::unique_lock lock{mtx_};
 			auto const data_i{data_.find(idx_val)};
-			if (data_i != data_.cend())
-			{
-				return data_i->second;
-			}
-			return _evaluate(idx_val);
+			return data_i != data_.cend()
+				? data_i->second
+				: data_.emplace(idx_val, _evaluate(idx_val)).first->second;
 		}
 	protected:
 		//---------------------------------------------------------------------------------------------------------
@@ -107,7 +105,9 @@ namespace feature
 				}
 			}
 			// 2.
-			return _call_evaluate(idx_val);
+			value_t const val{_call_evaluate(idx_val)};
+			assert(data_.contains(idx_val));
+			return val;
 		}
 	};
 }

@@ -6,6 +6,7 @@ add_library(feature OBJECT
 	impl/delta.cpp
 	shop.cpp
 	master_index.cpp
+	util.cpp
 )
 
 target_include_directories(feature PRIVATE

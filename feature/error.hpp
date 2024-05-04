@@ -47,4 +47,15 @@ namespace feature
 			: std::runtime_error("an attempt to access feature out of it's index bounds "s + std::to_string(idx))
 		{}
 	};
+	//---------------------------------------------------------------------------------------------------------
+	// not enough data to calc at least one point
+	//---------------------------------------------------------------------------------------------------------
+	class not_enough_data
+		: public std::runtime_error
+	{
+	public:
+		explicit not_enough_data(std::string const& label)
+			: std::runtime_error("not enough data for "s + label)
+		{}
+	};
 }

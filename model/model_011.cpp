@@ -100,7 +100,7 @@ void autodis::model::model_011::_create_features()
 		df_.reserve(mi_pos_max - mi_pos + 1);
 		for (; mi_pos <= mi_pos_max; ++mi_pos)
 		{
-			feature::master_index::index_value_t mival{mi.val(mi_pos)};
+			feature::master_index::index_value_t mival{mi.at(mi_pos)};
 			df_index.emplace_back(mival);
 // DEBUG
 			//df_series.emplace_back(target->value(mival));

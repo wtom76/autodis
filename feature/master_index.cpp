@@ -26,7 +26,7 @@ feature::master_index::index_pos_t feature::master_index::pos(index_value_t inde
 	return map_i->second;
 }
 //---------------------------------------------------------------------------------------------------------
-feature::master_index::index_value_t feature::master_index::val(index_pos_t pos) const
+feature::master_index::index_value_t feature::master_index::at(index_pos_t pos) const
 {
 	if (pos < 0 || static_cast<std::size_t>(pos) >= index_.size())
 	{
@@ -55,7 +55,7 @@ feature::master_index::index_value_t feature::master_index::max() const
 //---------------------------------------------------------------------------------------------------------
 feature::master_index::index_value_t feature::master_index::next(index_value_t start, std::ptrdiff_t distance) const
 {
-	return val(pos(start) + distance);
+	return at(pos(start) + distance);
 }
 //---------------------------------------------------------------------------------------------------------
 feature::master_index::index_value_t feature::master_index::safe_next(index_value_t start, std::ptrdiff_t max_distance) const
@@ -69,5 +69,5 @@ feature::master_index::index_value_t feature::master_index::safe_next(index_valu
 	{
 		unsafe_pos = index_.size() - 1;
 	}
-	return val(unsafe_pos);
+	return at(unsafe_pos);
 }

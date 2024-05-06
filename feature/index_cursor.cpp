@@ -13,17 +13,20 @@ namespace feature
 		, pos_{mi_.pos(start)}
 		, min_pos_{mi_.pos(feature_.bounds().index_min_)}
 		, max_pos_{mi_.pos(feature_.bounds().index_max_)}
-	{
-		assert(!std::isnan(feature_.value(start)));
-	}
+	{}
 	//---------------------------------------------------------------------------------------------------------
 	std::ptrdiff_t index_cursor::_next(std::ptrdiff_t max_distance)
 	{
 		assert(max_distance >= 0);
 		std::ptrdiff_t distance_left{max_distance};
+		while (max_pos_ > pos_ && on_nan())
+		{
+			++pos_;
+		}
 		while (max_pos_ > pos_ && distance_left)
 		{
-			if (!std::isnan(feature_.value(mi_.at(++pos_))))
+			++pos_;
+			if (!on_nan())
 			{
 				--distance_left;
 			}
@@ -35,9 +38,14 @@ namespace feature
 	{
 		assert(max_distance >= 0);
 		std::ptrdiff_t distance_left{max_distance};
+		while (min_pos_ < pos_ && on_nan())
+		{
+			--pos_;
+		}
 		while (min_pos_ < pos_ && distance_left)
 		{
-			if (!std::isnan(feature_.value(mi_.at(--pos_))))
+			--pos_;
+			if (!on_nan())
 			{
 				--distance_left;
 			}
@@ -45,10 +53,14 @@ namespace feature
 		return max_distance - distance_left;
 	}
 	//---------------------------------------------------------------------------------------------------------
+	bool index_cursor::on_nan() const
+	{
+		return std::isnan(feature_.value(mi_.at(pos_)));
+	}
+	//---------------------------------------------------------------------------------------------------------
 	void index_cursor::position(index_value_t index_value)
 	{
 		pos_ = mi_.pos(index_value);
-		assert(!std::isnan(feature_.value(index_value)));
 	}
 	//---------------------------------------------------------------------------------------------------------
 	std::ptrdiff_t index_cursor::next(std::ptrdiff_t max_distance)

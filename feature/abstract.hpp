@@ -7,6 +7,8 @@
 
 namespace feature
 {
+	class shop;
+
 	//---------------------------------------------------------------------------------------------------------
 	// abstract
 	//---------------------------------------------------------------------------------------------------------
@@ -21,16 +23,10 @@ namespace feature
 		{
 			index_value_t index_min_{1};	// 1 is to make default range empty
 			index_value_t index_max_{0};	// inclusive
-			value_t value_min_{};
-			value_t value_max_{};
+			value_t value_min_{std::numeric_limits<value_t>::max()};
+			value_t value_max_{std::numeric_limits<value_t>::lowest()};
 
 			bounds_data() noexcept = default;
-			bounds_data(keeper::data_read::bounds const& src) noexcept
-				: index_min_{src.index_min_}
-				, index_max_{src.index_max_}
-				, value_min_{src.value_min_}
-				, value_max_{src.value_max_}
-			{}
 			bool test(index_value_t idx_val) const noexcept
 			{
 				return idx_val >= index_min_ && idx_val <= index_max_;
@@ -42,6 +38,7 @@ namespace feature
 	// data
 	protected:
 		feature_info_t const	info_;
+		shop&					shop_;
 		bounds_data				bounds_;
 		normalization_t			norm_;
 		data_t					data_;
@@ -55,8 +52,9 @@ namespace feature
 			norm_ = shared::math::tanh_normalization{shared::math::min_max{bounds_.value_min_, bounds_.value_max_}};
 		}
 		//---------------------------------------------------------------------------------------------------------
-		explicit abstract(feature_info_t&& info)
+		explicit abstract(feature_info_t&& info, shop& shop)
 			: info_{std::move(info)}
+			, shop_{shop}
 		{}
 	public:
 		//---------------------------------------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 #include "../pch.hpp"
 #include "../shop.hpp"
+#include "../index_cursor.hpp"
 #include "sma.hpp"
 #include "error.hpp"
-#include "index_cursor.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 void feature::impl::sma::_init()
@@ -38,8 +38,7 @@ void feature::impl::sma::_init()
 }
 //---------------------------------------------------------------------------------------------------------
 feature::impl::sma::sma(feature_info_t&& info, shop& shop)
-	: abstract{std::move(info)}
-	, shop_{shop}
+	: abstract{std::move(info), shop}
 	, period_{cfg().at("period").get<decltype(period_)>()}
 	, underlying_{shop_.feature(cfg().at("underlying"))}
 {

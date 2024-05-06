@@ -20,7 +20,6 @@ namespace feature::impl
 		: public abstract
 	{
 	private:
-		shop& shop_;
 		std::pair<std::ptrdiff_t, std::ptrdiff_t> const shift_;
 		std::pair<std::shared_ptr<abstract>, std::shared_ptr<abstract>> underlying_;
 	private:

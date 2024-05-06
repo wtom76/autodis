@@ -1,8 +1,8 @@
 #include "../pch.hpp"
 #include "../shop.hpp"
+#include "../index_cursor.hpp"
 #include "delta.hpp"
 #include "error.hpp"
-#include "index_cursor.hpp"
 
 //---------------------------------------------------------------------------------------------------------
 void feature::impl::delta::_init()
@@ -40,8 +40,7 @@ void feature::impl::delta::_init()
 }
 //---------------------------------------------------------------------------------------------------------
 feature::impl::delta::delta(feature_info_t&& info, shop& shop)
-	: abstract{std::move(info)}
-	, shop_{shop}
+	: abstract{std::move(info), shop}
 	, shift_{cfg().at("shift_first").get<std::ptrdiff_t>(), cfg().at("shift_second").get<std::ptrdiff_t>()}
 	, underlying_{shop_.feature(cfg().at("underlying_first")), shop_.feature(cfg().at("underlying_second"))}
 {

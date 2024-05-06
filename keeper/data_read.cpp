@@ -135,36 +135,3 @@ void keeper::data_read::read(std::vector<long long> const& data_reg_ids, shared:
 		}
 	}
 }
-//---------------------------------------------------------------------------------------------------------
-keeper::data_read::bounds keeper::data_read::read_bounds(long long data_reg_id)
-{
-	std::vector<metadata::data_info> const metainfo{metadata{cfg_}.load_data_meta({data_reg_id})};
-	if (metainfo.empty())
-	{
-		throw std::runtime_error{"failed to load metadata (data_id = "s + std::to_string(data_reg_id) + ')'};
-	}
-	bounds result{};
-	try
-	{
-		std::unique_lock const lock{con_mtx_};
-		pqxx::work t{con_};
-		metadata::data_info const& mf{metainfo.front()};
-		pqxx::result const r{t.exec(
-			"select min(idx), max(idx), min(\""s + mf.data_uri_.field_name() + "\"), max(\""s + mf.data_uri_.field_name() + "\") from \"data\".\""s + mf.data_uri_.table_name() + '\"')
-		};
-		if (r.empty())
-		{
-			throw std::runtime_error{"failed to load data (data_id = "s + std::to_string(data_reg_id) + ')'};
-		}
-		pqxx::row const& rec{r.front()};
-		rec[0].to(result.index_min_);
-		rec[1].to(result.index_max_);
-		rec[2].to(result.value_min_);
-		rec[3].to(result.value_max_);
-	}
-	catch (std::exception const& ex)
-	{
-		throw std::runtime_error{"failed to load data (data_id = "s + std::to_string(data_reg_id) + "). "s + ex.what()};
-	}
-	return result;
-}

@@ -25,6 +25,8 @@ namespace feature
 
 	public:
 		explicit index_cursor(master_index const& mi, abstract& feature, index_value_t start);
+		// is feature value at current position is NaN
+		bool on_nan() const;
 		// set cursor in position corresponding to provided index value
 		void position(index_value_t index_value);
 		std::ptrdiff_t next(std::ptrdiff_t max_distance);

@@ -31,7 +31,7 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metada
 
 	if (feature_type == "stored"sv)
 	{
-		return std::make_shared<impl::stored>(std::move(info), keeper_dr_);
+		return std::make_shared<impl::stored>(std::move(info), *this, keeper_dr_);
 	}
 	else if (feature_type == "delta"sv)
 	{

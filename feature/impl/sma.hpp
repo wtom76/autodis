@@ -20,7 +20,6 @@ namespace feature::impl
 	{
 	// data
 	private:
-		shop& shop_;
 		std::ptrdiff_t const period_;
 		std::shared_ptr<abstract> underlying_;
 	// methods

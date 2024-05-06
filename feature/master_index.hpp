@@ -11,9 +11,6 @@ namespace feature
 	class master_index
 	{
 	// types
-	public:
-		using index_value_t = shared::data::frame::index_value_t;
-		using index_pos_t	= ptrdiff_t;
 	private:
 		using index_t		= std::vector<index_value_t>;
 		using map_t			= std::unordered_map<index_value_t, index_pos_t>; // index value -> position in index
@@ -25,6 +22,7 @@ namespace feature
 	public:
 		void load(keeper::data_read& dr);
 
+		[[nodiscard]] std::size_t size() const noexcept { return index_.size(); }
 		[[nodiscard]] index_pos_t pos(index_value_t index_val) const;
 		[[nodiscard]] index_value_t at(index_pos_t pos) const;
 		[[nodiscard]] index_value_t min() const;

@@ -2,17 +2,41 @@
 #include "../shop.hpp"
 #include "delta.hpp"
 #include "error.hpp"
+#include "index_cursor.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-feature::abstract::value_t feature::impl::delta::_evaluate(index_value_t idx_val)
+void feature::impl::delta::_init()
 {
-	if (!bounds_.test(idx_val))
+	bounds_data bounds;
+	index_cursor c1{_mi(), *underlying_.first, underlying_.first->bounds().index_min_};
+	c1.prev(shift_.first);
+	index_cursor c2{_mi(), *underlying_.second, underlying_.second->bounds().index_min_};
+	c2.prev(shift_.second);
+	bounds.index_min_ = std::max(c1.current(), c2.current());
+
+	index_pos_t master_pos{_mi().pos(bounds.index_min_)};
+	c1.position(bounds.index_min_);
+	c2.position(bounds.index_min_);
+	if (static_cast<std::size_t>(master_pos) >= _mi().size() ||
+		shift_.first != c1.next(shift_.first) ||
+		shift_.second != c2.next(shift_.second))
 	{
-		throw feature_out_of_bounds{idx_val};
+		throw not_enough_data(label());
 	}
-	return
-		underlying_.second->value(shop_.index().next(idx_val, shift_.second)) -
-		underlying_.first->value(shop_.index().next(idx_val, shift_.first));
+	do
+	{
+		data_.emplace(
+			_mi().at(master_pos++),
+			underlying_.second->value(c1.current()) -
+			underlying_.first->value(c2.current()));
+	}
+	while (static_cast<std::size_t>(master_pos) != _mi().size() && c1.next() && c2.next());
+
+	bounds.index_max_ = _mi().at(master_pos - 1);
+	bounds.value_min_ = underlying_.second->bounds().value_min_ - underlying_.first->bounds().value_max_;
+	bounds.value_max_ = underlying_.second->bounds().value_max_ - underlying_.first->bounds().value_min_;
+
+	_set_bounds(bounds);
 }
 //---------------------------------------------------------------------------------------------------------
 feature::impl::delta::delta(feature_info_t&& info, shop& shop)
@@ -21,24 +45,5 @@ feature::impl::delta::delta(feature_info_t&& info, shop& shop)
 	, shift_{cfg().at("shift_first").get<std::ptrdiff_t>(), cfg().at("shift_second").get<std::ptrdiff_t>()}
 	, underlying_{shop_.feature(cfg().at("underlying_first")), shop_.feature(cfg().at("underlying_second"))}
 {
-	std::pair<abstract::bounds_data, abstract::bounds_data> bounds{underlying_.first->bounds(), underlying_.second->bounds()};
-
-	bounds.first.index_min_ = shop_.index().safe_next(bounds.first.index_min_, -shift_.first);
-	bounds.second.index_min_ = shop_.index().safe_next(bounds.second.index_min_, -shift_.second);
-	bounds.first.index_min_ =
-		std::min(shop_.index().max(),
-			std::max(shop_.index().min(),
-				std::max(bounds.first.index_min_, bounds.second.index_min_)));
-
-	bounds.first.index_max_ = shop_.index().safe_next(bounds.first.index_max_, -shift_.first);
-	bounds.second.index_max_ = shop_.index().safe_next(bounds.second.index_max_, -shift_.second);
-	bounds.first.index_max_ =
-		std::min(shop_.index().max(),
-			std::max(shop_.index().min(),
-				std::min(bounds.first.index_max_, bounds.second.index_max_)));
-
-	bounds.first.value_min_ = bounds.second.value_min_ - bounds.first.value_max_;
-	bounds.first.value_max_ = bounds.second.value_max_ - bounds.first.value_min_;
-
-	_set_bounds(bounds.first);
+	_init();
 }

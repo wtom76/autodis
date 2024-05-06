@@ -24,7 +24,8 @@ namespace feature::impl
 		std::pair<std::ptrdiff_t, std::ptrdiff_t> const shift_;
 		std::pair<std::shared_ptr<abstract>, std::shared_ptr<abstract>> underlying_;
 	private:
-		value_t _evaluate(index_value_t idx_val) override;
+		master_index const& _mi() const noexcept { return shop_.index(); }
+		void _init();
 	public:
 		explicit delta(feature_info_t&& info, shop& shop);
 	};

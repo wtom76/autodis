@@ -17,7 +17,7 @@ namespace feature::impl
 		long long const data_reg_id_;
 		std::shared_ptr<keeper::data_read> keeper_dr_;
 	private:
-		value_t _evaluate(index_value_t idx_val) override;
+		void _init();
 	public:
 		explicit stored(feature_info_t&& info, std::shared_ptr<keeper::data_read> keeper_dr);
 	};

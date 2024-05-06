@@ -25,10 +25,8 @@ namespace feature::impl
 		std::shared_ptr<abstract> underlying_;
 	// methods
 	private:
-		value_t _under_val_out(index_value_t idx_val) const;
-		value_t _calc_from_scratch(index_value_t idx_val) const;
-		value_t _calc(index_value_t idx_val) const;
-		value_t _evaluate(index_value_t idx_val) override;
+		master_index const& _mi() const noexcept { return shop_.index(); }
+		void _init();
 	public:
 		explicit sma(feature_info_t&& info, shop& shop);
 	};

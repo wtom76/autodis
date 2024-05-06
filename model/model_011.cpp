@@ -95,12 +95,12 @@ void autodis::model::model_011::_create_features()
 		target_norm_ = target->norm();
 		shared::data::frame::series_t& df_series{*df_.create_series(target->label())};
 		shared::data::frame::index_t& df_index{df_.index()};
-		feature::master_index::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
-		feature::master_index::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
+		feature::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
+		feature::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
 		df_.reserve(mi_pos_max - mi_pos + 1);
 		for (; mi_pos <= mi_pos_max; ++mi_pos)
 		{
-			feature::master_index::index_value_t mival{mi.at(mi_pos)};
+			feature::index_value_t mival{mi.at(mi_pos)};
 			df_index.emplace_back(mival);
 // DEBUG
 			//df_series.emplace_back(target->value(mival));

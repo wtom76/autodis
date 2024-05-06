@@ -3,21 +3,8 @@
 #include "error.hpp"
 
 //---------------------------------------------------------------------------------------------------------
-// 1. until we implement partial load, nonempty data indicates that requested idx_val doesn't exist
-//  in storage
-feature::abstract::value_t feature::impl::stored::_evaluate(index_value_t idx_val)
+void feature::impl::stored::_init()
 {
-	if (!bounds_.test(idx_val))
-	{
-		throw feature_out_of_bounds{idx_val};
-	}
-	// 1.
-	if (!data_.empty())
-	{
-		assert(!data_.contains(idx_val));
-		data_.emplace(idx_val, shared::data::nan);
-		return shared::data::nan;
-	}
 	shared::data::frame df;
 	keeper_dr_->read(std::vector{data_reg_id_}, df);
 	auto index_i{std::cbegin(df.index())};
@@ -27,16 +14,6 @@ feature::abstract::value_t feature::impl::stored::_evaluate(index_value_t idx_va
 	{
 		data_.emplace(*index_i++, *series_i++);
 	}
-	auto const data_i{data_.find(idx_val)};
-	if (data_i != data_.cend())
-	{
-		return data_i->second;
-	}
-	else
-	{
-		data_.emplace(idx_val, shared::data::nan);
-		return shared::data::nan;
-	}
 }
 //---------------------------------------------------------------------------------------------------------
 feature::impl::stored::stored(feature_info_t&& info, std::shared_ptr<keeper::data_read> keeper_dr)
@@ -45,4 +22,5 @@ feature::impl::stored::stored(feature_info_t&& info, std::shared_ptr<keeper::dat
 	, keeper_dr_{std::move(keeper_dr)}
 {
 	_set_bounds(keeper_dr_->read_bounds(cfg().at("data_reg_id").get<long long>()));
+	_init();
 }

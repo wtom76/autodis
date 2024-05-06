@@ -25,4 +25,13 @@
 #include <shared/shared.hpp>
 #include <nlohmann/json.hpp>
 
+#include <shared/data/frame.hpp>
+
 using namespace std::literals;
+
+namespace feature
+{
+	using index_pos_t	= std::ptrdiff_t;
+	using index_value_t	= shared::data::frame::index_value_t;
+	using value_t		= shared::data::frame::value_t;
+}

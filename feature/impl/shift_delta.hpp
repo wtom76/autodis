@@ -12,19 +12,20 @@ namespace feature
 namespace feature::impl
 {
 	//---------------------------------------------------------------------------------------------------------
-	// delta
+	// shift_delta
 	// underlying_second->value(t + shift_second) - underlying_first->value(t + shift_first)
 	// since peeking into future is forbidden, shift can be negatve only
 	//---------------------------------------------------------------------------------------------------------
-	class delta
+	class shift_delta
 		: public abstract
 	{
 	private:
+		std::pair<std::ptrdiff_t, std::ptrdiff_t> const shift_;
 		std::pair<std::shared_ptr<abstract>, std::shared_ptr<abstract>> underlying_;
 	private:
 		master_index const& _mi() const noexcept { return shop_.index(); }
 		void _init();
 	public:
-		explicit delta(feature_info_t&& info, shop& shop);
+		explicit shift_delta(feature_info_t&& info, shop& shop);
 	};
 }

@@ -4,6 +4,7 @@ add_library(feature OBJECT
 	impl/stored.cpp
 	impl/sma.cpp
 	impl/delta.cpp
+	impl/shift_delta.cpp
 	shop.cpp
 	master_index.cpp
 	index_cursor.cpp

@@ -2,6 +2,7 @@
 #include "shop.hpp"
 #include "impl/stored.hpp"
 #include "impl/delta.hpp"
+#include "impl/shift_delta.hpp"
 #include "impl/sma.hpp"
 
 //---------------------------------------------------------------------------------------------------------
@@ -36,6 +37,10 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metada
 	else if (feature_type == "delta"sv)
 	{
 		return std::make_shared<impl::delta>(std::move(info), *this);
+	}
+	else if (feature_type == "shift_delta"sv)
+	{
+		return std::make_shared<impl::shift_delta>(std::move(info), *this);
 	}
 	else if (feature_type == "sma"sv)
 	{

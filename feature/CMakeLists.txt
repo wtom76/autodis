@@ -8,6 +8,7 @@ add_library(feature OBJECT
 	shop.cpp
 	master_index.cpp
 	index_cursor.cpp
+	randomiser.cpp
 )
 
 target_include_directories(feature PRIVATE

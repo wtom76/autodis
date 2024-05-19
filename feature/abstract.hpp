@@ -1,7 +1,6 @@
 #pragma once
 
 #include "framework.hpp"
-#include <keeper/keeper.hpp>
 #include <shared/math/normalization.hpp>
 #include "error.hpp"
 
@@ -16,7 +15,6 @@ namespace feature
 	{
 	// types
 	public:
-		using feature_info_t	= keeper::metadata::feature_info;
 		using normalization_t	= shared::math::tanh_normalization;
 
 		struct bounds_data
@@ -59,6 +57,8 @@ namespace feature
 	public:
 		//---------------------------------------------------------------------------------------------------------
 		virtual ~abstract(){}
+		//---------------------------------------------------------------------------------------------------------
+		feature_info_t const& info() const noexcept { return info_; }
 		//---------------------------------------------------------------------------------------------------------
 		nlohmann::json const& cfg() const noexcept { return info_.formula_; }
 		//---------------------------------------------------------------------------------------------------------

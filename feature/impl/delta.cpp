@@ -43,7 +43,7 @@ void feature::impl::delta::_init()
 //---------------------------------------------------------------------------------------------------------
 feature::impl::delta::delta(feature_info_t&& info, shop& shop)
 	: abstract{std::move(info), shop}
-	, underlying_{shop_.feature(cfg().at("underlying_first")), shop_.feature(cfg().at("underlying_second"))}
+	, underlying_{shop_.feature(cfg().at("underlying_1")), shop_.feature(cfg().at("underlying_2"))}
 {
 	_init();
 }

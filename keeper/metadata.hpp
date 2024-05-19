@@ -50,6 +50,7 @@ namespace keeper
 		struct feature_info
 		{
 			std::int64_t	id_{0};
+			std::int32_t	type_id_{0};
 			std::string		label_;
 			nlohmann::json	formula_;
 		};
@@ -60,11 +61,18 @@ namespace keeper
 
 	private:
 		std::vector<data_info> _load_data_meta();
+		void _read_query_result(pqxx::result const& r, std::vector<feature_info>& dest) const;
+
 	public:
 		metadata(const config& cfg);
 		[[nodiscard]] std::vector<source_info> load_source_meta();
 		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
 		[[nodiscard]] std::vector<feature_info> load_feature_meta(std::vector<std::int64_t> const& feature_ids);
+		[[nodiscard]] std::vector<feature_info> load_feature_meta_all();
 	};
+
+	//---------------------------------------------------------------------------------------------------------
+	void to_json(nlohmann::json& j, metadata::feature_info const& src);
+	void from_json(const nlohmann::json& j, metadata::feature_info& dst);
 }

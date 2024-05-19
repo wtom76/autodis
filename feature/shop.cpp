@@ -22,6 +22,7 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(std::int64_t f
 	{
 		throw std::runtime_error("failed to load feature info by id: "s + std::to_string(feature_id));
 	}
+	assert(feature_info.front().id_ == feature_id);
 	return _create_feature(std::move(feature_info.front()));
 }
 //---------------------------------------------------------------------------------------------------------
@@ -30,23 +31,60 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metada
 	std::string_view feature_type;
 	info.formula_.at("type"sv).get_to(feature_type);
 
+	if (feature_type == "template"sv)
+	{
+		return _create_feature(randomiser_.specialise(std::move(info)));
+	}
+	std::shared_ptr<feature::abstract> result;
 	if (feature_type == "stored"sv)
 	{
-		return std::make_shared<impl::stored>(std::move(info), *this, keeper_dr_);
+		result = std::make_shared<impl::stored>(std::move(info), *this, keeper_dr_);
 	}
 	else if (feature_type == "delta"sv)
 	{
-		return std::make_shared<impl::delta>(std::move(info), *this);
+		result = std::make_shared<impl::delta>(std::move(info), *this);
 	}
 	else if (feature_type == "shift_delta"sv)
 	{
-		return std::make_shared<impl::shift_delta>(std::move(info), *this);
+		result = std::make_shared<impl::shift_delta>(std::move(info), *this);
 	}
 	else if (feature_type == "sma"sv)
 	{
-		return std::make_shared<impl::sma>(std::move(info), *this);
+		result = std::make_shared<impl::sma>(std::move(info), *this);
 	}
-	throw std::runtime_error("unknown feature type. feature id: "s + std::to_string(info.id_));
+	else
+	{
+		throw std::runtime_error("unknown feature type. feature id: "s + std::to_string(info.id_));
+	}
+	assert(result);
+	feature_map_.emplace(info.id_, result);
+	return result;
+}
+//---------------------------------------------------------------------------------------------------------
+std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json& fj)
+{
+	constexpr std::string_view generated_from_template_tag{"generated"sv};
+	if (fj.is_number())
+	{
+		return feature(fj.get<std::int64_t>());
+	}
+	if (fj.is_object())
+	{
+		auto const cached_i{fj.find(generated_from_template_tag)};		// is used to cache specialised templates only
+		if (cached_i != fj.end())
+		{
+			keeper::metadata::feature_info info{cached_i->get<keeper::metadata::feature_info>()};
+			return _create_feature(std::move(info));
+		}
+		auto const id_i{fj.find("id"sv)};								// fall back to id
+		if (id_i != fj.end())
+		{
+			std::shared_ptr<feature::abstract> feature{_create_feature(id_i->get<std::int64_t>())};
+			fj[generated_from_template_tag] = feature->info();
+			return feature;
+		}
+	}
+	throw std::runtime_error{"invalid json representation of feature_info"};
 }
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_id)
@@ -58,11 +96,24 @@ std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_i
 	}
 	try
 	{
-		return feature_map_.emplace(feature_id, _create_feature(feature_id)).first->second;
+		return _create_feature(feature_id);
 	}
 	catch (std::exception const& ex)
 	{
 		SPDLOG_LOGGER_ERROR(log(), "failed to create feature with id: {}. error: {}", feature_id, ex.what());
+		throw;
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json& fj)
+{
+	try
+	{
+		return _feature(fj);
+	}
+	catch (std::exception const& ex)
+	{
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", fj.dump(), ex.what());
 		throw;
 	}
 }

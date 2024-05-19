@@ -2,6 +2,28 @@
 #include "metadata.hpp"
 #include "config.hpp"
 
+namespace keeper
+{
+	//---------------------------------------------------------------------------------------------------------
+	void to_json(nlohmann::json& j, metadata::feature_info const& src)
+	{
+		j = nlohmann::json{
+			{ "id", src.id_ },
+			{ "type_id", src.type_id_ },
+			{ "label", src.label_ },
+			{ "formula", src.formula_ }
+		};
+	}
+	//---------------------------------------------------------------------------------------------------------
+	void from_json(const nlohmann::json& j, metadata::feature_info& dst)
+	{
+		j.at("id").get_to(dst.id_);
+		j.at("type_id").get_to(dst.type_id_);
+		j.at("label").get_to(dst.label_);
+		j.at("formula").get_to(dst.formula_);
+	}
+}
+
 //---------------------------------------------------------------------------------------------------------
 keeper::metadata::metadata(const config& cfg)
 	: con_{cfg.db_connection_}
@@ -108,6 +130,20 @@ void keeper::metadata::drop_pending_flag(long long series_id)
 	t.commit();
 }
 //---------------------------------------------------------------------------------------------------------
+void keeper::metadata::_read_query_result(pqxx::result const& r, std::vector<feature_info>& dest) const
+{
+	dest.reserve(r.size());
+	for (auto const& rec : r)
+	{
+		dest.emplace_back(
+			rec[0].as<std::int64_t>(),
+			rec[1].as<std::int32_t>(),
+			rec[2].as<std::string>(),
+			nlohmann::json::parse(rec[3].as<std::string>())
+		);
+	}
+}
+//---------------------------------------------------------------------------------------------------------
 std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(std::vector<std::int64_t> const& feature_ids)
 {
 	std::vector<keeper::metadata::feature_info> result;
@@ -116,16 +152,22 @@ std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(
 	{
 		std::unique_lock const lock{con_mtx_};
 		pqxx::work t{con_};
-		const pqxx::result r{t.exec_params("select id, label, formula from metadata.feature where id in ($1)", p)};
-		result.reserve(r.size());
-		for (auto const& rec : r)
-		{
-			result.emplace_back(
-				rec[0].as<std::int64_t>(),
-				rec[1].as<std::string>(),
-				nlohmann::json::parse(rec[2].as<std::string>())
-			);
-		}
+		_read_query_result(
+			t.exec_params("select id, type_id, label, formula from metadata.feature where id in ($1)", p),
+			result);
+	}
+	return result;
+}
+//---------------------------------------------------------------------------------------------------------
+std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta_all()
+{
+	std::vector<keeper::metadata::feature_info> result;
+	{
+		std::unique_lock const lock{con_mtx_};
+		pqxx::work t{con_};
+		_read_query_result(
+			t.exec("select id, type_id, label, formula from metadata.feature"),
+			result);
 	}
 	return result;
 }

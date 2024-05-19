@@ -81,71 +81,92 @@ void autodis::model::model_011::_print_df(frame_t const& df, std::filesystem::pa
 	df.print(f);
 }
 //---------------------------------------------------------------------------------------------------------
+void autodis::model::model_011::_fill_normalized(feature::abstract& src_feature, shared::data::frame::series_t& dst_df_series)
+{
+	for (std::size_t df_idx{0}; df_idx != df_.row_count(); ++df_idx)
+	{
+		if (df_.index()[df_idx] < src_feature.bounds().index_min_)
+		{
+			continue;
+		}
+		if (df_.index()[df_idx] > src_feature.bounds().index_max_)
+		{
+			break;
+		}
+
+// DEBUG
+		// df_series[df_idx] = src_feature.value(df_.index()[df_idx]);
+//~DEBUG
+		dst_df_series[df_idx] = src_feature.norm().normalize(src_feature.value(df_.index()[df_idx]));
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_011::_create_target()
+{
+	assert(!df_.col_count());
+	feature::master_index const& mi{shop_->index()};
+	std::shared_ptr<feature::abstract> target{shop_->feature(model_file_.target().get<std::int64_t>())};
+	target_series_name_ = target->label();
+	target_norm_ = target->norm();
+	shared::data::frame::series_t& df_series{*df_.create_series(target->label())};
+	shared::data::frame::index_t& df_index{df_.index()};
+	feature::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
+	feature::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
+	df_.reserve(mi_pos_max - mi_pos + 1);
+	for (; mi_pos <= mi_pos_max; ++mi_pos)
+	{
+		feature::index_value_t mival{mi.at(mi_pos)};
+		df_index.emplace_back(mival);
+		df_series.emplace_back(target_norm_.normalize(target->value(mival)));
+		//df_series.emplace_back(target->value(mival)); // DEBUG
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_011::_create_input_features()
+{
+	for (nlohmann::json& fj : model_file_.features())
+	{
+		_create_input_feature(fj);
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
+{
+	std::shared_ptr<feature::abstract> feature{shop_->feature(fj)};
+	if (!feature)
+	{
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature: {}", fj.dump());
+		return;
+	}
+	
+	shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->label())};
+	if (!df_series_ptr)
+	{
+		SPDLOG_LOGGER_ERROR(log(), "failed to create series from '{}'", feature->label());
+		return;
+	}
+	input_series_names_.emplace_back(feature->label());
+	_fill_normalized(*feature, *df_series_ptr);
+}
+//---------------------------------------------------------------------------------------------------------
 // 1. init df shape with target
 // 2. fill inputs
 // 3. clear lacunes
 void autodis::model::model_011::_create_features()
 {
 	df_.clear();
-	feature::master_index const& mi{shop_->index()};
+
 	// 1.
-	{
-		std::shared_ptr<feature::abstract> target{shop_->feature(model_file_.target().get<std::int64_t>())};
-		target_series_name_ = target->label();
-		target_norm_ = target->norm();
-		shared::data::frame::series_t& df_series{*df_.create_series(target->label())};
-		shared::data::frame::index_t& df_index{df_.index()};
-		feature::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
-		feature::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
-		df_.reserve(mi_pos_max - mi_pos + 1);
-		for (; mi_pos <= mi_pos_max; ++mi_pos)
-		{
-			feature::index_value_t mival{mi.at(mi_pos)};
-			df_index.emplace_back(mival);
-// DEBUG
-			//df_series.emplace_back(target->value(mival));
-//~DEBUG
-			df_series.emplace_back(target_norm_.normalize(target->value(mival)));
-		}
-	}
+	_create_target();
 	if (!df_.row_count())
 	{
 		return;
 	}
 	// 2.
-	for (nlohmann::json const& fj : model_file_.features())
-	{
-		if (!fj.is_number())
-		{
-			SPDLOG_LOGGER_ERROR(log(), "invalid feature id: {}", fj.dump());
-			continue;
-		}
-		std::shared_ptr<feature::abstract> feature{shop_->feature(fj.get<std::int64_t>())};
-		shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->label())};
-		if (!df_series_ptr)
-		{
-			SPDLOG_LOGGER_ERROR(log(), "failed to create series from '{}'", feature->label());
-			continue;
-		}
-		input_series_names_.emplace_back(feature->label());
-		shared::data::frame::series_t& df_series{*df_series_ptr};
-		for (std::size_t df_idx{0}; df_idx != df_.row_count(); ++df_idx)
-		{
-			if (df_.index()[df_idx] < feature->bounds().index_min_)
-			{
-				continue;
-			}
-			if (df_.index()[df_idx] > feature->bounds().index_max_)
-			{
-				break;
-			}
+	_create_input_features();
 
-// DEBUG
-			// df_series[df_idx] = feature->value(df_.index()[df_idx]);
-//~DEBUG
-			df_series[df_idx] = feature->norm().normalize(feature->value(df_.index()[df_idx]));
-		}
-	}
+	model_file_.store();
+
 // DEBUG
 	_print_df(df_, "df_raw.csv"sv);
 //~DEBUG
@@ -224,7 +245,7 @@ void autodis::model::model_011::_show_analysis()
 		return;
 	}
 
-	std::ofstream out("network.txt", std::ios::trunc);
+	std::ofstream out{"network.txt", std::ios::trunc};
 	auto const& source_to_dest_matrix{weights[0]};
 	auto input_name_i{std::begin(input_series_names_)};
 	for (std::vector<double> const& one_src_many_dst : source_to_dest_matrix)

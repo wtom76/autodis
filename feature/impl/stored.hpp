@@ -22,5 +22,6 @@ namespace feature::impl
 		void _init();
 	public:
 		explicit stored(feature_info_t&& info, shop& shop, std::shared_ptr<keeper::data_read> keeper_dr);
+		static feature_info_t rnd_from_template(feature_info_t const& feature_template, shop& shop);
 	};
 }

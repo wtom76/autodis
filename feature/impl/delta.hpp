@@ -14,7 +14,6 @@ namespace feature::impl
 	//---------------------------------------------------------------------------------------------------------
 	// delta
 	// underlying_second->value(t + shift_second) - underlying_first->value(t + shift_first)
-	// since peeking into future is forbidden, shift can be negatve only
 	//---------------------------------------------------------------------------------------------------------
 	class delta
 		: public abstract
@@ -26,5 +25,6 @@ namespace feature::impl
 		void _init();
 	public:
 		explicit delta(feature_info_t&& info, shop& shop);
+		static feature_info_t rnd_from_template(feature_info_t const& feature_template, shop& shop);
 	};
 }

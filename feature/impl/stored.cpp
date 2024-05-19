@@ -54,3 +54,13 @@ feature::impl::stored::stored(feature_info_t&& info, shop& shop, std::shared_ptr
 	assert(!(index_cursor{_mi(), *this, bounds_.index_min_}.on_nan()));
 	assert(!(index_cursor{_mi(), *this, bounds_.index_max_}.on_nan()));
 }
+//---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::impl::stored::rnd_from_template(feature_info_t const&, shop& shop)
+{
+	constexpr std::int32_t type_id_stored{1};
+
+	feature::feature_info_t result;
+	result.formula_["type"s] = "stored"s;
+	result.formula_["data_reg_id"s] = shop.random_feature_info(type_id_stored).id_;
+	return result;
+}

@@ -47,3 +47,21 @@ feature::impl::delta::delta(feature_info_t&& info, shop& shop)
 {
 	_init();
 }
+//---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::impl::delta::rnd_from_template(feature_info_t const& feature_template, shop& shop)
+{
+	feature::feature_info_t result;
+	result.formula_["type"s] = "delta"s;
+
+	{
+		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> type_ids;
+		feature_template.formula_.at("underlying_1_types"sv).get_to(type_ids.first);
+		feature_template.formula_.at("underlying_2_types"sv).get_to(type_ids.second);
+		shop.verify_typeset(type_ids.first, feature_template.label_);
+		shop.verify_typeset(type_ids.second, feature_template.label_);
+		result.formula_["underlying_1"s] = shop.random_feature_info(shop.pick_random(type_ids.first)).id_;
+		result.formula_["underlying_2"s] = shop.random_feature_info(shop.pick_random(type_ids.second)).id_;
+	}
+
+	return result;
+}

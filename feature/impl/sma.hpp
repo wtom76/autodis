@@ -28,5 +28,6 @@ namespace feature::impl
 		void _init();
 	public:
 		explicit sma(feature_info_t&& info, shop& shop);
+		static feature_info_t rnd_from_template(feature_info_t const& feature_template, shop& shop);
 	};
 }

@@ -10,9 +10,16 @@ feature::shop::shop()
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
+
 	keeper_md_ = std::make_shared<keeper::metadata>(keeper_cfg);
 	keeper_dr_ = std::make_shared<keeper::data_read>(keeper_cfg);
 	master_index_.load(*keeper_dr_);
+
+	std::vector<keeper::metadata::feature_info> feature_info{keeper::metadata{keeper_cfg}.load_feature_meta_all()};
+	for (keeper::metadata::feature_info const& info : feature_info)
+	{
+		type_map_[info.type_id_].emplace_back(info);
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::_create_feature(std::int64_t feature_id)
@@ -26,6 +33,28 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(std::int64_t f
 	return _create_feature(std::move(feature_info.front()));
 }
 //---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::shop::_specialise(feature_info_t const& feature_template)
+{
+	std::string_view const template_type{feature_template.formula_.at("template_type"sv).get<std::string_view>()};
+	if (template_type == "stored"sv)
+	{
+		return impl::stored::rnd_from_template(feature_template, *this);
+	}
+	if (template_type == "delta"sv)
+	{
+		return impl::delta::rnd_from_template(feature_template, *this);
+	}
+	if (template_type == "shift_delta"sv)
+	{
+		return impl::shift_delta::rnd_from_template(feature_template, *this);
+	}
+	if (template_type == "sma"sv)
+	{
+		return impl::sma::rnd_from_template(feature_template, *this);
+	}
+	throw std::runtime_error("unknown template type: "s + feature_template.label_);
+}
+//---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metadata::feature_info&& info)
 {
 	std::string_view feature_type;
@@ -33,7 +62,7 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metada
 
 	if (feature_type == "template"sv)
 	{
-		return _create_feature(randomiser_.specialise(std::move(info)));
+		return _create_feature(_specialise(std::move(info)));
 	}
 	std::shared_ptr<feature::abstract> result;
 	if (feature_type == "stored"sv)
@@ -87,6 +116,22 @@ std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json& fj)
 	throw std::runtime_error{"invalid json representation of feature_info"};
 }
 //---------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------
+void feature::shop::verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label)
+{
+	if (type_ids.empty())
+	{
+		throw std::runtime_error("underlying_..._types is empty in "s + label);
+	}
+	for (std::int32_t id : type_ids)
+	{
+		if (!type_map_.contains(id))
+		{
+			throw std::runtime_error("unknown underlying_types: "s + std::to_string(id));
+		}
+	}
+}
+//---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_id)
 {
 	auto const feature_map_i{feature_map_.find(feature_id)};
@@ -116,4 +161,9 @@ std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json& fj)
 		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", fj.dump(), ex.what());
 		throw;
 	}
+}
+//---------------------------------------------------------------------------------------------------------
+feature::feature_info_t const& feature::shop::random_feature_info(std::int32_t feature_type_id)
+{
+	return randomiser_.pick_random(type_map_[feature_type_id]);
 }

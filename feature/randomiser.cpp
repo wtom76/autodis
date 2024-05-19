@@ -28,6 +28,16 @@ void feature::randomiser::_verify_typeset(std::vector<std::int32_t> const& type_
 	}
 }
 //---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::randomiser::_spec_stored()
+{
+	constexpr std::int32_t type_id_stored{1};
+
+	feature::feature_info_t result;
+	result.formula_["type"s] = "stored"s;
+	result.formula_["data_reg_id"s] = _pick_random(type_map_[type_id_stored]).id_;
+	return result;
+}
+//---------------------------------------------------------------------------------------------------------
 feature::feature_info_t feature::randomiser::_spec_delta(feature_info_t const& feature_template)
 {
 	feature::feature_info_t result;
@@ -51,11 +61,17 @@ feature::feature_info_t feature::randomiser::_spec_delta(feature_info_t const& f
 feature::feature_info_t feature::randomiser::specialise(feature_info_t const& feature_template)
 {
 	std::string_view const template_type{feature_template.formula_.at("template_type"sv).get<std::string_view>()};
+	if (template_type == "stored"sv)
+	{
+		return _spec_stored();
+	}
 	if (template_type == "delta"sv)
 	{
 		return _spec_delta(feature_template);
 	}
-	else if (template_type == "shift_delta"sv)
-	{}
+	if (template_type == "shift_delta"sv)
+	{
+
+	}
 	throw std::runtime_error("unknown template type: "s + feature_template.label_);
 }

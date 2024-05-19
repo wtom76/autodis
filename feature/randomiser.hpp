@@ -33,6 +33,7 @@ namespace feature
 		}
 
 		void _verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label);
+		feature_info_t _spec_stored();
 		feature_info_t _spec_delta(feature_info_t const& feature_template);
 	public:
 		randomiser();

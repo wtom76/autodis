@@ -18,13 +18,13 @@ namespace autodis::model
 	void to_json(nlohmann::json& j, model_011::config const& src)
 	{
 		j = nlohmann::json{
-			{ "layer_sizes", src.layer_sizes_ }
+			{ "net_cfg", src.net_cfg_ }
 		};
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void from_json(nlohmann::json const& j, model_011::config& dst)
 	{
-		j.at("layer_sizes").get_to(dst.layer_sizes_);
+		j.at("net_cfg").get_to(dst.net_cfg_);
 	}
 }
 //---------------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ public:
 		config const& cfg,
 		std::vector<std::string> const& input_series_names)
 		: dw_{df}
-		, mfn_cfg_{cfg.layer_sizes_}
+		, mfn_cfg_{cfg.net_cfg_}
 		, mfn_{mfn_cfg_}
 		, input_filler_{dw_, input_series_names, &mfn_.input_layer()}
 	{}
@@ -60,17 +60,15 @@ autodis::model::model_011::model_011(file&& model_file)
 	: shop_{std::make_unique<feature::shop>()}
 	, model_file_{std::move(model_file)}
 	, cfg_{model_file_.config().get<config>()}
-{}
-//---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::_set_layer_sizes_default(config& cfg)
 {
-	cfg.layer_sizes_ = {0, 16, 8, 1};
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_011::_adjust_cfg_input_size()
 {
-	assert(!cfg_.layer_sizes_.empty());
-	cfg_.layer_sizes_[0] = input_series_names_.size();
+	assert(!cfg_.net_cfg_.layer_sizes().empty());
+	learning::config::layer_sizes_t ls{cfg_.net_cfg_.layer_sizes()};
+	ls[0] = input_series_names_.size();
+	cfg_.net_cfg_.layer_sizes(std::move(ls));
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_011::_print_df(frame_t const& df, std::filesystem::path const& path) const
@@ -272,7 +270,6 @@ void autodis::model::model_011::create_model_file(
 	file f{type_name, model_id, file_path};
 	{
 		config default_cfg{};
-		_set_layer_sizes_default(default_cfg);
 		f.config() = default_cfg;
 	}
 	f.store();

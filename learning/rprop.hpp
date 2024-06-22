@@ -56,6 +56,7 @@ namespace learning
 		void _updateBiases(net& network);
 		void _split_data();
 		double _mean_sqr_error(net& network);
+		double _teach_epoch(net& network);
 	public:
 		rprop(sample_filler& input_filler, sample_filler& target_filler)
 			: rand_{rd_()}
@@ -295,56 +296,59 @@ namespace learning
 		return sqr_err_sum / test_set_.size();
 	}
 	//-----------------------------------------------------------------------------------------------------
-	/// \returns best mean square error
+	// returns mean square error of epoch
+	template <class net>
+	double rprop<net>::_teach_epoch(net& network)
+	{
+		dEdw_off_->reset(0.);
+		bias_dEdw_off_->reset(0.);
+		for (size_t row_idx : teaching_set_)
+		{
+			input_filler_.fill(row_idx);
+			target_filler_.fill(row_idx);
+			network.forward();
+			_updateGradients(network, sample_targets_);
+		}
+		_updateWeights(network);
+		_updateBiases(network);
+		return std::sqrt(_mean_sqr_error(network));
+	}
+	//-----------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------------
+	// returns best mean square error
 	template <class net>
 	double rprop<net>::teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token)
 	{
 		constexpr std::int64_t epochs_max{1000000};
 
 		pview.begin_teach();
-
 		_init(cfg);
-
-		double err{std::numeric_limits<double>::max()};
-		double cur_min_err{err};
 		net best_network{network};
+		double cur_min_err{std::numeric_limits<double>::max()};
 		pview.set_best(cur_min_err);
-
 		std::int64_t epochs_left{epochs_max};
-
-		while (err > min_err && !stop_token.stop_requested() && epochs_left--)
+		if (cfg.stable_test_set())
 		{
-			_split_data();
-
-			dEdw_off_->reset(0.);
-			bias_dEdw_off_->reset(0.);
-
-			for (size_t row_idx : teaching_set_)
+			_split_data(); // never change test set - more honest
+		}
+		while (cur_min_err > min_err && !stop_token.stop_requested() && epochs_left--)
+		{
+			if (!cfg.stable_test_set())
 			{
-				input_filler_.fill(row_idx);
-				target_filler_.fill(row_idx);
-				network.forward();
-				_updateGradients(network, sample_targets_);
+				_split_data(); // test set is new every epoch
 			}
-			_updateWeights(network);
-			_updateBiases(network);
-			err = std::sqrt(_mean_sqr_error(network));
-
+			double const err{_teach_epoch(network)};
 			if (cur_min_err > err)
 			{
 				cur_min_err = err;
 				best_network = network;
 				pview.set_best(cur_min_err);
 			}
-
 			pview.set_last(err);
 			pview.set_epoch(epochs_max - epochs_left);
 		}
-
 		network = best_network;
-
 		pview.end_teach();
-
 		return cur_min_err;
 	}
 	//-----------------------------------------------------------------------------------------------------

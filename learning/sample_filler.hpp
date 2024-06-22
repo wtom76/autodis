@@ -6,6 +6,7 @@ namespace learning
 {
 	//-----------------------------------------------------------------------------------------------------
 	// class sample_filler
+	// fills input network layer with a row from source data frame view
 	//-----------------------------------------------------------------------------------------------------
 	class sample_filler
 	{

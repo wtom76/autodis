@@ -33,9 +33,11 @@ namespace feature
 
 	// methods
 	private:
-		std::shared_ptr<abstract> _create_feature(std::int64_t feature_id);
-		feature_info_t _specialise(feature_info_t const& feature_template);
-		std::shared_ptr<abstract> _create_feature(keeper::metadata::feature_info&& info);
+		feature_info_t _load_feature_info(std::int64_t feature_id) const;
+		std::string_view _feature_type(feature_info_t const& feature_template);
+		feature_info_t _rnd_from_template(feature_info_t const& feature_template);
+		std::shared_ptr<abstract> _create_feature(feature_info_t&& info);
+		std::shared_ptr<abstract> _existing(std::int64_t feature_id);
 		std::shared_ptr<abstract> _feature(nlohmann::json& fj);
 
 	public:
@@ -43,6 +45,7 @@ namespace feature
 		master_index const& index() const noexcept { return master_index_; }
 		// feature_id is id from feature DB table
 		std::shared_ptr<abstract> feature(std::int64_t feature_id);
+		// feature from json wich may be feature_id, feature formula or feature formula template
 		std::shared_ptr<abstract> feature(nlohmann::json& fj);
 
 		void verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label);

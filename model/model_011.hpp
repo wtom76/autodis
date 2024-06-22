@@ -31,8 +31,9 @@ namespace autodis::model
 		class config
 		{
 		public:
-			using layer_sizes_t = std::vector<std::size_t>;
-			layer_sizes_t layer_sizes_;
+			learning::config net_cfg_;
+			config() : net_cfg_{{0, 16, 8, 1}}
+			{}
 		};
 
 	// data

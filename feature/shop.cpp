@@ -22,18 +22,24 @@ feature::shop::shop()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-std::shared_ptr<feature::abstract> feature::shop::_create_feature(std::int64_t feature_id)
+//---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::shop::_load_feature_info(std::int64_t feature_id) const
 {
-	std::vector<keeper::metadata::feature_info> feature_info{keeper_md_->load_feature_meta({feature_id})};
+	std::vector<feature_info_t> feature_info{keeper_md_->load_feature_meta({feature_id})};
 	if (feature_info.empty())
 	{
 		throw std::runtime_error("failed to load feature info by id: "s + std::to_string(feature_id));
 	}
 	assert(feature_info.front().id_ == feature_id);
-	return _create_feature(std::move(feature_info.front()));
+	return std::move(feature_info.front());
 }
 //---------------------------------------------------------------------------------------------------------
-feature::feature_info_t feature::shop::_specialise(feature_info_t const& feature_template)
+std::string_view feature::shop::_feature_type(feature_info_t const& info)
+{
+	return info.formula_.at("type"sv).get<std::string_view>();
+}
+//---------------------------------------------------------------------------------------------------------
+feature::feature_info_t feature::shop::_rnd_from_template(feature_info_t const& feature_template)
 {
 	std::string_view const template_type{feature_template.formula_.at("template_type"sv).get<std::string_view>()};
 	if (template_type == "stored"sv)
@@ -55,14 +61,13 @@ feature::feature_info_t feature::shop::_specialise(feature_info_t const& feature
 	throw std::runtime_error("unknown template type: "s + feature_template.label_);
 }
 //---------------------------------------------------------------------------------------------------------
-std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metadata::feature_info&& info)
+std::shared_ptr<feature::abstract> feature::shop::_create_feature(feature_info_t&& info)
 {
-	std::string_view feature_type;
-	info.formula_.at("type"sv).get_to(feature_type);
+	std::string_view feature_type{_feature_type(info)};
 
 	if (feature_type == "template"sv)
 	{
-		return _create_feature(_specialise(std::move(info)));
+		return _create_feature(_rnd_from_template(std::move(info)));
 	}
 	std::shared_ptr<feature::abstract> result;
 	if (feature_type == "stored"sv)
@@ -90,26 +95,45 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(keeper::metada
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
+std::shared_ptr<feature::abstract> feature::shop::_existing(std::int64_t feature_id) const
+{
+	auto const feature_map_i{feature_map_.find(feature_id)};
+	return feature_map_i != feature_map_.cend()
+			? feature_map_i->second
+			: std::shared_ptr<feature::abstract>{};
+}
+//---------------------------------------------------------------------------------------------------------
+// 1. get already existing in shop feature by id or create it using formula from DB otherwise
+// 2. or create feature from json
+//  2.1. "generated" if present contains generated from template formula. use "generated".
+//  2.2. "id" if present contains feature DB id. use it as in clause 1.
 std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json& fj)
 {
-	constexpr std::string_view generated_from_template_tag{"generated"sv};
+	// 1.
 	if (fj.is_number())
 	{
 		return feature(fj.get<std::int64_t>());
 	}
+	// 2.
 	if (fj.is_object())
 	{
-		auto const cached_i{fj.find(generated_from_template_tag)};		// is used to cache specialised templates only
-		if (cached_i != fj.end())
+		// 2.1.
+		constexpr std::string_view generated_from_template_tag{"generated"sv};
+		if (auto const info_i{fj.find(generated_from_template_tag)}; info_i != fj.end())			// is used to cache specialised templates only
 		{
-			keeper::metadata::feature_info info{cached_i->get<keeper::metadata::feature_info>()};
+			feature_info_t info{info_i->get<keeper::metadata::feature_info>()};
 			return _create_feature(std::move(info));
 		}
-		auto const id_i{fj.find("id"sv)};								// fall back to id
-		if (id_i != fj.end())
+		// 2.2.
+		if (auto const id_i{fj.find("id"sv)}; id_i != fj.end())										// fall back to id
 		{
-			std::shared_ptr<feature::abstract> feature{_create_feature(id_i->get<std::int64_t>())};
-			fj[generated_from_template_tag] = feature->info();
+			feature_info_t info{_load_feature_info(id_i->get<std::int64_t>())};
+			bool const is_template{_feature_type(info) == "template"sv};
+			std::shared_ptr<feature::abstract> feature{_create_feature(std::move(info))};
+			if (is_template)
+			{
+				fj[generated_from_template_tag] = feature->info();
+			}
 			return feature;
 		}
 	}
@@ -134,14 +158,13 @@ void feature::shop::verify_typeset(std::vector<std::int32_t> const& type_ids, st
 //---------------------------------------------------------------------------------------------------------
 std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_id)
 {
-	auto const feature_map_i{feature_map_.find(feature_id)};
-	if (feature_map_i != feature_map_.cend())
+	if (std::shared_ptr<abstract> existing{_existing(feature_id)})
 	{
-		return feature_map_i->second;
+		return existing;
 	}
 	try
 	{
-		return _create_feature(feature_id);
+		return _create_feature(_load_feature_info(feature_id));
 	}
 	catch (std::exception const& ex)
 	{

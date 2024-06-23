@@ -22,5 +22,6 @@ namespace autodis
 		void predict(std::string const& model_name);
 		void show(std::string const& model_name);
 		void show_analysis(std::string const& model_name);
+		void test_feature(std::int64_t feature_id, std::filesystem::path const& out_path);
 	};
 }

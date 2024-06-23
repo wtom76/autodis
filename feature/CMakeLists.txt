@@ -5,6 +5,7 @@ add_library(feature OBJECT
 	impl/sma.cpp
 	impl/delta.cpp
 	impl/shift_delta.cpp
+	abstract.cpp
 	shop.cpp
 	master_index.cpp
 	index_cursor.cpp

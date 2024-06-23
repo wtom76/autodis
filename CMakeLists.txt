@@ -50,6 +50,12 @@ target_link_libraries(autodis PRIVATE learning)
 target_link_libraries(autodis PRIVATE model)
 target_link_libraries(autodis PRIVATE visual)
 
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost COMPONENTS program_options) 
+target_link_libraries(autodis PRIVATE ${Boost_LIBRARIES})
+
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(autodis PRIVATE nlohmann_json::nlohmann_json)
 

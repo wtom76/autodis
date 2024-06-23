@@ -4,6 +4,8 @@
 #include "config.hpp"
 #include "learn_runner.hpp"
 #include "application.hpp"
+#include "feature/shop.hpp"
+#include "feature/abstract.hpp"
 
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::_store_prediction(int64_t model_id, model::prediction_result_t const& result)
@@ -73,4 +75,10 @@ void autodis::application::show_analysis(std::string const& model_name)
 		model->show_partial_dependence();
 		//model->show_analysis();
 	}
+}
+//----------------------------------------------------------------------------------------------------------
+void autodis::application::test_feature(std::int64_t feature_id, std::filesystem::path const& out_path)
+{
+	feature::shop shop;
+	shop.feature(feature_id)->dump(out_path);
 }

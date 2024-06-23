@@ -19,6 +19,11 @@
 #include <utility>
 #include <vector>
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/positional_options.hpp>
+
 using namespace std::literals;
 
 #include <shared/shared.hpp>

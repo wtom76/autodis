@@ -46,10 +46,10 @@ namespace learning
 			SPDLOG_LOGGER_INFO(log(), "current best mean sqr err: {}", best_err_);
 			_set_best();
 		}
-		void set_last(double min_err)
+		void set_last(double last_err)
 		{
-			SPDLOG_LOGGER_INFO(log(), "epoch: {}. last err: {}, min err: {}", epoch_, min_err, best_err_);
-			_set_last(min_err);
+			SPDLOG_LOGGER_INFO(log(), "epoch: {}. min err: {}, last err: {}", epoch_, best_err_, last_err);
+			_set_last(last_err);
 		}
 		void set_epoch(std::int64_t epoch)
 		{

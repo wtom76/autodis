@@ -22,7 +22,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 			("feature_id,I", po::value<std::int64_t>(), "feature DB id")
 			("out,O", po::value<std::string>(), "output file name");
 		po::positional_options_description p;
-		p.add("command", 1).add("name", 1).add("type", 1);
+		p.add("command", 1).add("file", 1);
 		po::variables_map params;
 		po::store(po::command_line_parser(argc, argv).options(all_options).positional(p).run(), params);
 		po::notify(params);
@@ -60,7 +60,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 			std::cout
 				<< all_options
 				<< "usage:\n"
-				<< "autodis makefile <model_name> <model_type>\n"
+				<< "autodis makefile <model_name> --type=<model_type>\n"
 				<< "autodis learn <model_name>\n"
 				<< "autodis predict <model_name>\n"
 				<< "autodis show <model_name>\n"

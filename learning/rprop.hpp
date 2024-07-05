@@ -98,8 +98,8 @@ namespace learning
 		// 1.
 		{
 			auto& grad_terms{grad_terms_->layers_.back()};
-			auto& outputs{network.output_layers().back()};
-			auto& functions{network.functions().back()};
+			auto const& outputs{network.output_layers().back()};
+			auto const& functions{network.functions().back()};
 			for (size_t node_idx{0}; node_idx < grad_terms.size(); ++node_idx)
 			{
 				grad_terms[node_idx] =

@@ -92,9 +92,6 @@ void autodis::model::model_011::_fill_normalized(feature::abstract& src_feature,
 			break;
 		}
 
-// DEBUG
-		// df_series[df_idx] = src_feature.value(df_.index()[df_idx]);
-//~DEBUG
 		dst_df_series[df_idx] = src_feature.norm().normalize(src_feature.value(df_.index()[df_idx]));
 	}
 }
@@ -116,7 +113,6 @@ void autodis::model::model_011::_create_target()
 		feature::index_value_t mival{mi.at(mi_pos)};
 		df_index.emplace_back(mival);
 		df_series.emplace_back(target_norm_.normalize(target->value(mival)));
-		//df_series.emplace_back(target->value(mival)); // DEBUG
 	}
 }
 //---------------------------------------------------------------------------------------------------------

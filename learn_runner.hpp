@@ -56,7 +56,6 @@ namespace autodis
 		{
 			nlohmann::json j = network_;
 			store_result_network_(std::move(network_));
-			//std::ofstream{"best_net.dump"s} << network_;
 			_update_chart();
 		}
 

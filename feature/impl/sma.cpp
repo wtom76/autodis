@@ -56,18 +56,17 @@ feature::feature_info_t feature::impl::sma::rnd_from_template(feature_info_t con
 	result.formula_["type"s] = "sma"s;
 
 	{
-		std::int64_t under_id;
 		std::vector<std::int32_t> type_ids;
 		feature_template.formula_.at("underlying_types"sv).get_to(type_ids);
 		shop.verify_typeset(type_ids, feature_template.label_);
-		under_id = shop.random_feature_info(shop.pick_random(type_ids)).id_;
+		std::int64_t const under_id{shop.random_feature_info(shop.pick_random(type_ids)).id_};
 		result.formula_["underlying"s] = under_id;
 	}
 	{
 		constexpr std::ptrdiff_t period_min{2};
-		std::ptrdiff_t period_max;
+		std::ptrdiff_t period_max{0};
 		feature_template.formula_.at("period_max"sv).get_to(period_max);
-		result.formula_["pariod"s] = shop.pick_random(period_min, period_max);
+		result.formula_["period"s] = shop.pick_random(period_min, period_max);
 	}
 
 	return result;

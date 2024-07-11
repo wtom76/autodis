@@ -15,7 +15,7 @@ namespace keeper
 		};
 	}
 	//---------------------------------------------------------------------------------------------------------
-	void from_json(const nlohmann::json& j, metadata::feature_info& dst)
+	void from_json(nlohmann::json const& j, metadata::feature_info& dst)
 	{
 		j.at("id").get_to(dst.id_);
 		j.at("type_id").get_to(dst.type_id_);

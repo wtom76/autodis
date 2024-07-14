@@ -8,19 +8,19 @@ namespace keeper
 	void to_json(nlohmann::json& j, metadata::feature_info const& src)
 	{
 		j = nlohmann::json{
-			{ "id", src.id_ },
-			{ "type_id", src.type_id_ },
-			{ "label", src.label_ },
-			{ "formula", src.formula_ }
+			{ "type_id"s, src.type_id_ },
+			{ "label"s, src.label_ },
+			{ "formula"s, src.formula_ }
 		};
+		shared::util::to_json(j, "id"s, 0l, src.id_);
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void from_json(nlohmann::json const& j, metadata::feature_info& dst)
 	{
-		j.at("id").get_to(dst.id_);
-		j.at("type_id").get_to(dst.type_id_);
-		j.at("label").get_to(dst.label_);
-		j.at("formula").get_to(dst.formula_);
+		shared::util::from_json_to(j, "id"s, 0, dst.id_);
+		j.at("type_id"s).get_to(dst.type_id_);
+		j.at("label"s).get_to(dst.label_);
+		j.at("formula"s).get_to(dst.formula_);
 	}
 }
 

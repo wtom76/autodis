@@ -54,12 +54,14 @@ feature::feature_info_t feature::impl::sma::rnd_from_template(feature_info_t con
 	feature::feature_info_t result;
 
 	result.formula_["type"s] = "sma"s;
+	result.type_id_ = 4;
+	result.label_ = "random sma"s;
 
 	{
-		std::vector<std::int32_t> type_ids;
-		feature_template.formula_.at("underlying_types"sv).get_to(type_ids);
-		shop.verify_typeset(type_ids, feature_template.label_);
-		std::int64_t const under_id{shop.random_feature_info(shop.pick_random(type_ids)).id_};
+		std::vector<std::int32_t> under_type_ids;
+		feature_template.formula_.at("underlying_types"sv).get_to(under_type_ids);
+		shop.verify_typeset(under_type_ids, feature_template.label_);
+		std::int64_t const under_id{shop.random_feature_info(shop.pick_random(under_type_ids)).id_};
 		result.formula_["underlying"s] = under_id;
 	}
 	{

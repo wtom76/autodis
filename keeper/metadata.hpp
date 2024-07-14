@@ -53,6 +53,8 @@ namespace keeper
 			std::int32_t	type_id_{0};
 			std::string		label_;
 			nlohmann::json	formula_;
+
+			static constexpr std::int32_t type_id_template_{1'000'000};
 		};
 
 	private:

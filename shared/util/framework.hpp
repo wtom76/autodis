@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <span>
 #include <string>
@@ -25,5 +26,7 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/fmt/ostr.h>
+
+#include <nlohmann/json.hpp>
 
 using namespace std::literals;

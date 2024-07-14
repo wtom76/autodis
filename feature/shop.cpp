@@ -103,63 +103,11 @@ std::shared_ptr<feature::abstract> feature::shop::_existing(std::int64_t feature
 			: std::shared_ptr<feature::abstract>{};
 }
 //---------------------------------------------------------------------------------------------------------
-// 1. get already existing in shop feature by id or create it using formula from DB otherwise
-// 2. or create feature from json
-//  2.1. "generated" if present contains generated from template formula. use "generated".
-//  2.2. "id" if present contains feature DB id. use it as in clause 1.
-std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json& fj)
-{
-	// 1.
-	if (fj.is_number())
-	{
-		return feature(fj.get<std::int64_t>());
-	}
-	// 2.
-	if (fj.is_object())
-	{
-		// 2.1.
-		constexpr std::string_view generated_from_template_tag{"generated"sv};
-		if (auto const info_i{fj.find(generated_from_template_tag)}; info_i != fj.end())			// is used to cache specialised templates only
-		{
-			feature_info_t info{info_i->get<keeper::metadata::feature_info>()};
-			return _create_feature(std::move(info));
-		}
-		// 2.2.
-		if (auto const id_i{fj.find("id"sv)}; id_i != fj.end())										// fall back to id
-		{
-			feature_info_t info{_load_feature_info(id_i->get<std::int64_t>())};
-			bool const is_template{_feature_type(info) == "template"sv};
-			std::shared_ptr<feature::abstract> feature{_create_feature(std::move(info))};
-			if (is_template)
-			{
-				fj[generated_from_template_tag] = feature->info();
-			}
-			return feature;
-		}
-	}
-	throw std::runtime_error{"invalid json representation of feature_info"};
-}
-//---------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------
-void feature::shop::verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label)
-{
-	if (type_ids.empty())
-	{
-		throw std::runtime_error("underlying_..._types is empty in "s + label);
-	}
-	for (std::int32_t id : type_ids)
-	{
-		if (!type_map_.contains(id))
-		{
-			throw std::runtime_error("unknown underlying_types: "s + std::to_string(id));
-		}
-	}
-}
-//---------------------------------------------------------------------------------------------------------
-std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_id)
+std::shared_ptr<feature::abstract> feature::shop::_feature(std::int64_t feature_id)
 {
 	if (std::shared_ptr<abstract> existing{_existing(feature_id)})
 	{
+		assert(_feature_type(existing->info()) != "template"sv);
 		return existing;
 	}
 	try
@@ -173,7 +121,39 @@ std::shared_ptr<feature::abstract> feature::shop::feature(std::int64_t feature_i
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json& fj)
+// 1. get already existing in shop feature by id or create it using formula from DB otherwise
+// 2. or create feature from json representing feature_info_t
+
+// TODO: shop doesn't replace json
+// TODO: if feature_info_t has non template id, no need to store it as feature_info_t. store id.
+// TODO: thus store feature_info_t instead of id into json if id == 0
+std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json const& fj)
+{
+	// 1.
+	if (fj.is_number())
+	{
+		return _feature(fj.get<std::int64_t>());
+	}
+	// 2.
+	if (fj.is_object())
+	{
+		feature_info_t info;
+		fj.get_to(info);
+		if (_feature_type(info) == "template"sv)
+		{
+			throw std::runtime_error{"json representation of feature_info should not be template. for templates use DB id instead"};
+		}
+		if (info.id_)
+		{
+			SPDLOG_LOGGER_WARN(log(), "store id instead of json representation of feature_info when id is not 0");
+		}
+		return _create_feature(std::move(info));
+	}
+	throw std::runtime_error{"invalid json representation of feature_info"};
+}
+//---------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------
+std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json const& fj)
 {
 	try
 	{
@@ -181,8 +161,23 @@ std::shared_ptr<feature::abstract> feature::shop::feature(nlohmann::json& fj)
 	}
 	catch (std::exception const& ex)
 	{
-		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}. error: {}", fj.dump(), ex.what());
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature from {}", fj.dump());
 		throw;
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+void feature::shop::verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label)
+{
+	if (type_ids.empty())
+	{
+		throw std::runtime_error("underlying_..._types is empty in "s + label);
+	}
+	for (std::int32_t id : type_ids)
+	{
+		if (!type_map_.contains(id))
+		{
+			throw std::runtime_error("unknown underlying_types: "s + std::to_string(id));
+		}
 	}
 }
 //---------------------------------------------------------------------------------------------------------

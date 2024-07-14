@@ -53,14 +53,27 @@ feature::feature_info_t feature::impl::delta::rnd_from_template(feature_info_t c
 	feature::feature_info_t result;
 	result.formula_["type"s] = "delta"s;
 
+	if (feature_template.formula_.contains("underlying_1_types"s))
 	{
-		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> type_ids;
-		feature_template.formula_.at("underlying_1_types"sv).get_to(type_ids.first);
-		feature_template.formula_.at("underlying_2_types"sv).get_to(type_ids.second);
-		shop.verify_typeset(type_ids.first, feature_template.label_);
-		shop.verify_typeset(type_ids.second, feature_template.label_);
-		result.formula_["underlying_1"s] = shop.random_feature_info(shop.pick_random(type_ids.first)).id_;
-		result.formula_["underlying_2"s] = shop.random_feature_info(shop.pick_random(type_ids.second)).id_;
+		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> under_type_ids;
+		feature_template.formula_.at("underlying_1_types"sv).get_to(under_type_ids.first);
+		feature_template.formula_.at("underlying_2_types"sv).get_to(under_type_ids.second);
+		shop.verify_typeset(under_type_ids.first, feature_template.label_);
+		shop.verify_typeset(under_type_ids.second, feature_template.label_);
+		result.formula_["underlying_1"s] = shop.random_feature_info(shop.pick_random(under_type_ids.first)).id_;
+		result.formula_["underlying_2"s] = shop.random_feature_info(shop.pick_random(under_type_ids.second)).id_;
+	}
+	else if (feature_template.formula_.contains("underlying_1"s))
+	{
+		std::pair<std::vector<std::int64_t>, std::vector<std::int64_t>> under_ids;
+		feature_template.formula_.at("underlying_1"sv).get_to(under_ids.first);
+		feature_template.formula_.at("underlying_2"sv).get_to(under_ids.second);
+		result.formula_["underlying_1"s] = shop.pick_random(under_ids.first);
+		result.formula_["underlying_2"s] = shop.pick_random(under_ids.second);
+	}
+	else
+	{
+		throw std::runtime_error{"neither underlying_*_types nor underlying_*"};
 	}
 
 	return result;

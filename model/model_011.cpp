@@ -132,6 +132,11 @@ void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
 		SPDLOG_LOGGER_ERROR(log(), "failed to create feature: {}", fj.dump());
 		return;
 	}
+	assert(feature->info().type_id_ != feature::feature_info_t::type_id_template_);
+	if (!feature->info().id_)
+	{
+		to_json(fj, feature->info());
+	}
 	
 	shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->label())};
 	if (!df_series_ptr)

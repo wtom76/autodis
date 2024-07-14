@@ -7,23 +7,45 @@ namespace keeper
 	//---------------------------------------------------------------------------------------------------------
 	void to_json(nlohmann::json& j, metadata::feature_info const& src)
 	{
-		j = nlohmann::json{
-			{ "type_id"s, src.type_id_ },
-			{ "label"s, src.label_ },
-			{ "formula"s, src.formula_ }
-		};
-		shared::util::to_json(j, "id"s, 0l, src.id_);
+		if (src.is_from_db())
+		{
+			j = src.id_;
+		}
+		else
+		{
+			j = nlohmann::json{
+				{ "type_id"s, src.type_id_ },
+				{ "label"s, src.label_ },
+				{ "formula"s, src.formula_ }
+			};
+		}
 	}
 	//---------------------------------------------------------------------------------------------------------
 	void from_json(nlohmann::json const& j, metadata::feature_info& dst)
 	{
-		shared::util::from_json_to(j, "id"s, 0, dst.id_);
-		j.at("type_id"s).get_to(dst.type_id_);
-		j.at("label"s).get_to(dst.label_);
-		j.at("formula"s).get_to(dst.formula_);
+		if (j.is_number())
+		{
+			j.get_to(dst.id_);
+		}
+		else
+		{
+			j.at("type_id"s).get_to(dst.type_id_);
+			j.at("label"s).get_to(dst.label_);
+			j.at("formula"s).get_to(dst.formula_);
+		}
 	}
 }
-
+//---------------------------------------------------------------------------------------------------------
+bool keeper::metadata::feature_info::is_template() const noexcept
+{
+	return id_ == type_id_template_;
+}
+//---------------------------------------------------------------------------------------------------------
+std::string_view keeper::metadata::feature_info::feature_type() const
+{
+	return formula_.at("type"sv).get<std::string_view>();
+}
+//---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
 keeper::metadata::metadata(const config& cfg)
 	: con_{cfg.db_connection_}
@@ -159,15 +181,18 @@ std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta_all()
+std::vector<std::int64_t> keeper::metadata::load_feature_ids_by_type(std::int32_t type_id)
 {
-	std::vector<keeper::metadata::feature_info> result;
+	std::vector<std::int64_t> result;
 	{
 		std::unique_lock const lock{con_mtx_};
 		pqxx::work t{con_};
-		_read_query_result(
-			t.exec("select id, type_id, label, formula from metadata.feature"),
-			result);
+		pqxx::result const r{t.exec_params("select id from metadata.feature where type_id = $1", type_id)};
+		result.reserve(r.size());
+		for (auto const& row : r)
+		{
+			result.emplace_back(row[0].as<std::int64_t>());
+		}
 	}
 	return result;
 }

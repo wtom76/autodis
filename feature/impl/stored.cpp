@@ -61,6 +61,6 @@ feature::feature_info_t feature::impl::stored::rnd_from_template(feature_info_t 
 
 	feature::feature_info_t result;
 	result.formula_["type"s] = "stored"s;
-	result.formula_["data_reg_id"s] = shop.random_feature_info(type_id_stored).id_;
+	result.formula_["data_reg_id"s] = shop.random_info_of_type(type_id_stored);
 	return result;
 }

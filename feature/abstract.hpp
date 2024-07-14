@@ -12,6 +12,7 @@ namespace feature
 	// abstract
 	//---------------------------------------------------------------------------------------------------------
 	class abstract
+		: protected shared::util::logged
 	{
 	// types
 	public:
@@ -49,6 +50,8 @@ namespace feature
 			bounds_ = b;
 			norm_ = shared::math::tanh_normalization{shared::math::min_max{bounds_.value_min_, bounds_.value_max_}};
 		}
+		//---------------------------------------------------------------------------------------------------------
+		static void _verify_typeset(std::vector<std::int32_t> const& type_ids, std::string const& label);
 		//---------------------------------------------------------------------------------------------------------
 		explicit abstract(feature_info_t&& info, shop& shop)
 			: info_{std::move(info)}

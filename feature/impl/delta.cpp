@@ -58,23 +58,34 @@ feature::feature_info_t feature::impl::delta::rnd_from_template(feature_info_t c
 		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> under_type_ids;
 		feature_template.formula_.at("underlying_1_types"sv).get_to(under_type_ids.first);
 		feature_template.formula_.at("underlying_2_types"sv).get_to(under_type_ids.second);
-		shop.verify_typeset(under_type_ids.first, feature_template.label_);
-		shop.verify_typeset(under_type_ids.second, feature_template.label_);
-		result.formula_["underlying_1"s] = shop.random_feature_info(shop.pick_random(under_type_ids.first)).id_;
-		result.formula_["underlying_2"s] = shop.random_feature_info(shop.pick_random(under_type_ids.second)).id_;
+		_verify_typeset(under_type_ids.first, feature_template.label_);
+		_verify_typeset(under_type_ids.second, feature_template.label_);
+		result.formula_["underlying_1"s] = shop.random_info_of_type(shop.random_value(under_type_ids.first));
+		result.formula_["underlying_2"s] = shop.random_info_of_type(shop.random_value(under_type_ids.second));
 	}
 	else if (feature_template.formula_.contains("underlying_1"s))
 	{
 		std::pair<std::vector<std::int64_t>, std::vector<std::int64_t>> under_ids;
 		feature_template.formula_.at("underlying_1"sv).get_to(under_ids.first);
 		feature_template.formula_.at("underlying_2"sv).get_to(under_ids.second);
-		result.formula_["underlying_1"s] = shop.pick_random(under_ids.first);
-		result.formula_["underlying_2"s] = shop.pick_random(under_ids.second);
+		result.formula_["underlying_1"s] = shop.random_info(under_ids.first);
+		result.formula_["underlying_2"s] = shop.random_info(under_ids.second);
 	}
 	else
 	{
-		throw std::runtime_error{"neither underlying_*_types nor underlying_*"};
+		throw std::runtime_error{"neither underlying_*_types nor underlying_* provided"};
 	}
+
+// DEBUG
+	{
+		nlohmann::json j = feature_template;
+		SPDLOG_LOGGER_DEBUG(shared::util::log(), "delta::from_template\n{}", j.dump(4));
+	}
+	{
+		nlohmann::json j = result;
+		SPDLOG_LOGGER_DEBUG(shared::util::log(), "delta::result\n{}", j.dump(4));
+	}
+//~DEBUG
 
 	return result;
 }

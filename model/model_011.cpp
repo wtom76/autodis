@@ -132,7 +132,7 @@ void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
 		SPDLOG_LOGGER_ERROR(log(), "failed to create feature: {}", fj.dump());
 		return;
 	}
-	assert(feature->info().type_id_ != feature::feature_info_t::type_id_template_);
+	assert(!feature->info().is_template());
 	if (!feature->info().id_)
 	{
 		to_json(fj, feature->info());

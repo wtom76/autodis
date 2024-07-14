@@ -15,7 +15,7 @@ namespace keeper
 	{
 	public:
 		//---------------------------------------------------------------------------------------------------------
-		// struct feed_info
+		// feed_info
 		//---------------------------------------------------------------------------------------------------------
 		struct feed_info
 		{
@@ -24,7 +24,7 @@ namespace keeper
 			std::vector<data_uri>		data_uri_;
 		};
 		//---------------------------------------------------------------------------------------------------------
-		// struct source_info
+		// source_info
 		//---------------------------------------------------------------------------------------------------------
 		struct source_info
 		{
@@ -36,7 +36,7 @@ namespace keeper
 			feed_info	dest_;
 		};
 		//---------------------------------------------------------------------------------------------------------
-		// struct data_info
+		// data_info
 		//---------------------------------------------------------------------------------------------------------
 		struct data_info
 		{
@@ -45,16 +45,21 @@ namespace keeper
 			std::string	description_;
 		};
 		//---------------------------------------------------------------------------------------------------------
-		// struct feature_info
+		// feature_info
 		//---------------------------------------------------------------------------------------------------------
-		struct feature_info
+		class feature_info
 		{
+		private:
+			static constexpr std::int32_t type_id_template_{1'000'000};
+		public:
 			std::int64_t	id_{0};
 			std::int32_t	type_id_{0};
 			std::string		label_;
 			nlohmann::json	formula_;
 
-			static constexpr std::int32_t type_id_template_{1'000'000};
+			bool is_from_db() const noexcept { return id_; }	// the feature info is from the database
+			bool is_template() const noexcept;					// the feature info represents a feature template
+			std::string_view feature_type() const;
 		};
 
 	private:
@@ -71,7 +76,7 @@ namespace keeper
 		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
 		[[nodiscard]] std::vector<feature_info> load_feature_meta(std::vector<std::int64_t> const& feature_ids);
-		[[nodiscard]] std::vector<feature_info> load_feature_meta_all();
+		[[nodiscard]] std::vector<std::int64_t> load_feature_ids_by_type(std::int32_t type_id);
 	};
 
 	//---------------------------------------------------------------------------------------------------------

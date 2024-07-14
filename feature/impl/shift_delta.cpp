@@ -56,17 +56,17 @@ feature::feature_info_t feature::impl::shift_delta::rnd_from_template(feature_in
 
 	result.formula_["type"s] = "shift_delta"s;
 
-	std::pair<std::int64_t, std::int64_t> under_id;
+	std::pair<feature_info_t, feature_info_t> under;
 	{
 		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> type_ids;
 		feature_template.formula_.at("underlying_1_types"sv).get_to(type_ids.first);
 		feature_template.formula_.at("underlying_2_types"sv).get_to(type_ids.second);
-		shop.verify_typeset(type_ids.first, feature_template.label_);
-		shop.verify_typeset(type_ids.second, feature_template.label_);
-		under_id.first = shop.random_feature_info(shop.pick_random(type_ids.first)).id_;
-		under_id.second = shop.random_feature_info(shop.pick_random(type_ids.second)).id_;
-		result.formula_["underlying_1"s] = under_id.first;
-		result.formula_["underlying_2"s] = under_id.second;
+		_verify_typeset(type_ids.first, feature_template.label_);
+		_verify_typeset(type_ids.second, feature_template.label_);
+		under.first = shop.random_info_of_type(shop.random_value(type_ids.first));
+		under.second = shop.random_info_of_type(shop.random_value(type_ids.second));
+		result.formula_["underlying_1"s] = under.first;
+		result.formula_["underlying_2"s] = under.second;
 	}
 	{
 		constexpr std::pair<std::ptrdiff_t, std::ptrdiff_t> shift_min{0, 0};
@@ -74,11 +74,11 @@ feature::feature_info_t feature::impl::shift_delta::rnd_from_template(feature_in
 		feature_template.formula_.at("shift_1_max"sv).get_to(shift_max.first);
 		feature_template.formula_.at("shift_2_max"sv).get_to(shift_max.second);
 		std::pair<std::ptrdiff_t, std::ptrdiff_t> shift;
-		shift.first = shop.pick_random(shift_min.first, shift_max.first);
-		shift.second = shop.pick_random(shift_min.second, shift_max.first);
+		shift.first = shop.random_value(shift_min.first, shift_max.first);
+		shift.second = shop.random_value(shift_min.second, shift_max.first);
 
 		// 1.
-		if (under_id.first == under_id.second)
+		if (under.first.id_ == under.second.id_)
 		{
 			if (shift_max.first == shift_min.first && shift_max.second == shift_min.second)
 			{
@@ -87,8 +87,8 @@ feature::feature_info_t feature::impl::shift_delta::rnd_from_template(feature_in
 			int tries_count{1000};
 			while (shift.first == shift.second)
 			{
-				shift.first = shop.pick_random(shift_min.first, shift_max.first);
-				shift.second = shop.pick_random(shift_min.second, shift_max.first);
+				shift.first = shop.random_value(shift_min.first, shift_max.first);
+				shift.second = shop.random_value(shift_min.second, shift_max.first);
 				if (!--tries_count)
 				{
 					throw std::runtime_error("long/infinite loop protection is hit when picking random shifts in "s + feature_template.label_);

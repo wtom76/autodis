@@ -38,7 +38,7 @@ namespace keeper
 //---------------------------------------------------------------------------------------------------------
 bool keeper::metadata::feature_info::is_template() const noexcept
 {
-	return id_ == type_id_template_;
+	return type_id_ == type_id_template_;
 }
 //---------------------------------------------------------------------------------------------------------
 std::string_view keeper::metadata::feature_info::feature_type() const

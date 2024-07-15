@@ -18,6 +18,8 @@ namespace feature::impl
 	class delta
 		: public abstract
 	{
+	public:
+		static constexpr type_id_t type_id_{2};
 	private:
 		std::pair<std::shared_ptr<abstract>, std::shared_ptr<abstract>> underlying_;
 	private:

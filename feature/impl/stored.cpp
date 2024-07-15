@@ -47,7 +47,7 @@ void feature::impl::stored::_init()
 //---------------------------------------------------------------------------------------------------------
 feature::impl::stored::stored(feature_info_t&& info, shop& shop, std::shared_ptr<keeper::data_read> keeper_dr)
 	: abstract{std::move(info), shop}
-	, data_reg_id_{cfg().at("data_reg_id").get<long long>()}
+	, data_reg_id_{cfg().at("data_reg_id"sv).get<long long>()}
 	, keeper_dr_{std::move(keeper_dr)}
 {
 	_init();
@@ -57,10 +57,10 @@ feature::impl::stored::stored(feature_info_t&& info, shop& shop, std::shared_ptr
 //---------------------------------------------------------------------------------------------------------
 feature::feature_info_t feature::impl::stored::rnd_from_template(feature_info_t const&, shop& shop)
 {
-	constexpr std::int32_t type_id_stored{1};
-
 	feature::feature_info_t result;
+	result.type_id_ = type_id_;
 	result.formula_["type"s] = "stored"s;
-	result.formula_["data_reg_id"s] = shop.random_info_of_type(type_id_stored);
+	result.formula_["data_reg_id"s] = shop.random_info_of_type(type_id_);
+	result.label_ = "random stored"s;
 	return result;
 }

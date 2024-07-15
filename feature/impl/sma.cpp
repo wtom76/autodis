@@ -39,8 +39,8 @@ void feature::impl::sma::_init()
 //---------------------------------------------------------------------------------------------------------
 feature::impl::sma::sma(feature_info_t&& info, shop& shop)
 	: abstract{std::move(info), shop}
-	, period_{cfg().at("period").get<decltype(period_)>()}
-	, underlying_{shop_.feature(cfg().at("underlying"))}
+	, period_{cfg().at("period"sv).get<decltype(period_)>()}
+	, underlying_{shop_.feature(cfg().at("underlying"sv))}
 {
 	if (period_ <= 1)
 	{
@@ -53,8 +53,9 @@ feature::feature_info_t feature::impl::sma::rnd_from_template(feature_info_t con
 {
 	feature::feature_info_t result;
 
+	result.type_id_ = type_id_;
 	result.formula_["type"s] = "sma"s;
-	result.label_ = "random sma"s;
+	result.label_ = feature_template.label_;
 
 	{
 		std::vector<std::int32_t> under_type_ids;

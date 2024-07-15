@@ -41,8 +41,8 @@ void feature::impl::shift_delta::_init()
 //---------------------------------------------------------------------------------------------------------
 feature::impl::shift_delta::shift_delta(feature_info_t&& info, shop& shop)
 	: abstract{std::move(info), shop}
-	, shift_{cfg().at("shift_1").get<std::ptrdiff_t>(), cfg().at("shift_2").get<std::ptrdiff_t>()}
-	, underlying_{shop_.feature(cfg().at("underlying_1")), shop_.feature(cfg().at("underlying_2"))}
+	, shift_{cfg().at("shift_1"sv).get<std::ptrdiff_t>(), cfg().at("shift_2"sv).get<std::ptrdiff_t>()}
+	, underlying_{shop_.feature(cfg().at("underlying_1"sv)), shop_.feature(cfg().at("underlying_2"sv))}
 {
 	_init();
 }
@@ -54,7 +54,9 @@ feature::feature_info_t feature::impl::shift_delta::rnd_from_template(feature_in
 {
 	feature::feature_info_t result;
 
+	result.type_id_ = type_id_;
 	result.formula_["type"s] = "shift_delta"s;
+	result.label_ = feature_template.label_;
 
 	std::pair<feature_info_t, feature_info_t> under;
 	{

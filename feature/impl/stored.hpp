@@ -14,6 +14,8 @@ namespace feature::impl
 	class stored
 		: public abstract
 	{
+	public:
+		static constexpr type_id_t type_id_{1};
 	private:
 		long long const data_reg_id_;
 		std::shared_ptr<keeper::data_read> keeper_dr_;

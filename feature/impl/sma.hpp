@@ -19,6 +19,8 @@ namespace feature::impl
 		: public abstract
 	{
 	// data
+	public:
+		static constexpr type_id_t type_id_{4};
 	private:
 		std::ptrdiff_t const period_;
 		std::shared_ptr<abstract> underlying_;

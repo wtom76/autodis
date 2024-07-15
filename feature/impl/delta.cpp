@@ -43,7 +43,7 @@ void feature::impl::delta::_init()
 //---------------------------------------------------------------------------------------------------------
 feature::impl::delta::delta(feature_info_t&& info, shop& shop)
 	: abstract{std::move(info), shop}
-	, underlying_{shop_.feature(cfg().at("underlying_1")), shop_.feature(cfg().at("underlying_2"))}
+	, underlying_{shop_.feature(cfg().at("underlying_1"sv)), shop_.feature(cfg().at("underlying_2"sv))}
 {
 	_init();
 }
@@ -51,7 +51,10 @@ feature::impl::delta::delta(feature_info_t&& info, shop& shop)
 feature::feature_info_t feature::impl::delta::rnd_from_template(feature_info_t const& feature_template, shop& shop)
 {
 	feature::feature_info_t result;
+
+	result.type_id_ = type_id_;
 	result.formula_["type"s] = "delta"s;
+	result.label_ = feature_template.label_;
 
 	if (feature_template.formula_.contains("underlying_1_types"s))
 	{
@@ -75,17 +78,6 @@ feature::feature_info_t feature::impl::delta::rnd_from_template(feature_info_t c
 	{
 		throw std::runtime_error{"neither underlying_*_types nor underlying_* provided"};
 	}
-
-// DEBUG
-	{
-		nlohmann::json j = feature_template;
-		SPDLOG_LOGGER_DEBUG(shared::util::log(), "delta::from_template\n{}", j.dump(4));
-	}
-	{
-		nlohmann::json j = result;
-		SPDLOG_LOGGER_DEBUG(shared::util::log(), "delta::result\n{}", j.dump(4));
-	}
-//~DEBUG
 
 	return result;
 }

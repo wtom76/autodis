@@ -60,7 +60,7 @@ feature::feature_info_t feature::impl::shift_delta::rnd_from_template(feature_in
 
 	std::pair<feature_info_t, feature_info_t> under;
 	{
-		std::pair<std::vector<std::int32_t>, std::vector<std::int32_t>> type_ids;
+		std::pair<std::vector<type_id_t>, std::vector<type_id_t>> type_ids;
 		feature_template.formula_.at("underlying_1_types"sv).get_to(type_ids.first);
 		feature_template.formula_.at("underlying_2_types"sv).get_to(type_ids.second);
 		_verify_typeset(type_ids.first, feature_template.label_);

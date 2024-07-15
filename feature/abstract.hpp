@@ -17,6 +17,7 @@ namespace feature
 	// types
 	public:
 		using type_id_t			= std::int32_t;
+		using id_t				= std::int64_t;
 		using normalization_t	= shared::math::tanh_normalization;
 
 		struct bounds_data

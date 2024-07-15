@@ -57,12 +57,20 @@ feature::feature_info_t feature::impl::sma::rnd_from_template(feature_info_t con
 	result.formula_["type"s] = "sma"s;
 	result.label_ = feature_template.label_;
 
+	if (feature_template.formula_.contains("underlying_types"s))
 	{
-		std::vector<std::int32_t> under_type_ids;
+		std::vector<type_id_t> under_type_ids;
 		feature_template.formula_.at("underlying_types"sv).get_to(under_type_ids);
 		_verify_typeset(under_type_ids, feature_template.label_);
 		result.formula_["underlying"s] = shop.random_info_of_type(shop.random_value(under_type_ids));
 	}
+	else if (feature_template.formula_.contains("underlying"s))
+	{
+		std::vector<id_t> under_ids;
+		feature_template.formula_.at("underlying"sv).get_to(under_ids);
+		result.formula_["underlying"s] = shop.random_info(under_ids);
+	}
+
 	{
 		constexpr std::ptrdiff_t period_min{2};
 		std::ptrdiff_t period_max{0};

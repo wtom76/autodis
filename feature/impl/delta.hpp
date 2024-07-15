@@ -25,6 +25,7 @@ namespace feature::impl
 	private:
 		master_index const& _mi() const noexcept { return shop_.index(); }
 		void _init();
+		[[nodiscard]] static feature_info_t _rnd_underlying(feature_info_t const& feature_template, shop& shop, char num);
 	public:
 		explicit delta(feature_info_t&& info, shop& shop);
 		static feature_info_t rnd_from_template(feature_info_t const& feature_template, shop& shop);

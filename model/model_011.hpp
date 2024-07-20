@@ -61,7 +61,7 @@ namespace autodis::model
 		void _create_input_feature(nlohmann::json& fj);
 		void _create_features();
 		void _create_chart();
-		void _learn();
+		void _learn(std::filesystem::path const& out_path);
 		std::optional<prediction_result_t> _predict();
 		void _show();
 		void _show_analysis();
@@ -72,13 +72,13 @@ namespace autodis::model
 		static void create_model_file(
 			std::string type_name,
 			std::int64_t model_id,
-			std::filesystem::path file_path);
+			std::filesystem::path const& out_path);
 
 		std::int64_t id() override { return model_file_.model_id(); }
-		void learn() override;
+		void learn(std::filesystem::path const& out_path) override;
 		std::optional<prediction_result_t> predict() override;
 		void show() override;
 		void show_analysis() override;
-		void show_partial_dependence() override;
+		void show_partial_dependence(std::filesystem::path const& out_path) override;
 	};
 }

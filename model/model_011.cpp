@@ -164,8 +164,6 @@ void autodis::model::model_011::_create_features()
 	// 2.
 	_create_input_features();
 
-	model_file_.store();
-
 // DEBUG
 	_print_df(df_, "df_raw.csv"sv);
 //~DEBUG
@@ -180,7 +178,7 @@ void autodis::model::model_011::_create_chart()
 	chart_->add_line(1, df_.series_idx(predicted_series_name_), {0.f, .5f, .5f});	// predicted
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::_learn()
+void autodis::model::model_011::_learn(std::filesystem::path const& out_path)
 {
 	_adjust_cfg_input_size();
 	prediction_context ctx{df_, cfg_, input_series_names_};
@@ -190,7 +188,7 @@ void autodis::model::model_011::_learn()
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		ctx.cfg(), ctx.network(), teacher,
 		ctx.input_filler(), predicted_series, target_norm_, *chart_,
-		[this](nlohmann::json&& j){ model_file_.network() = std::move(j); model_file_.store(); }};
+		[this, out_path](nlohmann::json&& j){ model_file_.network() = std::move(j); model_file_.store(out_path); }};
 	runner.wait();
 	best_err_ = runner.best_err();
 }
@@ -259,26 +257,28 @@ void autodis::model::model_011::_show_analysis()
 		out << std::sqrt(sum_sqr / source_to_dest_matrix.size()) << "\n";
 	}
 
-	visual::heatmap hm{weights[0], input_series_names_, model_file_.path().filename()};
+	visual::heatmap hm{weights[0], input_series_names_, "heatmap"};
 }
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_011::create_model_file(
 	std::string type_name,
 	std::int64_t model_id,
-	std::filesystem::path file_path)
+	std::filesystem::path const& out_path)
 {
-	file f{type_name, model_id, file_path};
+	file f{type_name, model_id};
 	{
 		config default_cfg{};
 		f.config() = default_cfg;
 	}
-	f.store();
+	f.store(out_path);
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::learn()
+void autodis::model::model_011::learn(std::filesystem::path const& out_path)
 {
 	_create_features();
+
+	model_file_.store(out_path);
 
 	df_.create_series(predicted_series_name_);
 
@@ -287,7 +287,7 @@ void autodis::model::model_011::learn()
 
 	_print_df(df_, "df.csv"sv);
 
-	_learn();
+	_learn(out_path);
 }
 //---------------------------------------------------------------------------------------------------------
 std::optional<autodis::model::prediction_result_t> autodis::model::model_011::predict()
@@ -312,7 +312,7 @@ void autodis::model::model_011::show_analysis()
 	_show_analysis();
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::show_partial_dependence()
+void autodis::model::model_011::show_partial_dependence(std::filesystem::path const& out_path)
 {
 	_create_features();
 	_adjust_cfg_input_size();
@@ -322,8 +322,6 @@ void autodis::model::model_011::show_partial_dependence()
 	pd.run(ctx, 100);
 
 	{
-		std::filesystem::path out_path{model_file_.path()};
-		out_path.replace_extension("pd.csv");
 		std::ofstream f{out_path};
 		pd.write_sorted_result(f, input_series_names_);
 		SPDLOG_LOGGER_INFO(log(), "result is written in {}", out_path.native());

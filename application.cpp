@@ -7,6 +7,17 @@
 #include "feature/shop.hpp"
 #include "feature/abstract.hpp"
 
+//---------------------------------------------------------------------------------------------------------
+static std::filesystem::path _model_file_path(std::string const& model_name)
+{
+	std::filesystem::path path{model_name};
+	if (!path.has_extension())
+	{
+		path += ".json";
+	}
+	return path;
+}
+
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::_store_prediction(int64_t model_id, model::prediction_result_t const& result)
 {
@@ -25,15 +36,15 @@ void autodis::application::_store_prediction(int64_t model_id, model::prediction
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::create_model_file(std::string const& model_type, std::string const& model_name)
 {
-	model::factory::create_model_file(model_type, model_name);
+	model::factory::create_model_file(model_type, _model_file_path(model_name));
 }
 //----------------------------------------------------------------------------------------------------------
-void autodis::application::learn(std::string const& model_name)
+void autodis::application::learn(std::string const& model_name, std::string const& out_file_name)
 {
-	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(_model_file_path(model_name))};
 	if (model)
 	{
-		model->learn();
+		model->learn(out_file_name);
 	}
 }
 //----------------------------------------------------------------------------------------------------------
@@ -41,7 +52,7 @@ void autodis::application::predict(std::string const& model_name)
 {
 	int64_t model_id{0};
 	std::optional<model::prediction_result_t> result{};
-	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(_model_file_path(model_name))};
 	if (model)
 	{
 		model_id = model->id();
@@ -60,19 +71,19 @@ void autodis::application::predict(std::string const& model_name)
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::show(std::string const& model_name)
 {
-	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(_model_file_path(model_name))};
 	if (model)
 	{
 		model->show();
 	}
 }
 //----------------------------------------------------------------------------------------------------------
-void autodis::application::show_analysis(std::string const& model_name)
+void autodis::application::show_analysis(std::string const& model_name, std::filesystem::path const& out_path)
 {
-	std::unique_ptr<model::abstract> model{model::factory::make_unique(model_name)};
+	std::unique_ptr<model::abstract> model{model::factory::make_unique(_model_file_path(model_name))};
 	if (model)
 	{
-		model->show_partial_dependence();
+		model->show_partial_dependence(out_path);
 		//model->show_analysis();
 	}
 }

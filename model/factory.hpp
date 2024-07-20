@@ -8,7 +8,7 @@ namespace autodis::model
 	class factory
 	{
 	public:
-		static void create_model_file(std::string const& model_type, std::string const& model_name);
-		[[nodiscard]] static std::unique_ptr<abstract> make_unique(std::string const& model_name);
+		static void create_model_file(std::string const& model_type, std::filesystem::path const& out_path);
+		[[nodiscard]] static std::unique_ptr<abstract> make_unique(std::filesystem::path const& in_path);
 	};
 }

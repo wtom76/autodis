@@ -12,17 +12,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 	try
 	{
 		std::string command;
-		std::string file_name;
+		std::string in_file_name;
+		std::string out_file_name;
 
 		po::options_description all_options{"autodis options"};
 		all_options.add_options()
 			("command,C", po::value<std::string>(&command))
-			("file,F", po::value<std::string>(&file_name), "model file name")
+			("in,S", po::value<std::string>(&in_file_name), "model input file name")
+			("out,O", po::value<std::string>(&out_file_name), "[model] output file name")
 			("type,T", po::value<std::string>(), "model type")
-			("feature_id,I", po::value<std::int64_t>(), "feature DB id")
-			("out,O", po::value<std::string>(), "output file name");
+			("feature_id,I", po::value<std::int64_t>(), "feature DB id");
 		po::positional_options_description p;
-		p.add("command", 1).add("file", 1);
+		p.add("command", 1);
 		po::variables_map params;
 		po::store(po::command_line_parser(argc, argv).options(all_options).positional(p).run(), params);
 		po::notify(params);
@@ -32,23 +33,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 		if (command == "makefile"sv)
 		{
-			app.create_model_file(params["type"s].as<std::string>(), file_name);
+			app.create_model_file(params["type"s].as<std::string>(), out_file_name);
 		}
 		else if (command == "learn"sv)
 		{
-			app.learn(file_name);
+			app.learn(in_file_name, out_file_name);
 		}
 		else if (command == "predict"sv)
 		{
-			app.predict(file_name);
+			app.predict(in_file_name);
 		}
 		else if (command == "show"sv)
 		{
-			app.show(file_name);
+			app.show(in_file_name);
 		}
 		else if (command == "show_network"sv)
 		{
-			app.show_analysis(file_name);
+			app.show_analysis(in_file_name, out_file_name);
 		}
 		else if (command == "test_feature"sv)
 		{
@@ -60,12 +61,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 			std::cout
 				<< all_options
 				<< "usage:\n"
-				<< "autodis makefile <model_name> --type=<model_type>\n"
-				<< "autodis learn <model_name>\n"
-				<< "autodis predict <model_name>\n"
-				<< "autodis show <model_name>\n"
-				<< "autodis show_network <model_name>\n"
-				<< "autodis test_feature --feature_id=<id> --out=<path>\n";
+				<< "autodis makefile --type=<model type> --out=<file name>\n"
+				<< "autodis learn --in=<file name> --out=<file name>\n"
+				<< "autodis predict --in=<file name>\n"
+				<< "autodis show --in=<file name>\n"
+				<< "autodis show_network --in=<file name> --out=<file name>\n"
+				<< "autodis test_feature --feature_id=<id> --out=<file name>\n";
 		}
 	}
 	catch ([[maybe_unused]] std::exception const& ex)

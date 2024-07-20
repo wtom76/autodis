@@ -14,20 +14,18 @@ struct autodis::model::file::section_name
 	static constexpr std::string_view network_{"network"};
 }; 
 //---------------------------------------------------------------------------------------------------------
-autodis::model::file::file(std::filesystem::path file_path)
-	: file_path_{std::move(file_path)}
-	, j_(nlohmann::json::value_t::object)	// can't use {} instead of () because {} will create array
+autodis::model::file::file(std::filesystem::path const& file_path)
+	: j_(nlohmann::json::value_t::object)	// can't use {} instead of () because {} will create array
 {
-	std::ifstream f{file_path_};
+	std::ifstream f{file_path};
 	if (f)
 	{
 		j_ = nlohmann::json::parse(f);
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-autodis::model::file::file(std::string type_name, std::int64_t model_id, std::filesystem::path file_path)
-	: file_path_{std::move(file_path)}
-	, j_(nlohmann::json::value_t::object)	// can't use {} instead of () because {} will create array
+autodis::model::file::file(std::string type_name, std::int64_t model_id)
+	: j_(nlohmann::json::value_t::object)	// can't use {} instead of () because {} will create array
 {
 	j_[section_name::type_name_] = type_name;
 	j_[section_name::model_id_] = model_id;
@@ -65,12 +63,12 @@ nlohmann::json& autodis::model::file::network()
 	return j_[section_name::network_];
 }
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::file::store() const
+void autodis::model::file::store(std::filesystem::path const& file_path) const
 {
-	std::ofstream f{file_path_};
+	std::ofstream f{file_path};
 	if (!f)
 	{
-		throw std::runtime_error{"can't store model file "s + file_path_.native()};
+		throw std::runtime_error{"can't store model file "s + file_path.native()};
 	}
 	f << j_;
 }

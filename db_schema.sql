@@ -1,3 +1,551 @@
+-- DROP SCHEMA "data";
+
+CREATE SCHEMA "data" AUTHORIZATION ml_role;
+
+-- DROP TYPE "data"."000001";
+
+CREATE TYPE "data"."000001" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000003";
+
+CREATE TYPE "data"."000003" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000004";
+
+CREATE TYPE "data"."000004" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000005";
+
+CREATE TYPE "data"."000005" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000006";
+
+CREATE TYPE "data"."000006" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000007";
+
+CREATE TYPE "data"."000007" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000008";
+
+CREATE TYPE "data"."000008" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000009";
+
+CREATE TYPE "data"."000009" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000010";
+
+CREATE TYPE "data"."000010" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000011";
+
+CREATE TYPE "data"."000011" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data"."000012";
+
+CREATE TYPE "data"."000012" AS (
+	idx int8,
+	f1 float8,
+	f2 float8,
+	f3 float8,
+	f4 float8,
+	f5 float8);
+
+-- DROP TYPE "data".master_index;
+
+CREATE TYPE "data".master_index AS (
+	idx int8);
+
+-- DROP TYPE "data".test_linear;
+
+CREATE TYPE "data".test_linear AS (
+	idx int8,
+	x float8,
+	y float8);
+
+-- DROP TYPE "data"."_000001";
+
+CREATE TYPE "data"."_000001" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000001",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000003";
+
+CREATE TYPE "data"."_000003" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000003",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000004";
+
+CREATE TYPE "data"."_000004" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000004",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000005";
+
+CREATE TYPE "data"."_000005" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000005",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000006";
+
+CREATE TYPE "data"."_000006" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000006",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000007";
+
+CREATE TYPE "data"."_000007" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000007",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000008";
+
+CREATE TYPE "data"."_000008" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000008",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000009";
+
+CREATE TYPE "data"."_000009" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000009",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000010";
+
+CREATE TYPE "data"."_000010" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000010",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000011";
+
+CREATE TYPE "data"."_000011" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000011",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_000012";
+
+CREATE TYPE "data"."_000012" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data"."000012",
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_master_index";
+
+CREATE TYPE "data"."_master_index" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data".master_index,
+	DELIMITER = ',');
+
+-- DROP TYPE "data"."_test_linear";
+
+CREATE TYPE "data"."_test_linear" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = "data".test_linear,
+	DELIMITER = ',');
+-- "data"."000001" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000001";
+
+CREATE TABLE "data"."000001" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000001_idx_key" UNIQUE (idx)
+);
+
+
+-- "data"."000003" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000003";
+
+CREATE TABLE "data"."000003" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000003_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000003_idx_IDX" ON data."000003" USING btree (idx);
+
+
+-- "data"."000004" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000004";
+
+CREATE TABLE "data"."000004" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000004_idx_key" UNIQUE (idx)
+);
+
+
+-- "data"."000005" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000005";
+
+CREATE TABLE "data"."000005" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000005_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000005_idx_IDX" ON data."000005" USING btree (idx);
+
+
+-- "data"."000006" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000006";
+
+CREATE TABLE "data"."000006" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000006_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000006_idx_IDX" ON data."000006" USING btree (idx);
+
+
+-- "data"."000007" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000007";
+
+CREATE TABLE "data"."000007" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000007_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000007_idx_IDX" ON data."000007" USING btree (idx);
+
+
+-- "data"."000008" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000008";
+
+CREATE TABLE "data"."000008" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000008_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000008_idx_IDX" ON data."000008" USING btree (idx);
+
+
+-- "data"."000009" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000009";
+
+CREATE TABLE "data"."000009" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000009_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000009_idx_IDX" ON data."000009" USING btree (idx);
+
+
+-- "data"."000010" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000010";
+
+CREATE TABLE "data"."000010" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000010_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000010_idx_IDX" ON data."000010" USING btree (idx);
+
+
+-- "data"."000011" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000011";
+
+CREATE TABLE "data"."000011" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000011_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000011_idx_IDX" ON data."000011" USING btree (idx);
+
+
+-- "data"."000012" definition
+
+-- Drop table
+
+-- DROP TABLE "data"."000012";
+
+CREATE TABLE "data"."000012" (
+	idx int8 NOT NULL,
+	f1 float8 NULL,
+	f2 float8 NULL,
+	f3 float8 NULL,
+	f4 float8 NULL,
+	f5 float8 NULL,
+	CONSTRAINT "000012_un" UNIQUE (idx)
+);
+CREATE UNIQUE INDEX "000012_idx_IDX" ON data."000012" USING btree (idx);
+
+
+-- "data".master_index definition
+
+-- Drop table
+
+-- DROP TABLE "data".master_index;
+
+CREATE TABLE "data".master_index (
+	idx int8 NOT NULL,
+	CONSTRAINT master_index_pk PRIMARY KEY (idx)
+);
+
+
+-- "data".test_linear definition
+
+-- Drop table
+
+-- DROP TABLE "data".test_linear;
+
+CREATE TABLE "data".test_linear (
+	idx int8 NOT NULL,
+	x float8 NULL,
+	y float8 NULL,
+	CONSTRAINT test_xor_idx_key UNIQUE (idx)
+);
+
+
+
+-- DROP PROCEDURE "data".generate_master_index();
+
+CREATE OR REPLACE PROCEDURE data.generate_master_index()
+ LANGUAGE sql
+AS $procedure$
+		with days as
+		(
+		    select dd, extract(DOW from dd) dw
+		    from generate_series('2000-01-01'::date, '2029-12-31'::date, '1 day'::interval) dd
+		)
+		insert into data.master_index (idx)
+		select 10000 * extract(YEAR from dd) + 100 * extract(MONTH from dd) + extract(DAY from dd)
+		from days
+		where dw not in (6,0)
+		on conflict (idx) do nothing;
+$procedure$
+;
+
 -- DROP SCHEMA metadata;
 
 CREATE SCHEMA metadata AUTHORIZATION ml_role;
@@ -16,7 +564,15 @@ CREATE TYPE metadata.data_registry AS (
 CREATE TYPE metadata.feature AS (
 	id int8,
 	"label" text,
-	formula json);
+	formula json,
+	type_id int4,
+	feature_set_id int8);
+
+-- DROP TYPE metadata.feature_type;
+
+CREATE TYPE metadata.feature_type AS (
+	id int8,
+	"name" text);
 
 -- DROP TYPE metadata.feed_registry;
 
@@ -103,6 +659,20 @@ CREATE TYPE metadata."_feature" (
 	STORAGE = any,
 	CATEGORY = A,
 	ELEMENT = metadata.feature,
+	DELIMITER = ',');
+
+-- DROP TYPE metadata."_feature_type";
+
+CREATE TYPE metadata."_feature_type" (
+	INPUT = array_in,
+	OUTPUT = array_out,
+	RECEIVE = array_recv,
+	SEND = array_send,
+	ANALYZE = array_typanalyze,
+	ALIGNMENT = 8,
+	STORAGE = any,
+	CATEGORY = A,
+	ELEMENT = metadata.feature_type,
 	DELIMITER = ',');
 
 -- DROP TYPE metadata."_feed_registry";
@@ -233,6 +803,15 @@ CREATE SEQUENCE metadata.source_registry_id_seq
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
+	NO CYCLE;
+-- DROP SEQUENCE metadata.temp_id_seq;
+
+CREATE SEQUENCE metadata.temp_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 9223372036854775807
+	START 32
+	CACHE 1
 	NO CYCLE;-- metadata.data_registry definition
 
 -- Drop table
@@ -259,7 +838,23 @@ CREATE TABLE metadata.feature (
 	id int8 NOT NULL,
 	"label" text NULL,
 	formula json NULL,
+	type_id int4 NULL,
+	feature_set_id int8 DEFAULT 0 NULL,
 	CONSTRAINT feature_pk PRIMARY KEY (id)
+);
+CREATE INDEX feature_feature_set_id_idx ON metadata.feature USING btree (feature_set_id);
+
+
+-- metadata.feature_type definition
+
+-- Drop table
+
+-- DROP TABLE metadata.feature_type;
+
+CREATE TABLE metadata.feature_type (
+	id int8 NOT NULL,
+	"name" text NULL,
+	CONSTRAINT feature_type_pk PRIMARY KEY (id)
 );
 
 
@@ -326,6 +921,19 @@ CREATE TABLE metadata.type_registry (
 );
 
 
+-- metadata.feature_set definition
+
+-- Drop table
+
+-- DROP TABLE metadata.feature_set;
+
+CREATE TABLE metadata.feature_set (
+	id bigserial NOT NULL,
+	"name" text NULL,
+	CONSTRAINT feature_set_pk PRIMARY KEY (id)
+);
+
+
 -- metadata.human_metadata_view source
 
 CREATE OR REPLACE VIEW metadata.human_metadata_view
@@ -376,236 +984,3 @@ AS $procedure$
 update metadata.source_registry set pending = false where id = source_registry_id and "always" = false;
 $procedure$
 ;
-
--- DROP SCHEMA "data";
-
-CREATE SCHEMA "data" AUTHORIZATION ml_role;
-
--- DROP TYPE "data"."000001";
-
-CREATE TYPE "data"."000001" AS (
-	idx int8,
-	f1 float8,
-	f2 float8,
-	f3 float8,
-	f4 float8,
-	f5 float8);
-
--- DROP TYPE "data"."000002";
-
-CREATE TYPE "data"."000002" AS (
-	idx int8,
-	f1 float8,
-	f2 float8,
-	f3 float8,
-	f4 float8,
-	f5 float8);
-
--- DROP TYPE "data"."000003";
-
-CREATE TYPE "data"."000003" AS (
-	idx int8,
-	f1 float8,
-	f2 float8,
-	f3 float8,
-	f4 float8,
-	f5 float8);
-
--- DROP TYPE "data"."000004";
-
-CREATE TYPE "data"."000004" AS (
-	idx int8,
-	f1 float8,
-	f2 float8,
-	f3 float8,
-	f4 float8,
-	f5 float8);
-
--- DROP TYPE "data".master_index;
-
-CREATE TYPE "data".master_index AS (
-	idx int8);
-
--- DROP TYPE "data".test_linear;
-
-CREATE TYPE "data".test_linear AS (
-	idx int8,
-	x float8,
-	y float8);
-
--- DROP TYPE "data"."_000001";
-
-CREATE TYPE "data"."_000001" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data"."000001",
-	DELIMITER = ',');
-
--- DROP TYPE "data"."_000002";
-
-CREATE TYPE "data"."_000002" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data"."000002",
-	DELIMITER = ',');
-
--- DROP TYPE "data"."_000003";
-
-CREATE TYPE "data"."_000003" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data"."000003",
-	DELIMITER = ',');
-
--- DROP TYPE "data"."_000004";
-
-CREATE TYPE "data"."_000004" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data"."000004",
-	DELIMITER = ',');
-
--- DROP TYPE "data"."_master_index";
-
-CREATE TYPE "data"."_master_index" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data".master_index,
-	DELIMITER = ',');
-
--- DROP TYPE "data"."_test_linear";
-
-CREATE TYPE "data"."_test_linear" (
-	INPUT = array_in,
-	OUTPUT = array_out,
-	RECEIVE = array_recv,
-	SEND = array_send,
-	ANALYZE = array_typanalyze,
-	ALIGNMENT = 8,
-	STORAGE = any,
-	CATEGORY = A,
-	ELEMENT = "data".test_linear,
-	DELIMITER = ',');
--- "data"."000001" definition
-
--- Drop table
-
--- DROP TABLE "data"."000001";
-
-CREATE TABLE "data"."000001" (
-	idx int8 NOT NULL,
-	f1 float8 NULL,
-	f2 float8 NULL,
-	f3 float8 NULL,
-	f4 float8 NULL,
-	f5 float8 NULL,
-	CONSTRAINT "000001_idx_key" UNIQUE (idx)
-);
-
-
--- "data"."000002" definition
-
--- Drop table
-
--- DROP TABLE "data"."000002";
-
-CREATE TABLE "data"."000002" (
-	idx int8 NOT NULL,
-	f1 float8 NULL,
-	f2 float8 NULL,
-	f3 float8 NULL,
-	f4 float8 NULL,
-	f5 float8 NULL,
-	CONSTRAINT "000002_idx_key" UNIQUE (idx)
-);
-
-
--- "data"."000003" definition
-
--- Drop table
-
--- DROP TABLE "data"."000003";
-
-CREATE TABLE "data"."000003" (
-	idx int8 NOT NULL,
-	f1 float8 NULL,
-	f2 float8 NULL,
-	f3 float8 NULL,
-	f4 float8 NULL,
-	f5 float8 NULL,
-	CONSTRAINT "000003_un" UNIQUE (idx)
-);
-CREATE UNIQUE INDEX "000003_idx_IDX" ON data."000003" USING btree (idx);
-
-
--- "data"."000004" definition
-
--- Drop table
-
--- DROP TABLE "data"."000004";
-
-CREATE TABLE "data"."000004" (
-	idx int8 NOT NULL,
-	f1 float8 NULL,
-	f2 float8 NULL,
-	f3 float8 NULL,
-	f4 float8 NULL,
-	f5 float8 NULL,
-	CONSTRAINT "000004_idx_key" UNIQUE (idx)
-);
-
-
--- "data".master_index definition
-
--- Drop table
-
--- DROP TABLE "data".master_index;
-
-CREATE TABLE "data".master_index (
-	idx int8 NOT NULL,
-	CONSTRAINT master_index_pk PRIMARY KEY (idx)
-);
-
-
--- "data".test_linear definition
-
--- Drop table
-
--- DROP TABLE "data".test_linear;
-
-CREATE TABLE "data".test_linear (
-	idx int8 NOT NULL,
-	x float8 NULL,
-	y float8 NULL,
-	CONSTRAINT test_xor_idx_key UNIQUE (idx)
-);

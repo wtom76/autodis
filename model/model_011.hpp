@@ -27,22 +27,12 @@ namespace autodis::model
 
 		class prediction_context;
 
-	public:
-		class config
-		{
-		public:
-			learning::config net_cfg_;
-			config() : net_cfg_{{0, 16, 8, 1}}
-			{}
-		};
-
 	// data
 	private:
 		std::string const predicted_series_name_{"predicted"s};
 
 		std::unique_ptr<feature::shop> shop_;
 		file		model_file_;
-		config		cfg_;
 		frame_t		df_;
 		double		best_err_{0};
 		std::shared_ptr<autodis::visual::chart> chart_;
@@ -52,8 +42,7 @@ namespace autodis::model
 
 	// methods
 	private:
-		static void _set_layer_sizes_default(config& cfg);
-		void _adjust_cfg_input_size();
+		learning::config _config();
 		void _print_df(frame_t const& df, std::filesystem::path const& path) const;
 		void _fill_normalized(feature::abstract& src_feature, shared::data::frame::series_t& dst_df_series);
 		void _create_target();

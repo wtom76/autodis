@@ -10,4 +10,6 @@ namespace shared::util
 	[[nodiscard]] std::filesystem::path exe_dir_path();
 	//---------------------------------------------------------------------------------------------------------
 	[[nodiscard]] std::filesystem::path log_root();
+	//---------------------------------------------------------------------------------------------------------
+	bool not_exist_or_overwrite(std::filesystem::path const& out_path);
 }

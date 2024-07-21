@@ -10,6 +10,7 @@ namespace feature
 {
 	//---------------------------------------------------------------------------------------------------------
 	// shop
+	// TODO: keep calculated features in DB
 	//---------------------------------------------------------------------------------------------------------
 	class shop
 		: private shared::util::logged
@@ -24,6 +25,7 @@ namespace feature
 	private:
 		std::shared_ptr<keeper::metadata>	keeper_md_;
 		std::shared_ptr<keeper::data_read>	keeper_dr_;
+		std::int64_t						feature_set_id_{0};		// restricts random feature selection
 		master_index						master_index_;
 		feature_map_t						feature_map_;
 		randomiser							randomiser_;
@@ -38,6 +40,7 @@ namespace feature
 
 	public:
 		shop();
+		shop(std::int64_t feature_set_id);
 		master_index const& index() const noexcept { return master_index_; }
 		// returns feature described by json
 		// fj may be feature_id from DB or json representation of feature_info_t

@@ -34,9 +34,14 @@ void autodis::application::_store_prediction(int64_t model_id, model::prediction
 	}
 }
 //----------------------------------------------------------------------------------------------------------
-void autodis::application::create_model_file(std::string const& model_type, std::string const& model_name)
+void autodis::application::create_model_file(std::string const& model_type, std::string const& out_file_name)
 {
-	model::factory::create_model_file(model_type, _model_file_path(model_name));
+	std::filesystem::path const out_path{_model_file_path(out_file_name)};
+	if (!shared::util::not_exist_or_overwrite(out_path))
+	{
+		return;
+	}
+	model::factory::create_model_file(model_type, _model_file_path(out_path));
 }
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::learn(std::string const& model_name, std::string const& out_file_name)
@@ -44,7 +49,12 @@ void autodis::application::learn(std::string const& model_name, std::string cons
 	std::unique_ptr<model::abstract> model{model::factory::make_unique(_model_file_path(model_name))};
 	if (model)
 	{
-		model->learn(out_file_name);
+		std::filesystem::path const out_path{_model_file_path(out_file_name)};
+		if (!shared::util::not_exist_or_overwrite(out_path))
+		{
+			return;
+		}
+		model->learn(out_path);
 	}
 }
 //----------------------------------------------------------------------------------------------------------

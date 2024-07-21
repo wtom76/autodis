@@ -47,11 +47,15 @@ std::string_view keeper::metadata::feature_info::feature_type() const
 }
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
-keeper::metadata::metadata(const config& cfg)
+keeper::metadata::metadata(config const& cfg)
 	: con_{cfg.db_connection_}
 {
 	// drop pending flag
-	con_.prepare("dpf", "call \"metadata\".drop_pending_flag($1)");
+	con_.prepare("dpf"s, "call \"metadata\".drop_pending_flag($1)");
+	// load feature meta
+	con_.prepare("lfm"s, "select id, type_id, label, formula from metadata."s + cfg.feature_table_name_ +" where id in ($1)");
+	// load feature ids by type
+	con_.prepare("lfit"s, "select id from metadata."s + cfg.feature_table_name_ + " where feature_set_id = $1 and type_id = $2");
 }
 //---------------------------------------------------------------------------------------------------------
 std::vector<keeper::metadata::source_info> keeper::metadata::load_source_meta()
@@ -173,21 +177,17 @@ std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(
 	p.append_multi(feature_ids);
 	{
 		std::unique_lock const lock{con_mtx_};
-		pqxx::work t{con_};
-		_read_query_result(
-			t.exec_params("select id, type_id, label, formula from metadata.feature where id in ($1)", p),
-			result);
+		_read_query_result(pqxx::work{con_}.exec_prepared("lfm"s, p), result);
 	}
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<std::int64_t> keeper::metadata::load_feature_ids_by_type(std::int32_t type_id)
+std::vector<std::int64_t> keeper::metadata::load_feature_ids_by_type(std::int64_t feature_set_id, std::int32_t type_id)
 {
 	std::vector<std::int64_t> result;
 	{
 		std::unique_lock const lock{con_mtx_};
-		pqxx::work t{con_};
-		pqxx::result const r{t.exec_params("select id from metadata.feature where type_id = $1", type_id)};
+		pqxx::result const r{pqxx::work{con_}.exec_prepared("lfit"s, feature_set_id, type_id)};
 		result.reserve(r.size());
 		for (auto const& row : r)
 		{

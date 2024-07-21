@@ -71,12 +71,12 @@ namespace keeper
 		void _read_query_result(pqxx::result const& r, std::vector<feature_info>& dest) const;
 
 	public:
-		metadata(const config& cfg);
+		metadata(config const& cfg);
 		[[nodiscard]] std::vector<source_info> load_source_meta();
 		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
 		[[nodiscard]] std::vector<feature_info> load_feature_meta(std::vector<std::int64_t> const& feature_ids);
-		[[nodiscard]] std::vector<std::int64_t> load_feature_ids_by_type(std::int32_t type_id);
+		[[nodiscard]] std::vector<std::int64_t> load_feature_ids_by_type(std::int64_t feature_set_id, std::int32_t type_id);
 	};
 
 	//---------------------------------------------------------------------------------------------------------

@@ -10,6 +10,7 @@ namespace keeper
 	{
 	public:
 		std::string db_connection_;
+		std::string feature_table_name_;
 
 	public:
 		void load();

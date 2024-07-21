@@ -10,23 +10,6 @@
 #include <visual/partial_dependence_view.hpp>
 #include <visual/box_plot.hpp>
 
-namespace autodis::model
-{
-	//---------------------------------------------------------------------------------------------------------
-	// config
-	//---------------------------------------------------------------------------------------------------------
-	void to_json(nlohmann::json& j, model_011::config const& src)
-	{
-		j = nlohmann::json{
-			{ "net_cfg", src.net_cfg_ }
-		};
-	}
-	//---------------------------------------------------------------------------------------------------------
-	void from_json(nlohmann::json const& j, model_011::config& dst)
-	{
-		j.at("net_cfg").get_to(dst.net_cfg_);
-	}
-}
 //---------------------------------------------------------------------------------------------------------
 // class prediction_context
 //---------------------------------------------------------------------------------------------------------
@@ -38,17 +21,24 @@ private:
 	learning::config					mfn_cfg_;
 	learning::multilayer_feed_forward	mfn_;
 	learning::sample_filler				input_filler_;
+
+private:
+	static learning::config&& _set_input_layer_size(learning::config& net_cfg, std::size_t size) noexcept
+	{
+		net_cfg.set_input_layer_size(size);
+		return std::move(net_cfg);
+	}
 public:
 	explicit prediction_context(
 		shared::data::frame& df,
-		config const& cfg,
+		learning::config&& net_cfg,
 		std::vector<std::string> const& input_series_names)
 		: dw_{df}
-		, mfn_cfg_{cfg.net_cfg_}
+		, mfn_cfg_{_set_input_layer_size(net_cfg, input_series_names.size())}
 		, mfn_{mfn_cfg_}
 		, input_filler_{dw_, input_series_names, &mfn_.input_layer()}
 	{}
-	learning::config const& cfg() const noexcept { return mfn_cfg_; }
+	learning::config const& net_cfg() const noexcept { return mfn_cfg_; }
 	shared::data::view& data_view() noexcept { return dw_; }
 	learning::sample_filler& input_filler() noexcept { return input_filler_; }
 	learning::multilayer_feed_forward& network() noexcept { return mfn_; }
@@ -57,18 +47,15 @@ public:
 // model_011
 //---------------------------------------------------------------------------------------------------------
 autodis::model::model_011::model_011(file&& model_file)
-	: shop_{std::make_unique<feature::shop>()}
+	: shop_{std::make_unique<feature::shop>(model_file.feature_set_id())}
 	, model_file_{std::move(model_file)}
-	, cfg_{model_file_.config().get<config>()}
-{
-}
+{}
 //---------------------------------------------------------------------------------------------------------
-void autodis::model::model_011::_adjust_cfg_input_size()
+learning::config autodis::model::model_011::_config()
 {
-	assert(!cfg_.net_cfg_.layer_sizes().empty());
-	learning::config::layer_sizes_t ls{cfg_.net_cfg_.layer_sizes()};
-	ls[0] = input_series_names_.size();
-	cfg_.net_cfg_.layer_sizes(std::move(ls));
+	learning::config cfg;
+	model_file_.net_config().get_to(cfg);
+	return cfg;
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_011::_print_df(frame_t const& df, std::filesystem::path const& path) const
@@ -180,13 +167,12 @@ void autodis::model::model_011::_create_chart()
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::model_011::_learn(std::filesystem::path const& out_path)
 {
-	_adjust_cfg_input_size();
-	prediction_context ctx{df_, cfg_, input_series_names_};
+	prediction_context ctx{df_, _config(), input_series_names_};
 	learning::sample_filler target_filler{ctx.data_view(), {target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{ctx.input_filler(), target_filler};
 	auto predicted_series{ctx.data_view().series_view(predicted_series_name_)};
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
-		ctx.cfg(), ctx.network(), teacher,
+		ctx.net_cfg(), ctx.network(), teacher,
 		ctx.input_filler(), predicted_series, target_norm_, *chart_,
 		[this, out_path](nlohmann::json&& j){ model_file_.network() = std::move(j); model_file_.store(out_path); }};
 	runner.wait();
@@ -201,9 +187,7 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_011::_p
 	{
 		return {};
 	}
-
-	_adjust_cfg_input_size();
-	prediction_context ctx{df_, cfg_, input_series_names_};
+	prediction_context ctx{df_, _config(), input_series_names_};
 	model_file_.network().get_to(ctx.network());
 	ctx.input_filler().fill_last();
 	ctx.network().forward();
@@ -215,9 +199,7 @@ std::optional<autodis::model::prediction_result_t> autodis::model::model_011::_p
 void autodis::model::model_011::_show()
 {
 	assert(!model_file_.network().empty());
-
-	_adjust_cfg_input_size();
-	prediction_context ctx{df_, cfg_, input_series_names_};
+	prediction_context ctx{df_, _config(), input_series_names_};
 	model_file_.network().get_to(ctx.network());
 	learning::sample_filler target_filler{ctx.data_view(), {target_series_name_}, nullptr};
 	learning::rprop<learning::multilayer_feed_forward> teacher{ctx.input_filler(), target_filler};
@@ -231,8 +213,7 @@ void autodis::model::model_011::_show_analysis()
 {
 	assert(!model_file_.network().empty());
 
-	_adjust_cfg_input_size();
-	prediction_context ctx{df_, cfg_, input_series_names_};
+	prediction_context ctx{df_, _config(), input_series_names_};
 	model_file_.network().get_to(ctx.network());
 
 	auto const& weights{ctx.network().weight_layers()};
@@ -268,8 +249,8 @@ void autodis::model::model_011::create_model_file(
 {
 	file f{type_name, model_id};
 	{
-		config default_cfg{};
-		f.config() = default_cfg;
+		learning::config default_net_cfg{{0, 16, 8, 1}};
+		f.net_config() = default_net_cfg;
 	}
 	f.store(out_path);
 }
@@ -315,8 +296,7 @@ void autodis::model::model_011::show_analysis()
 void autodis::model::model_011::show_partial_dependence(std::filesystem::path const& out_path)
 {
 	_create_features();
-	_adjust_cfg_input_size();
-	prediction_context ctx{df_, cfg_, input_series_names_};
+	prediction_context ctx{df_, _config(), input_series_names_};
 	model_file_.network().get_to(ctx.network());
 	partial_dependence<prediction_context> pd;
 	pd.run(ctx, 100);

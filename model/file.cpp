@@ -8,7 +8,8 @@ struct autodis::model::file::section_name
 {
 	static constexpr std::string_view type_name_{"type_name"};
 	static constexpr std::string_view model_id_{"model_id"};
-	static constexpr std::string_view config_{"config"};
+	static constexpr std::string_view feature_set_id_{"feature_set_id"};
+	static constexpr std::string_view net_cfg_{"net_cfg"};
 	static constexpr std::string_view features_{"features"};
 	static constexpr std::string_view target_{"target"};
 	static constexpr std::string_view network_{"network"};
@@ -43,9 +44,14 @@ std::int64_t autodis::model::file::model_id() const
 	return j_.at(section_name::model_id_).get<std::int64_t>();
 }
 //---------------------------------------------------------------------------------------------------------
-nlohmann::json& autodis::model::file::config()
+std::int64_t autodis::model::file::feature_set_id() const
 {
-	return j_[section_name::config_];
+	return j_.at(section_name::feature_set_id_).get<std::int64_t>();
+}
+//---------------------------------------------------------------------------------------------------------
+nlohmann::json& autodis::model::file::net_config()
+{
+	return j_[section_name::net_cfg_];
 }
 //---------------------------------------------------------------------------------------------------------
 nlohmann::json& autodis::model::file::features()

@@ -7,6 +7,11 @@
 
 //---------------------------------------------------------------------------------------------------------
 feature::shop::shop()
+	: shop{0}
+{}
+//---------------------------------------------------------------------------------------------------------
+feature::shop::shop(std::int64_t feature_set_id)
+	: feature_set_id_{feature_set_id}
 {
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
@@ -146,7 +151,7 @@ feature::feature_info_t feature::shop::random_info(std::vector<std::int64_t> con
 //---------------------------------------------------------------------------------------------------------
 feature::feature_info_t feature::shop::random_info_of_type(std::int32_t feature_type_id)
 {
-	std::vector<std::int64_t> feature_ids{keeper_md_->load_feature_ids_by_type(feature_type_id)};
+	std::vector<std::int64_t> feature_ids{keeper_md_->load_feature_ids_by_type(feature_set_id_, feature_type_id)};
 	if (feature_ids.empty())
 	{
 		throw std::runtime_error("no features of type "s + std::to_string(feature_type_id));

@@ -280,7 +280,7 @@ namespace learning
 		}
 
 		double sqr_err_sum{0.};
-		for (const size_t row : test_set_)
+		for (size_t const row : test_set_)
 		{
 			input_filler_.fill(row);
 			target_filler_.fill(row);
@@ -288,7 +288,7 @@ namespace learning
 			auto target_i{cbegin(sample_targets_)};
 			for (auto omega : network.omega_layer())
 			{
-				const double err{omega - *target_i};
+				double const err{omega - *target_i};
 				sqr_err_sum += err * err;
 				++target_i;
 			}
@@ -302,7 +302,7 @@ namespace learning
 	{
 		dEdw_off_->reset(0.);
 		bias_dEdw_off_->reset(0.);
-		for (size_t row_idx : teaching_set_)
+		for (size_t const row_idx : teaching_set_)
 		{
 			input_filler_.fill(row_idx);
 			target_filler_.fill(row_idx);

@@ -11,9 +11,9 @@
 static std::filesystem::path _model_file_path(std::string const& model_name)
 {
 	std::filesystem::path path{model_name};
-	if (!path.has_extension())
+	if (path.extension() != ".json"sv)
 	{
-		path += ".json";
+		path += ".json"sv;
 	}
 	return path;
 }

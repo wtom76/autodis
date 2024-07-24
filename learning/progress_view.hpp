@@ -63,7 +63,7 @@ namespace learning
 		}
 		void begin_test()
 		{
-			SPDLOG_LOGGER_INFO(log(), "begin_test");;
+			SPDLOG_LOGGER_INFO(log(), "begin_test");
 			_begin_test();
 		}
 		void add_sample_result(double result, double tagret)

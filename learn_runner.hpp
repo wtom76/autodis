@@ -14,7 +14,7 @@ namespace autodis
 		using series_view_t = shared::data::view::series_view_t;
 		using target_normalization_t = target_normalization;
 		using chart_t = autodis::visual::chart;
-		using store_result_network_t = std::function<void(nlohmann::json&&)>;
+		using store_result_network_t = std::function<void(net const&, double)>;
 	
 	private:
 		double							min_err_{0.001};	// TODO: pass as arg or config
@@ -54,8 +54,7 @@ namespace autodis
 		// learning::progress_view overrides
 		void _set_best() override
 		{
-			nlohmann::json j = network_;
-			store_result_network_(std::move(network_));
+			store_result_network_(network_, best_err_);
 			_update_chart();
 		}
 

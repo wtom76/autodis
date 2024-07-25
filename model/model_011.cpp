@@ -125,8 +125,9 @@ void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
 		to_json(fj, feature->info());
 	}
 	
-	shared::data::frame::series_t& df_series{df_.create_series(feature->label())};
-	input_series_names_.emplace_back(feature->label());
+	std::string label{"i"s + std::to_string(input_series_names_.size() + 1) + '.' + feature->label()};
+	shared::data::frame::series_t& df_series{df_.create_series(label)};
+	input_series_names_.emplace_back(std::move(label));
 	_fill_normalized(*feature, df_series);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -169,7 +170,13 @@ void autodis::model::model_011::_learn(std::filesystem::path const& out_path)
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		ctx.net_cfg(), ctx.network(), teacher,
 		ctx.input_filler(), predicted_series, target_norm_, *chart_,
-		[this, out_path](nlohmann::json&& j){ model_file_.network() = std::move(j); model_file_.store(out_path); }};
+		[this, out_path](learning::multilayer_feed_forward const& network, double best_err)
+		{
+			model_file_.network() = network;
+			model_file_.error() = best_err;
+			model_file_.store(out_path);
+		}
+	};
 	runner.wait();
 	best_err_ = runner.best_err();
 }

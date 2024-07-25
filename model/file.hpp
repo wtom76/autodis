@@ -31,6 +31,7 @@ namespace autodis::model
 		nlohmann::json& features();							// for feature shop
 		nlohmann::json& target();							// for feature shop
 		nlohmann::json& network();							// network part of JSON file
+		nlohmann::json& error();							// error of best (it is current) learning epoch
 
 		void store(std::filesystem::path const& file_path) const; // stores JSON file or throws an exception
 	};

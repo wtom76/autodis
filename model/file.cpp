@@ -13,6 +13,7 @@ struct autodis::model::file::section_name
 	static constexpr std::string_view features_{"features"};
 	static constexpr std::string_view target_{"target"};
 	static constexpr std::string_view network_{"network"};
+	static constexpr std::string_view error_{"error"};
 }; 
 //---------------------------------------------------------------------------------------------------------
 autodis::model::file::file(std::filesystem::path const& file_path)
@@ -67,6 +68,11 @@ nlohmann::json& autodis::model::file::target()
 nlohmann::json& autodis::model::file::network()
 {
 	return j_[section_name::network_];
+}
+//---------------------------------------------------------------------------------------------------------
+nlohmann::json& autodis::model::file::error()
+{
+	return j_[section_name::error_];
 }
 //---------------------------------------------------------------------------------------------------------
 void autodis::model::file::store(std::filesystem::path const& file_path) const

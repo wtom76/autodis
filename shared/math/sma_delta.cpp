@@ -13,7 +13,7 @@ namespace shared::math
 
 		data::frame::series_t const& src_series{df.series(src_idx)};
 		std::string const generated_name{df.name(src_idx) + "_sma_delta("s + std::to_string(period_short) + '-' + std::to_string(period_long) + ')'};
-		data::frame::series_t& dst_series{*df.create_series(generated_name, shared::data::nan)};
+		data::frame::series_t& dst_series{df.create_series(generated_name, shared::data::nan)};
 
 		data::frame::value_t sma_short{};
 		data::frame::value_t sma_long{};

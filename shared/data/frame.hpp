@@ -65,7 +65,7 @@ namespace shared::data
 		void resize(size_t row_count);
 		void swap(frame& other) noexcept;
 		
-		series_t* create_series(name_t const& name, value_t initial_value = nan);
+		series_t& create_series(name_t const& name, value_t initial_value = nan);
 
 		template <class other_frame>
 		void append_series(other_frame&& other, std::vector<std::size_t> const& series_idxs = {});		// appends series from other if indexes are equal, throws runtime_error otherwise

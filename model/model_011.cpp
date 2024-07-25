@@ -90,7 +90,7 @@ void autodis::model::model_011::_create_target()
 	std::shared_ptr<feature::abstract> target{shop_->feature(model_file_.target().get<std::int64_t>())};
 	target_series_name_ = target->label();
 	target_norm_ = target->norm();
-	shared::data::frame::series_t& df_series{*df_.create_series(target->label())};
+	shared::data::frame::series_t& df_series{df_.create_series(target->label())};
 	shared::data::frame::index_t& df_index{df_.index()};
 	feature::index_pos_t mi_pos{mi.pos(target->bounds().index_min_)};
 	feature::index_pos_t const mi_pos_max{mi.pos(target->bounds().index_max_)};
@@ -116,8 +116,8 @@ void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
 	std::shared_ptr<feature::abstract> feature{shop_->feature(fj)};
 	if (!feature)
 	{
-		SPDLOG_LOGGER_ERROR(log(), "failed to create feature: {}", fj.dump());
-		return;
+		SPDLOG_LOGGER_ERROR(log(), "failed to create feature:\n{}", fj.dump());
+		throw std::runtime_error{"failed to create feature"s};
 	}
 	assert(!feature->info().is_template());
 	if (!feature->info().id_)
@@ -125,14 +125,9 @@ void autodis::model::model_011::_create_input_feature(nlohmann::json& fj)
 		to_json(fj, feature->info());
 	}
 	
-	shared::data::frame::series_t* df_series_ptr{df_.create_series(feature->label())};
-	if (!df_series_ptr)
-	{
-		SPDLOG_LOGGER_ERROR(log(), "failed to create series from '{}'", feature->label());
-		return;
-	}
+	shared::data::frame::series_t& df_series{df_.create_series(feature->label())};
 	input_series_names_.emplace_back(feature->label());
-	_fill_normalized(*feature, *df_series_ptr);
+	_fill_normalized(*feature, df_series);
 }
 //---------------------------------------------------------------------------------------------------------
 // 1. init df shape with target

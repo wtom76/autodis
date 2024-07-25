@@ -13,7 +13,7 @@ void shared::data::frame::_shrink_to_fit()
 //-----------------------------------------------------------------------------------------------------
 void shared::data::frame::_left_join(frame const& other, std::size_t series_idx)
 {
-	auto dst_i{create_series(other.name(series_idx))->begin()};
+	auto dst_i{create_series(other.name(series_idx)).begin()};
 	
 	auto index_i{index_.cbegin()};
 	auto const index_e{index_.cend()};
@@ -179,17 +179,16 @@ void shared::data::frame::swap(frame& other) noexcept
 	series_names_.swap(other.series_names_);
 }
 //-----------------------------------------------------------------------------------------------------
-typename shared::data::frame::series_t* shared::data::frame::create_series(name_t const& name, value_t initial_value)
+typename shared::data::frame::series_t& shared::data::frame::create_series(name_t const& name, value_t initial_value)
 {
 	const auto name_i{std::find(series_names_.cbegin(), series_names_.cend(), name)};
 	if (name_i != series_names_.cend())
 	{
-		assert(false);
-		return nullptr;
+		throw std::runtime_error{"dataframe series '"s + name + "' already exist"s};
 	}
 	data_.emplace_back(index_.size(), initial_value);
 	series_names_.emplace_back(name);
-	return &data_.back();
+	return data_.back();
 }
 //-----------------------------------------------------------------------------------------------------
 void shared::data::frame::delete_series(std::size_t idx) noexcept

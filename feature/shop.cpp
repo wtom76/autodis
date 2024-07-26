@@ -85,13 +85,20 @@ std::shared_ptr<feature::abstract> feature::shop::_create_feature(feature_info_t
 		throw std::runtime_error("unknown feature type. feature id: "s + std::to_string(info.id_));
 	}
 	assert(result);
-	feature_map_.emplace(info.id_, result);
+	if (info.id_)
+	{
+		feature_map_.emplace(info.id_, result);
+	}
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
 // TODO: reuse existing features not only with DB ids
 std::shared_ptr<feature::abstract> feature::shop::_existing(feature_info_t const& info) const
 {
+	if (!info.id_)
+	{
+		return {};
+	}
 	auto const feature_map_i{feature_map_.find(info.id_)};
 	return feature_map_i != feature_map_.cend()
 			? feature_map_i->second
@@ -103,6 +110,7 @@ std::shared_ptr<feature::abstract> feature::shop::_existing(feature_info_t const
 // 3. or create feature from json representing feature_info_t
 std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json const& fj)
 {
+	SPDLOG_LOGGER_DEBUG(log(), "_feature()\n{}", fj.dump(4));
 	feature_info_t info;
 	fj.get_to(info);
 

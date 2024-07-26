@@ -110,7 +110,6 @@ std::shared_ptr<feature::abstract> feature::shop::_existing(feature_info_t const
 // 3. or create feature from json representing feature_info_t
 std::shared_ptr<feature::abstract> feature::shop::_feature(nlohmann::json const& fj)
 {
-	SPDLOG_LOGGER_DEBUG(log(), "_feature()\n{}", fj.dump(4));
 	feature_info_t info;
 	fj.get_to(info);
 

@@ -13,6 +13,7 @@
 #include <filesystem>
 #include <functional>
 #include <limits>
+#include <list>
 #include <memory>
 #include <mutex>
 #include <optional>

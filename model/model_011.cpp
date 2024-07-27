@@ -51,6 +51,9 @@ autodis::model::model_011::model_011(file&& model_file)
 	, model_file_{std::move(model_file)}
 {}
 //---------------------------------------------------------------------------------------------------------
+autodis::model::model_011::~model_011()
+{}
+//---------------------------------------------------------------------------------------------------------
 learning::config autodis::model::model_011::_config()
 {
 	learning::config cfg;
@@ -170,15 +173,15 @@ void autodis::model::model_011::_learn(std::filesystem::path const& out_path)
 	autodis::learn_runner<learning::multilayer_feed_forward, norm_t> runner{
 		ctx.net_cfg(), ctx.network(), teacher,
 		ctx.input_filler(), predicted_series, target_norm_, *chart_,
-		[this, out_path](learning::multilayer_feed_forward const& network, double best_err)
+		[this](learning::multilayer_feed_forward const& network)
 		{
 			model_file_.network() = network;
-			model_file_.error() = best_err;
-			model_file_.store(out_path);
 		}
 	};
 	runner.wait();
-	best_err_ = runner.best_err();
+	model_file_.error() = runner.best_err();
+	model_file_.store(out_path);
+	SPDLOG_LOGGER_INFO(log(), "model with error {} is stored to '{}'", runner.best_err(), out_path.native());
 }
 //---------------------------------------------------------------------------------------------------------
 std::optional<autodis::model::prediction_result_t> autodis::model::model_011::_predict()

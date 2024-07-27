@@ -14,7 +14,7 @@ namespace autodis
 		using series_view_t = shared::data::view::series_view_t;
 		using target_normalization_t = target_normalization;
 		using chart_t = autodis::visual::chart;
-		using store_result_network_t = std::function<void(net const&, double)>;
+		using store_result_network_t = std::function<void(net const&)>;
 	
 	private:
 		double							min_err_{0.001};	// TODO: pass as arg or config
@@ -54,7 +54,7 @@ namespace autodis
 		// learning::progress_view overrides
 		void _set_best() override
 		{
-			store_result_network_(network_, best_err_);
+			store_result_network_(network_);
 			_update_chart();
 		}
 
@@ -80,6 +80,7 @@ namespace autodis
 			, thread_{
 				[this](std::stop_token stoken)
 				{
+					shared::util::signal_handler ctrl_c_handler{thread_.get_stop_source()};
 					teacher_.teach(cfg_, network_, min_err_, *this, stoken);
 					if (stoken.stop_requested())
 					{
@@ -88,8 +89,7 @@ namespace autodis
 					teacher_.show_test(network_, *this, stoken);
 				}
 			}
-		{
-		}
+		{}
 		//----------------------------------------------------------------------------------------------------------
 		~learn_runner()
 		{

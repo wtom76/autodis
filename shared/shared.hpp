@@ -7,6 +7,7 @@
 #include "util/scope_lifetime.hpp"
 #include "util/logger.hpp"
 #include "util/time.hpp"
+#include "util/signal_handler.hpp"
 #include "data/frame.hpp"
 #include "data/view.hpp"
 

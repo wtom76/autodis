@@ -34,7 +34,6 @@ namespace autodis::model
 		std::unique_ptr<feature::shop> shop_;
 		file		model_file_;
 		frame_t		df_;
-		double		best_err_{0};
 		std::shared_ptr<autodis::visual::chart> chart_;
 		std::string					target_series_name_;
 		std::vector<std::string>	input_series_names_;
@@ -57,6 +56,7 @@ namespace autodis::model
 
 	public:
 		model_011(file&& model_file);
+		~model_011();
 
 		static void create_model_file(
 			std::string type_name,

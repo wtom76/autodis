@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -10,14 +11,17 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <functional>
 #include <limits>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <ranges>
 #include <span>
 #include <string>
 #include <stdexcept>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG

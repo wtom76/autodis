@@ -157,17 +157,29 @@ void learning::multilayer_feed_forward::forward()
 		}
 	}
 }
+#if defined DUMP_EPOCH
+//---------------------------------------------------------------------------------------------------------
+void learning::multilayer_feed_forward::dump(std::ostream& s)
+{
+	nlohmann::json j;
+	j["biases"s] = biases_.layers_;
+	j["weights"s] = weights_.layers_;
+	j["outputs"s] = outputs_.layers_;
+
+	s << j.dump(4);
+}
+#endif
 //---------------------------------------------------------------------------------------------------------
 void learning::to_json(nlohmann::json& j, const multilayer_feed_forward& src)
 {
 	j = nlohmann::json{
-		{ "biases", src.biases_.layers_ },
-		{ "weights", src.weights_.layers_ }
+		{ "biases"s, src.biases_.layers_ },
+		{ "weights"s, src.weights_.layers_ }
 	};
 }
 //---------------------------------------------------------------------------------------------------------
 void learning::from_json(const nlohmann::json& j, multilayer_feed_forward& dst)
 {
-	j.at("biases").get_to(dst.biases_.layers_);
-	j.at("weights").get_to(dst.weights_.layers_);
+	j.at("biases"s).get_to(dst.biases_.layers_);
+	j.at("weights"s).get_to(dst.weights_.layers_);
 }

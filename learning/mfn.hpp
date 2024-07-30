@@ -76,10 +76,15 @@ namespace learning
 
 		void forward();
 
+#if defined DUMP_EPOCH
+		// dump weights, biases and outputs
+		void dump(std::ostream& s);
+#endif
 		friend void to_json(nlohmann::json& j, const multilayer_feed_forward& src);
 		friend void from_json(const nlohmann::json& j, multilayer_feed_forward& dst);
 	};
 	
+	// weights and biases
 	void to_json(nlohmann::json& j, const multilayer_feed_forward& src);
 	void from_json(const nlohmann::json& j, multilayer_feed_forward& dst);
 }

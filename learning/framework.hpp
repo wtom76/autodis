@@ -29,3 +29,5 @@
 using namespace std::literals;
 
 #include <shared/shared.hpp>
+
+//#define DUMP_EPOCH

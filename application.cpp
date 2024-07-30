@@ -56,6 +56,10 @@ void autodis::application::learn(std::string const& model_name, std::string cons
 		}
 		model->learn(out_path);
 	}
+	else
+	{
+		SPDLOG_LOGGER_ERROR(log(), "unknown model type '{}'", model_name);
+	}
 }
 //----------------------------------------------------------------------------------------------------------
 void autodis::application::predict(std::string const& model_name)

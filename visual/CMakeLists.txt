@@ -6,9 +6,6 @@ add_library(visual OBJECT
 	scale_y.cpp
 	chart.cpp
 	shader.cpp
-	heatmap.cpp
-	partial_dependence_view.cpp
-	box_plot.cpp
 )
 
 target_include_directories(visual PRIVATE

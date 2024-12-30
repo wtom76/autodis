@@ -22,9 +22,9 @@ std::vector<std::string> shared::util::uri::_parse(std::string src)
 std::vector<std::string> shared::util::uri::_parse(std::initializer_list<std::string> src)
 {
 	std::vector<std::string> result;
-	for (const std::string& str : src)
+	for (std::string const& str : src)
 	{
-		_parse(std::move(str), result);
+		_parse(str, result);
 	}
 	return result;
 }

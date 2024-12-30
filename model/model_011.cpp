@@ -6,9 +6,6 @@
 #include <shared/math/target_delta.hpp>
 #include <shared/math/track.hpp>
 #include <shared/math/sma_delta.hpp>
-#include <visual/heatmap.hpp>
-#include <visual/partial_dependence_view.hpp>
-#include <visual/box_plot.hpp>
 
 //---------------------------------------------------------------------------------------------------------
 // class prediction_context
@@ -228,7 +225,8 @@ void autodis::model::model_011::_show_analysis()
 		return;
 	}
 
-	std::ofstream out{"network.txt", std::ios::trunc};
+	std::ofstream out{"network_analysis.txt", std::ios::trunc};
+
 	auto const& source_to_dest_matrix{weights[0]};
 	auto input_name_i{std::begin(input_series_names_)};
 	for (std::vector<double> const& one_src_many_dst : source_to_dest_matrix)
@@ -242,8 +240,6 @@ void autodis::model::model_011::_show_analysis()
 		}
 		out << std::sqrt(sum_sqr / source_to_dest_matrix.size()) << "\n";
 	}
-
-	visual::heatmap hm{weights[0], input_series_names_, "heatmap"};
 }
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
@@ -311,7 +307,4 @@ void autodis::model::model_011::show_partial_dependence(std::filesystem::path co
 		pd.write_sorted_result(f, input_series_names_);
 		SPDLOG_LOGGER_INFO(log(), "result is written in {}", out_path.native());
 	}
-	visual::partial_dependence_view pdw{pd.result(), input_series_names_, "partial dependence"};
-
-	//visual::box_plot pdw{pd.result(), input_series_names_, "partial dependence"};
 }

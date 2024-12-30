@@ -54,7 +54,7 @@ namespace learning
 		void _update_gradients(net& network, std::vector<double> const& targets);
 		void _update_weights(net& network);
 		void _update_biases(net& network);
-		void _split_data();
+		void _split_data(bool backwards);
 		double _mean_sqr_error(net& network);
 		double _teach_epoch(net& network);
 
@@ -244,14 +244,15 @@ namespace learning
 	}
 	//-----------------------------------------------------------------------------------------------------
 	template <class net>
-	void rprop<net>::_split_data()
+	void rprop<net>::_split_data(bool backwards)
 	{
 		constexpr double train_fraction{0.8};
 
 		teaching_set_.clear();
 		test_set_.clear();
 
-		const size_t teaching_size{static_cast<size_t>(src_row_count_ * train_fraction)};
+		size_t const teaching_size{static_cast<size_t>(src_row_count_ * train_fraction)};
+		size_t const test_size{src_row_count_ - teaching_size};
 		if (!teaching_size || teaching_size > src_row_count_)
 		{
 			return;
@@ -262,13 +263,40 @@ namespace learning
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<size_t> distribution(0, src_row_count_ - 1);
 
-		for (size_t i{0}; i < src_row_count_ && test_set_.size() < src_row_count_ - teaching_size; ++i)
+		if (backwards)
 		{
-			if (distribution(gen) < teaching_size)
+			std::ptrdiff_t i{src_row_count_ - 1};
+			for (; i >= 0 && teaching_set_.size() < teaching_size; --i)
 			{
-				teaching_set_.push_back(i);
+				if (distribution(gen) < teaching_size)
+				{
+					teaching_set_.push_back(i);
+				}
+				else
+				{
+					test_set_.push_back(i);
+				}
 			}
-			else
+			for (; i >= 0; --i)
+			{
+				test_set_.push_back(i);
+			}
+		}
+		else
+		{
+			std::ptrdiff_t i{0};
+			for (; i < src_row_count_ && teaching_set_.size() < teaching_size; ++i)
+			{
+				if (distribution(gen) < teaching_size)
+				{
+					teaching_set_.push_back(i);
+				}
+				else
+				{
+					test_set_.push_back(i);
+				}
+			}
+			for (; i < src_row_count_; ++i)
 			{
 				test_set_.push_back(i);
 			}
@@ -330,7 +358,7 @@ namespace learning
 	template <class net>
 	double rprop<net>::teach(typename net::config_t const& cfg, net& network, double min_err, progress_view& pview, std::stop_token stop_token)
 	{
-		constexpr std::int64_t epochs_max{1000000};
+		constexpr std::int64_t epochs_max{100000000};
 
 		pview.begin_teach();
 		_init(cfg);
@@ -340,13 +368,13 @@ namespace learning
 		std::int64_t epochs_left{epochs_max};
 		if (cfg.stable_test_set())
 		{
-			_split_data(); // never change test set - more honest
+			_split_data(true); // never change test set - more honest
 		}
 		while (cur_min_err > min_err && !stop_token.stop_requested() && epochs_left--)
 		{
 			if (!cfg.stable_test_set())
 			{
-				_split_data(); // test set is new every epoch
+				_split_data(epochs_left % 2); // test set is new every epoch
 			}
 			double const err{_teach_epoch(network)};
 			if (cur_min_err > err)

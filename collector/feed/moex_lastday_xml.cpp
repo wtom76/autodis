@@ -1,9 +1,9 @@
 #include "pch.hpp"
-#include "moex_rest.hpp"
+#include "moex_lastday_xml.hpp"
 #include <pugixml.hpp>
 
 //---------------------------------------------------------------------------------------------------------
-collector::feed::moex_rest::moex_rest(std::span<keeper::feed_args_t const> feed_args)
+collector::feed::moex_lastday_xml::moex_lastday_xml(std::span<keeper::feed_args_t const> feed_args)
 	: feed_args_{feed_args.begin(), feed_args.end()}
 {}
 //---------------------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ collector::feed::moex_rest::moex_rest(std::span<keeper::feed_args_t const> feed_
 // "2023-05-21..." -> "2023052121..." -> 20230521
 // 1. MOEX puts next day in SYSTIME field at midnight even though the record represents previous day
 // so if time is less than 1 hour (heuristic threshold), take previous date.
-void collector::feed::moex_rest::_parse_date(std::string dt_str)
+void collector::feed::moex_lastday_xml::_parse_date(std::string dt_str)
 {
 	if (dt_str.size() < 10)
 	{
@@ -34,7 +34,7 @@ void collector::feed::moex_rest::_parse_date(std::string dt_str)
 	result_.date_ = shared::util::time::yyyymmdd(ymd);
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::moex_rest::_parse_store()
+void collector::feed::moex_lastday_xml::_parse_store()
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result const result{doc.load_buffer_inplace(buffer_.data(), buffer_.size())};
@@ -69,19 +69,19 @@ void collector::feed::moex_rest::_parse_store()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::moex_rest::start(std::unique_ptr<keeper::data_write> dest)
+void collector::feed::moex_lastday_xml::start(std::unique_ptr<keeper::data_write> dest)
 {
 	dest_ = std::move(dest);
 }
 //---------------------------------------------------------------------------------------------------------
-size_t collector::feed::moex_rest::read(std::span<const char> chunk)
+size_t collector::feed::moex_lastday_xml::read(std::span<const char> chunk)
 {
 	buffer_.reserve(buffer_.size() + chunk.size());
 	buffer_.insert(buffer_.end(), chunk.begin(), chunk.end());
 	return chunk.size();
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::moex_rest::finish(std::span<const char> chunk)
+void collector::feed::moex_lastday_xml::finish(std::span<const char> chunk)
 {
 	assert(dest_);
 	try
@@ -98,6 +98,10 @@ void collector::feed::moex_rest::finish(std::span<const char> chunk)
 	}
 	catch (std::exception const& ex)
 	{
-		throw std::runtime_error{"failed to parse moex_rest source. "s + ex.what()};
+		{
+			std::ofstream f{"feed_dump.xml"};
+			f.write(buffer_.data(), buffer_.size());
+		}
+		throw std::runtime_error{"failed to parse moex_lastday_xml source. see feed_dump.xml. "s + ex.what()};
 	}
 }

@@ -64,6 +64,7 @@ std::span<const char>::iterator collector::feed::finam_daily_csv::_parse_header(
 //---------------------------------------------------------------------------------------------------------
 collector::feed::finam_daily_csv::row collector::feed::finam_daily_csv::_read_row(std::stringstream& s)
 {
+	std::size_t filled_num{0};
 	std::size_t src_idx{0};
 	std::string field;
 	row result{field_map_.field_num()};
@@ -76,16 +77,18 @@ collector::feed::finam_daily_csv::row collector::feed::finam_daily_csv::_read_ro
 			{
 				throw std::runtime_error("date field should be in 'yyyymmdd' format"s);
 			}
+			++filled_num;
 		}
 		else if (field_map_.dst_idx(src_idx) != field_map_.null())
 		{
 			read_field(field, result.data_[field_map_.dst_idx(src_idx)]);
-		}
-		else if (src_idx >= result.data_.size())
-		{
-			throw std::runtime_error("line in file has more fields than header"s);
+			++filled_num;
 		}
 		++src_idx;
+	}
+	if (filled_num < result.data_.size() + 1)
+	{
+		throw std::runtime_error("not all fields found in data row"s);
 	}
 	return result;
 }

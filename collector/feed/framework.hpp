@@ -19,4 +19,6 @@
 #include <stdexcept>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 using namespace std::literals;

@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.22.0)
 add_library(feed OBJECT
 	finam_daily_csv.cpp
 	linear_generator.cpp
-	moex_rest.cpp
+	moex_lastday_xml.cpp
+	moex_daily_json.cpp
 	metastock.cpp
 )
 

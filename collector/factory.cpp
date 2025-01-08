@@ -1,8 +1,9 @@
 #include "pch.hpp"
 #include "factory.hpp"
 #include "feed/finam_daily_csv.hpp"
+#include "feed/moex_daily_json.hpp"
 #include "feed/linear_generator.hpp"
-#include "feed/moex_rest.hpp"
+#include "feed/moex_lastday_xml.hpp"
 #include "source/file.hpp"
 #include "source/dummy.hpp"
 #include "source/rest.hpp"
@@ -17,6 +18,10 @@ std::unique_ptr<collector::source::base> collector::factory::_create_file(std::s
 std::unique_ptr<collector::source::feed> collector::factory::feed(keeper::metadata::feed_info const& info)
 {
 	feed_uri const uri{info.feed_uri_};
+	if (uri.feed_name() == "moex_daily_json")
+	{
+		return std::make_unique<feed::moex_daily_json>(std::span<keeper::feed_args_t const>{info.feed_args_});
+	}
 	if (uri.feed_name() == "finam_daily_csv")
 	{
 		return std::make_unique<feed::finam_daily_csv>(std::span<keeper::feed_args_t const>{info.feed_args_});
@@ -27,7 +32,7 @@ std::unique_ptr<collector::source::feed> collector::factory::feed(keeper::metada
 	}
 	if (uri.feed_name() == "moex_rest")
 	{
-		return std::make_unique<feed::moex_rest>(info.feed_args_);
+		return std::make_unique<feed::moex_lastday_xml>(info.feed_args_);
 	}
 	throw std::runtime_error("unknown feed in uri "s + uri.to_string());
 }

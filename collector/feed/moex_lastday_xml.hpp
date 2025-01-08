@@ -8,9 +8,10 @@
 namespace collector::feed
 {
 	//---------------------------------------------------------------------------------------------------------
-	// class moex_rest
+	// class moex_lastday_xml
+	// parsed source example: https://iss.moex.com/iss/engines/stock/markets/shares/securities/SBER.xml
 	//---------------------------------------------------------------------------------------------------------
-	class moex_rest
+	class moex_lastday_xml
 		: public source::feed
 	{
 	private:
@@ -35,7 +36,7 @@ namespace collector::feed
 		void _parse_store();
 
 	public:
-		moex_rest(std::span<keeper::feed_args_t const> feed_args);
+		moex_lastday_xml(std::span<keeper::feed_args_t const> feed_args);
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

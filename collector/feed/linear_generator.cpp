@@ -21,8 +21,15 @@ collector::feed::linear_generator::linear_generator(std::span<keeper::feed_args_
 {
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::linear_generator::start(std::unique_ptr<keeper::data_write> dest)
+void collector::feed::linear_generator::set_data_write(std::unique_ptr<keeper::data_write> dest)
 {
+	dest_ = std::move(dest);
+}
+//---------------------------------------------------------------------------------------------------------
+void collector::feed::linear_generator::start()
+{
+	assert(dest_);
+
 	constexpr long long row_count_{200};
 	constexpr double a_{0.02};
 	constexpr double b_{0.01};
@@ -32,9 +39,8 @@ void collector::feed::linear_generator::start(std::unique_ptr<keeper::data_write
 	{
 		values[dst_idx_x_] = x;
 		values[dst_idx_y_] = a_ * x + b_;
-		dest->add(std::make_pair(x, values));
+		dest_->add(std::make_pair(x, values));
 	}
-	dest->finish();
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::linear_generator::read(std::span<const char>)
@@ -43,4 +49,6 @@ size_t collector::feed::linear_generator::read(std::span<const char>)
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::feed::linear_generator::finish(std::span<const char>)
-{}
+{
+	dest_->finish();
+}

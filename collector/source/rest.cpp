@@ -11,6 +11,7 @@ collector::source::rest::rest(std::string source_args)
 void collector::source::rest::fetch_to(feed& dest)
 {
 	dest_ = &dest;
+	dest_->start();
 	{
 		curl_easy ce;
 		curl_easy_setopt(ce.handle(), CURLOPT_WRITEDATA, static_cast<void*>(this));

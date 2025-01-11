@@ -15,6 +15,7 @@ namespace collector::source
 
 		void fetch_to(feed& dest) override
 		{
+			dest.start();
 			dest.read({});
 			dest.finish({});
 		}

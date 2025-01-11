@@ -63,6 +63,7 @@ namespace shared::util
 			, index_src_name_{std::move(index_src_name)}
 		{}
 
+		void clear();
 		void map_next_src_name(std::string const& src_name);
 		void validate() const;
 

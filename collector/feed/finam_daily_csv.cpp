@@ -100,9 +100,14 @@ void collector::feed::finam_daily_csv::_send(row&& r)
 	dest_->add(std::make_pair(r.date_, std::move(r.data_)));
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::finam_daily_csv::start(std::unique_ptr<keeper::data_write> dest)
+void collector::feed::finam_daily_csv::set_data_write(std::unique_ptr<keeper::data_write> dest)
 {
 	dest_ = std::move(dest);
+}
+//---------------------------------------------------------------------------------------------------------
+void collector::feed::finam_daily_csv::start()
+{
+	assert(dest_);
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::finam_daily_csv::read(std::span<const char> chunk)

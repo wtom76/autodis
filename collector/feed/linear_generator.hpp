@@ -16,6 +16,7 @@ namespace collector::feed
 	private:
 		const std::size_t dst_idx_x_;
 		const std::size_t dst_idx_y_;
+		std::unique_ptr<keeper::data_write>	dest_;
 
 	private:
 		static std::size_t _index(std::span<keeper::feed_args_t const> list, std::string const& value);
@@ -25,9 +26,11 @@ namespace collector::feed
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------
-		void start(std::unique_ptr<keeper::data_write> dest) override;
+		void set_data_write(std::unique_ptr<keeper::data_write> dest) override;
+		void start() override;
 		size_t read(std::span<const char> chunk) override;
 		void finish(std::span<const char> chunk) override;
+		int last_recvd_date() override { assert(false); return 0; }	// implement on demand
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

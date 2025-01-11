@@ -20,6 +20,7 @@ collector::source::file::file(const std::filesystem::path& path)
 //---------------------------------------------------------------------------------------------------------
 void collector::source::file::fetch_to(feed& dest)
 {
+	dest.start();
 	std::vector<char> buffer(buf_size_);
 	std::ptrdiff_t size_buffered{0};
 	while (f_.good())

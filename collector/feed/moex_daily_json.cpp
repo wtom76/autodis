@@ -66,6 +66,10 @@ collector::feed::moex_daily_json::row collector::feed::moex_daily_json::_read_ro
 			{
 				throw std::runtime_error("can't parse date part"s);
 			}
+			if (last_recvd_date_ < result.date_)
+			{
+				last_recvd_date_ = result.date_;
+			}
 			++filled_num;
 		}
 		else if (field_map_.dst_idx(src_idx) != field_map_.null())
@@ -89,9 +93,15 @@ void collector::feed::moex_daily_json::_send(row&& r)
 	dest_->add(std::make_pair(r.date_, std::move(r.data_)));
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::moex_daily_json::start(std::unique_ptr<keeper::data_write> dest)
+void collector::feed::moex_daily_json::set_data_write(std::unique_ptr<keeper::data_write> dest)
 {
 	dest_ = std::move(dest);
+}
+//---------------------------------------------------------------------------------------------------------
+void collector::feed::moex_daily_json::start()
+{
+	assert(dest_);
+	assert(buffer_.empty());
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::moex_daily_json::read(std::span<const char> chunk)
@@ -109,6 +119,8 @@ void collector::feed::moex_daily_json::finish(std::span<const char> chunk)
 		read(chunk);
 		_parse_store();
 		dest_->finish();
+		buffer_.clear();
+		field_map_.clear();
 	}
 	catch (std::exception const& ex)
 	{

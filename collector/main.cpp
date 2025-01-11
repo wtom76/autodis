@@ -9,9 +9,9 @@
 void process_source(keeper::metadata::source_info const& info, keeper::config const& keeper_cfg)
 {
 	assert(info.pending_);
-	auto src{collector::factory::source(info.source_uri_, info.source_args_)};
-	auto feed{collector::factory::feed(info.dest_)};
-	feed->start(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
+	std::unique_ptr<collector::source::feed> feed{collector::factory::feed(info.dest_)};
+	feed->set_data_write(std::make_unique<keeper::data_write>(keeper_cfg, info.dest_.data_uri_));
+	std::unique_ptr<collector::source::base> src{collector::factory::source(info.source_uri_, info.source_args_)};
 	src->fetch_to(*feed);
 }
 //---------------------------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ void collect()
 	keeper::config keeper_cfg;
 	keeper_cfg.load();
 	keeper::metadata metadata{keeper_cfg};
-	auto const sources{metadata.load_source_meta()};
+	std::vector<keeper::metadata::source_info> const sources{metadata.load_source_meta()};
 	for (auto const& source_info : sources)
 	{
 		if (!source_info.pending_)

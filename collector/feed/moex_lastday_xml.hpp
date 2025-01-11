@@ -27,7 +27,6 @@ namespace collector::feed
 	private:
 		std::vector<keeper::feed_args_t>	feed_args_;
 		std::unique_ptr<keeper::data_write>	dest_;
-		std::ptrdiff_t						field_idx_to_store_;		// index in row::ohlvcv_ to store to dest
 		std::vector<char>					buffer_;
 		row									result_;
 
@@ -40,9 +39,11 @@ namespace collector::feed
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------
-		void start(std::unique_ptr<keeper::data_write> dest) override;
+		void set_data_write(std::unique_ptr<keeper::data_write> dest) override;
+		void start() override;
 		size_t read(std::span<const char> chunk) override;
 		void finish(std::span<const char> chunk) override;
+		int last_recvd_date() override { assert(false); return 0; }	// implement on demand
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

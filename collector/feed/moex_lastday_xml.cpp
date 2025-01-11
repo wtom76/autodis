@@ -69,9 +69,14 @@ void collector::feed::moex_lastday_xml::_parse_store()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void collector::feed::moex_lastday_xml::start(std::unique_ptr<keeper::data_write> dest)
+void collector::feed::moex_lastday_xml::set_data_write(std::unique_ptr<keeper::data_write> dest)
 {
 	dest_ = std::move(dest);
+}
+//---------------------------------------------------------------------------------------------------------
+void collector::feed::moex_lastday_xml::start()
+{
+	assert(dest_);
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::moex_lastday_xml::read(std::span<const char> chunk)

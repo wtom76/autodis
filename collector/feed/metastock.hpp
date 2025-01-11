@@ -21,9 +21,11 @@ namespace collector::feed::metastock
 		//---------------------------------------------------------------------------------------------------------
 		// source::feed impl		
 		//---------------------------------------------------------------------------------------------------------
-		void start(std::unique_ptr<keeper::data_write> dest) override;
+		void set_data_write(std::unique_ptr<keeper::data_write> dest) override;
+		void start() override;
 		size_t read(std::span<const char> chunk) override;
 		void finish(std::span<const char> chunk) override;
+		int last_recvd_date() override { assert(false); return 0; }	// implement on demand
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

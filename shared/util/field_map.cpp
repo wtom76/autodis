@@ -2,6 +2,12 @@
 #include "field_map.hpp"
 
 //---------------------------------------------------------------------------------------------------------
+void shared::util::field_map::field_map::clear()
+{
+	src_idx_dst_idx_.clear();
+	index_field_src_idx_ = idx_null_;
+}
+//---------------------------------------------------------------------------------------------------------
 void shared::util::field_map::field_map::map_next_src_name(std::string const& src_name)
 {
 	if (src_name == index_src_name_)

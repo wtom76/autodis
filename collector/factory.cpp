@@ -7,6 +7,7 @@
 #include "source/file.hpp"
 #include "source/dummy.hpp"
 #include "source/rest.hpp"
+#include "source/rest_by_chunks.hpp"
 
 //----------------------------------------------------------------------------------------------------------
 std::unique_ptr<collector::source::base> collector::factory::_create_file(std::string file_name)
@@ -50,6 +51,10 @@ std::unique_ptr<collector::source::base> collector::factory::source(source_uri c
 	if (uri.type_name() == "rest")
 	{
 		return std::make_unique<source::rest>(source_args);
+	}
+	if (uri.type_name() == "rest_by_chunks")
+	{
+		return std::make_unique<source::rest_by_chunks>(source_args);
 	}
 	throw std::runtime_error("unknown source in uri "s + uri.to_string());
 }

@@ -4,6 +4,7 @@ add_library(source OBJECT
 	file.cpp
 	curl.cpp
 	rest.cpp
+	rest_by_chunks.cpp
 )
 
 target_include_directories(source PRIVATE

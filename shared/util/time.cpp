@@ -19,9 +19,18 @@ uint32_t shared::util::time::yyyymmdd(std::tm const& tm_val) noexcept
 	return (tm_val.tm_year + 1900) * 10000 + (tm_val.tm_mon + 1) * 100 + tm_val.tm_mday;
 }
 //---------------------------------------------------------------------------------------------------------
-[[nodiscard]] uint32_t shared::util::time::yyyymmdd(std::chrono::year_month_day const& ymd) noexcept
+uint32_t shared::util::time::yyyymmdd(std::chrono::year_month_day const& ymd) noexcept
 {
 	return static_cast<int>(ymd.year()) * 10000 + static_cast<unsigned int>(ymd.month()) * 100 + static_cast<unsigned int>(ymd.day());
+}
+//---------------------------------------------------------------------------------------------------------
+std::chrono::year_month_day shared::util::time::ymd_from_yyyymmdd(uint32_t yyyymmdd) noexcept
+{
+	unsigned int const d{yyyymmdd % 100};
+	yyyymmdd /= 100;
+	unsigned int const m{yyyymmdd % 100};
+	yyyymmdd /= 100;
+	return {std::chrono::year{static_cast<int>(yyyymmdd)}, std::chrono::month{m}, std::chrono::day{d}};
 }
 //---------------------------------------------------------------------------------------------------------
 // parses 0000-00-00 00:00:00

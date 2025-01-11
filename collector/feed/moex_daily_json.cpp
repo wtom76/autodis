@@ -10,6 +10,7 @@ collector::feed::moex_daily_json::moex_daily_json(std::span<keeper::feed_args_t 
 			{"high"s,	"high"s},
 			{"low"s,	"low"s},
 			{"close"s,	"close"s},
+			{"value"s,	"value"s},
 			{"volume"s,	"volume"s}
 		},
 		feed_args | std::views::transform([](keeper::feed_args_t const& args){ return args.parts().back(); }),

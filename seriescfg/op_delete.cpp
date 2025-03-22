@@ -43,9 +43,11 @@ std::array<std::int64_t, 5> seriescfg::op_delete::_delete_data_registry(pqxx::wo
 //---------------------------------------------------------------------------------------------------------
 std::array<std::int64_t, 2> seriescfg::op_delete::_delete_source_binding(pqxx::work& t, std::array<std::int64_t, 5> const& dr_ids) const
 {
-	pqxx::result const r{t.exec_params(
-		"with deleted as (delete from metadata.source_binding where data_id in ($1, $2, $3, $4, $5) returning source_id) select distinct source_id from deleted"s,
-		dr_ids[0], dr_ids[1], dr_ids[2], dr_ids[3], dr_ids[4])};	// yes, it's laziness
+	pqxx::params params;
+	std::ranges::for_each(dr_ids, [&params](std::int64_t id){ params.append(id); });
+	pqxx::result const r{t.exec(
+		"with deleted as (delete from metadata.source_binding where data_id in ($1, $2, $3, $4, $5) returning source_id) select distinct source_id from deleted"sv,
+		params)};
 
 	if (r.size() != 2)
 	{
@@ -61,7 +63,9 @@ std::array<std::int64_t, 2> seriescfg::op_delete::_delete_source_binding(pqxx::w
 //---------------------------------------------------------------------------------------------------------
 void seriescfg::op_delete::_delete_source_registry(pqxx::work& t, std::array<std::int64_t, 2> const& src_ids) const
 {
-	pqxx::result const r{t.exec_params("delete from metadata.source_registry where id in ($1, $2)"s, src_ids[0], src_ids[1])};
+	pqxx::params params;
+	std::ranges::for_each(src_ids, [&params](std::int64_t id){ params.append(id); });
+	pqxx::result const r{t.exec("delete from metadata.source_registry where id in ($1, $2)"sv, params)};
 }
 //---------------------------------------------------------------------------------------------------------
 void seriescfg::op_delete::run(pqxx::connection& con)

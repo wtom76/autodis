@@ -67,7 +67,7 @@ std::vector<keeper::metadata::source_info> keeper::metadata::load_source_meta()
 		{
 			std::unique_lock const lock{con_mtx_};
 			pqxx::work t{con_};
-			const pqxx::result r{t.exec_params("select source_id, source_uri, source_args, feed_uri, feed_args, data_uri, pending from metadata.metadata_view")};
+			const pqxx::result r{t.exec("select source_id, source_uri, source_args, feed_uri, feed_args, data_uri, pending from metadata.metadata_view"sv)};
 			if (r.empty())
 			{
 				return {};
@@ -113,7 +113,7 @@ std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_meta()
 	{
 		std::unique_lock const lock{con_mtx_};
 		pqxx::work t{con_};
-		const pqxx::result r{t.exec_params("select data_id, data_uri, data_description from metadata.metadata_view")};
+		const pqxx::result r{t.exec("select data_id, data_uri, data_description from metadata.metadata_view"sv)};
 		if (r.empty())
 		{
 			return {};
@@ -152,7 +152,7 @@ void keeper::metadata::drop_pending_flag(long long series_id)
 {
 	std::unique_lock const lock{con_mtx_};
 	pqxx::work t{con_};
-	t.exec_prepared("dpf", series_id);
+	t.exec(pqxx::prepped{"dpf"s}, series_id);
 	t.commit();
 }
 //---------------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ std::vector<keeper::metadata::feature_info> keeper::metadata::load_feature_meta(
 	p.append_multi(feature_ids);
 	{
 		std::unique_lock const lock{con_mtx_};
-		_read_query_result(pqxx::work{con_}.exec_prepared("lfm"s, p), result);
+		_read_query_result(pqxx::work{con_}.exec(pqxx::prepped{"lfm"s}, p), result);
 	}
 	return result;
 }
@@ -187,7 +187,7 @@ std::vector<std::int64_t> keeper::metadata::load_feature_ids_by_type(std::int64_
 	std::vector<std::int64_t> result;
 	{
 		std::unique_lock const lock{con_mtx_};
-		pqxx::result const r{pqxx::work{con_}.exec_prepared("lfit"s, feature_set_id, type_id)};
+		pqxx::result const r{pqxx::work{con_}.exec(pqxx::prepped{"lfit"s}, pqxx::params{feature_set_id, type_id})};
 		result.reserve(r.size());
 		for (auto const& row : r)
 		{

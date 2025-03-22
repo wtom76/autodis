@@ -1,12 +1,12 @@
 {
   "dependencies": [
-    { "name": "libpqxx", "version>=": "7.7.4" },
+    "libpqxx",
     "nlohmann-json",
     "pugixml",
     "spdlog",
     "curl",
     "sfml",
     "glew",
-	"boost"
+    "boost"
   ]
 }

@@ -22,7 +22,7 @@ RUN apt update && export DEBIAN_FRONTEND=noninteractive && apt -y install --no-i
 	bison flex \
 	libudev-dev libx11-dev libxi-dev libxrandr-dev libxcursor-dev libgl1-mesa-dev \
 	libsfml-dev \
-	python3-pip \
+#	python3-pip \
 	&& apt clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --break-system-packages tensorflow
+#RUN pip install --break-system-packages tensorflow

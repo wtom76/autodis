@@ -77,7 +77,7 @@ void keeper::data_write::_commit_buf()
 		{
 			p.append(val);
 		}
-		t.exec_prepared("store"s, p);
+		t.exec("store"sv, p);
 	}
 	t.commit();
 	data_.clear();

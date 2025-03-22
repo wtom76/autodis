@@ -65,7 +65,7 @@ void keeper::data_read::read(std::vector<data_uri> const& src_uri, shared::data:
 
 	std::unique_lock const lock{con_mtx_};
 	pqxx::work t{con_};
-	const pqxx::result r{t.exec_params(
+	const pqxx::result r{t.exec(
 		"select \"idx\","s + field_list(request.begin()->second) + " from \"data\".\""s + request.begin()->first + "\" order by idx asc"s)
 	};
 
@@ -98,7 +98,7 @@ void keeper::data_read::_read(metadata::data_info const& mf, shared::data::frame
 
 	std::unique_lock const lock{con_mtx_};
 	pqxx::work t{con_};
-	const pqxx::result r{t.exec_params(
+	const pqxx::result r{t.exec(
 		"select \"idx\","s + mf.data_uri_.field_name() + " from \"data\".\""s + mf.data_uri_.table_name() + "\" order by idx asc"s)
 	};
 

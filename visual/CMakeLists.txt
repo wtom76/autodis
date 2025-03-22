@@ -29,8 +29,8 @@ target_link_libraries(visual PRIVATE spdlog::spdlog)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(visual PRIVATE nlohmann_json::nlohmann_json)
 
-find_package(SFML COMPONENTS system window graphics REQUIRED)
-target_link_libraries(visual PRIVATE sfml-graphics)
+find_package(SFML COMPONENTS System Window Graphics REQUIRED)
+target_link_libraries(visual PRIVATE SFML::Graphics)
 
 find_package(GLEW REQUIRED)
 target_link_libraries(visual PRIVATE GLEW::GLEW)

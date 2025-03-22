@@ -386,68 +386,82 @@ void autodis::visual::chart::show()
 	fut_ = std::async(std::launch::async,
 		[this]()
 		{
-			window_.create(sf::VideoMode{window_size_.x_, window_size_.y_}, "Test window");
+			window_.create(sf::VideoMode{sf::Vector2u{window_size_.x_, window_size_.y_}}, "Test window");
 			window_.setVerticalSyncEnabled(true);
 			window_.setKeyRepeatEnabled(false);
 
 			gl_ctx_ = _create_ctx();
 			_fill_ctx(*gl_ctx_);
 
-			while (window_.isOpen())
-			{
-				sf::Event event;
-				while (window_.pollEvent(event))
+			auto const on_close{
+				[this](sf::Event::Closed const&)
 				{
-					switch (event.type)
+					window_.close();
+				}
+			};
+			auto const on_resized{
+				[this](sf::Event::Resized const& event)
+				{
+					window_size_.x_ = event.size.x;
+					window_size_.y_ = event.size.y;
+					glViewport(0, 0, event.size.x, event.size.y);
+					need_redraw_.store(true);
+				}
+			};
+			auto const on_mouse_button_pressed{
+				[this](sf::Event::MouseButtonPressed const& event)
+				{
+					switch (event.button)
 					{
-					case sf::Event::Closed:
-						window_.close();
-						break;
-					case sf::Event::Resized:
-						window_size_.x_ = event.size.width;
-						window_size_.y_ = event.size.height;
-						glViewport(0, 0, event.size.width, event.size.height);
-						need_redraw_.store(true);
-						break;
-					case sf::Event::MouseButtonPressed:
-						switch (event.mouseButton.button)
-						{
-						case sf::Mouse::Button::Left:
-							mouse_.active_ = true;
-							mouse_.current_point_.x_ = event.mouseButton.x;
-							mouse_.current_point_.y_ = event.mouseButton.y;
-							mouse_.start_point_ = mouse_.current_point_;
-							scale_x_.start_scroll();
-							break;
-						default:
-							break;
-						}
-						break;
-					case sf::Event::MouseButtonReleased:
-						switch (event.mouseButton.button)
-						{
-						case sf::Mouse::Button::Left:
-							mouse_.active_ = false;
-							break;
-						default:
-							break;
-						}
-						break;
-					case sf::Event::MouseMoved:
-						if (mouse_.active_)
-						{
-							mouse_.current_point_.x_ = event.mouseMove.x;
-							mouse_.current_point_.y_ = event.mouseMove.y;
-							if (scale_x_.scroll(static_cast<float>(mouse_.current_point_.x_ - mouse_.start_point_.x_) / window_size_.x_))
-							{
-								need_recalc_.store(true);
-							}
-						}
+					case sf::Mouse::Button::Left:
+						mouse_.active_ = true;
+						mouse_.current_point_.x_ = event.position.x;
+						mouse_.current_point_.y_ = event.position.y;
+						mouse_.start_point_ = mouse_.current_point_;
+						scale_x_.start_scroll();
 						break;
 					default:
 						break;
 					}
 				}
+			};
+			auto const on_mouse_button_released{
+				[this](sf::Event::MouseButtonReleased const& event)
+				{
+					switch (event.button)
+					{
+					case sf::Mouse::Button::Left:
+						mouse_.active_ = false;
+						break;
+					default:
+						break;
+					}
+				}
+			};
+			auto const on_mouse_moved{
+				[this](sf::Event::MouseMoved const& event)
+				{
+					if (mouse_.active_)
+					{
+						mouse_.current_point_.x_ = event.position.x;
+						mouse_.current_point_.y_ = event.position.y;
+						if (scale_x_.scroll(static_cast<float>(mouse_.current_point_.x_ - mouse_.start_point_.x_) / window_size_.x_))
+						{
+							need_recalc_.store(true);
+						}
+					}
+				}
+			};
+
+			while (window_.isOpen())
+			{
+				window_.handleEvents(
+					on_close,
+					on_resized,
+					on_mouse_button_pressed,
+					on_mouse_button_released,
+					on_mouse_moved
+				);
 				if (need_recalc_.exchange(false))
 				{
 					_fill_ctx(*gl_ctx_);

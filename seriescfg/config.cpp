@@ -9,7 +9,7 @@ namespace seriescfg
 	{
 		try
 		{
-			std::ifstream f{shared::util::exe_dir_path() / "seriescfg.json"s};
+			std::ifstream f{std::filesystem::current_path() / "seriescfg.json"s};
 			nlohmann::json const j = nlohmann::json::parse(f);		// don't use {} here istead of =. https://github.com/nlohmann/json/issues/2204
 			j.at("db_connection"sv).get_to(db_connection_);
 		}

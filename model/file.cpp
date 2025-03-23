@@ -24,6 +24,10 @@ autodis::model::file::file(std::filesystem::path const& file_path)
 	{
 		j_ = nlohmann::json::parse(f);
 	}
+	else
+	{
+		throw std::runtime_error{"failed to open model file '"s + file_path.native() + "'. current path: '" + std::filesystem::current_path().native() + '\''};
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 autodis::model::file::file(std::string type_name, std::int64_t model_id)

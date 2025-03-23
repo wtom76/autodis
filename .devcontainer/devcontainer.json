@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
-	"name": "C++",
+	"name": "autodis",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
@@ -25,8 +25,19 @@
                 "ms-vscode.cpptools-extension-pack"
             ]
         }
-    }
+    },
 	
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+
+	// This fixes "Failed to open X11 display;" problem with SFML.
+	// also need to run command
+	// xhost local:vscode
+	// in host (not container) console
+	"containerEnv": {
+        "DISPLAY": "unix:0"
+    },
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    ]
 }

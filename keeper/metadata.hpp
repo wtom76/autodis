@@ -40,9 +40,9 @@ namespace keeper
 		//---------------------------------------------------------------------------------------------------------
 		struct data_info
 		{
-			long long	data_id_{0};
-			data_uri	data_uri_;
-			std::string	description_;
+			std::int64_t	data_id_{0};
+			data_uri		data_uri_;
+			std::string		description_;
 		};
 		//---------------------------------------------------------------------------------------------------------
 		// feature_info
@@ -73,7 +73,7 @@ namespace keeper
 	public:
 		metadata(config const& cfg);
 		[[nodiscard]] std::vector<source_info> load_source_meta();
-		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<long long> const& reg_data_ids);
+		[[nodiscard]] std::vector<data_info> load_data_meta(std::vector<std::int64_t> const& reg_data_ids);
 		void drop_pending_flag(long long source_id);
 		[[nodiscard]] std::vector<feature_info> load_feature_meta(std::vector<std::int64_t> const& feature_ids);
 		[[nodiscard]] std::vector<std::int64_t> load_feature_ids_by_type(std::int64_t feature_set_id, std::int32_t type_id);

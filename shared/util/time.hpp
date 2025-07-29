@@ -9,6 +9,8 @@ namespace shared::util::time
 	//---------------------------------------------------------------------------------------------------------
 	[[nodiscard]] uint32_t yyyymmdd(std::tm const& tm_val) noexcept;
 	//---------------------------------------------------------------------------------------------------------
+	[[nodiscard]] uint32_t yyyymmddhh(std::tm const& tm_val) noexcept;
+	//---------------------------------------------------------------------------------------------------------
 	[[nodiscard]] uint32_t yyyymmdd(std::chrono::year_month_day const& ymd) noexcept;
 	//---------------------------------------------------------------------------------------------------------
 	[[nodiscard]] std::chrono::year_month_day ymd_from_yyyymmdd(uint32_t yyyymmdd) noexcept;

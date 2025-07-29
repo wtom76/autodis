@@ -130,20 +130,20 @@ std::vector<keeper::metadata::data_info> keeper::metadata::_load_data_meta()
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-std::vector<keeper::metadata::data_info> keeper::metadata::load_data_meta(std::vector<long long> const& reg_data_ids)
+std::vector<keeper::metadata::data_info> keeper::metadata::load_data_meta(std::vector<std::int64_t> const& reg_data_ids)
 {
 	std::vector<keeper::metadata::data_info> result;
 	std::vector<data_info> data{_load_data_meta()};
-	std::unordered_map<long long /*data_id*/, data_info> all_data_map;
+	std::unordered_map<std::int64_t /*data_id*/, data_info> all_data_map;
 	for (auto& entry : data)
 	{
 		all_data_map.emplace(entry.data_id_, entry);
 	}
 	result.reserve(reg_data_ids.size());
-	for (long long requested_id : reg_data_ids)
+	for (std::int64_t requested_id : reg_data_ids)
 	{
-		//result.emplace_back(std::move(all_data_map[requested_id]));
-		result.emplace_back(all_data_map[requested_id]);
+		result.emplace_back(std::move(all_data_map[requested_id]));
+		//result.emplace_back(all_data_map[requested_id]);
 	}
 	return result;
 }

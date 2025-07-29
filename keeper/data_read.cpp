@@ -116,7 +116,7 @@ void keeper::data_read::_read(metadata::data_info const& mf, shared::data::frame
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void keeper::data_read::read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest)
+void keeper::data_read::read(std::vector<std::int64_t> const& data_reg_ids, shared::data::frame& dest)
 {
 	std::vector<metadata::data_info> const metainfo{metadata{cfg_}.load_data_meta(data_reg_ids)};
 

@@ -17,18 +17,31 @@ void feature::impl::shift_delta::_init()
 	index_pos_t master_pos{_mi().pos(bounds.index_min_)};
 	c1.position(bounds.index_min_);
 	c2.position(bounds.index_min_);
+
 	if (static_cast<std::size_t>(master_pos) >= _mi().size() ||
 		shift_.first != c1.next(shift_.first) ||
 		shift_.second != c2.next(shift_.second))
 	{
 		throw not_enough_data(label());
 	}
+
 	do
 	{
-		data_.emplace(
-			_mi().at(master_pos++),
-			underlying_.second->value(c1.current()) -
-			underlying_.first->value(c2.current()));
+		// TODO: evaluate c1 and c2 from master_pos at each iteration. remove  && c1.next() && c2.next()
+		if (_mi().at(master_pos) == c1.current())
+		{
+			data_.emplace(
+				_mi().at(master_pos),
+				underlying_.second->value(c2.current()) -
+				underlying_.first->value(c1.current()));
+
+			SPDLOG_LOGGER_DEBUG(log(), "{}. ({}): {} = c2({}): {} - c1({}): {}",
+				info_.label_,
+				_mi().at(master_pos), underlying_.second->value(c2.current()) - underlying_.first->value(c1.current()),
+				c2.current(), underlying_.first->value(c2.current()),
+				c1.current(), underlying_.second->value(c1.current()));
+		}
+		++master_pos;
 	}
 	while (static_cast<std::size_t>(master_pos) != _mi().size() && c1.next() && c2.next());
 

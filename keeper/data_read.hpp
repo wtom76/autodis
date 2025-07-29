@@ -31,6 +31,6 @@ namespace keeper
 
 		void read_master_index(index_t& dest);
 		void read(std::vector<data_uri> const& src_uri, shared::data::frame& dest);
-		void read(std::vector<long long> const& data_reg_ids, shared::data::frame& dest);
+		void read(std::vector<std::int64_t> const& data_reg_ids, shared::data::frame& dest);
 	};
 }

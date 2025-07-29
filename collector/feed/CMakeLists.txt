@@ -5,6 +5,7 @@ add_library(feed OBJECT
 	linear_generator.cpp
 	moex_lastday_xml.cpp
 	moex_daily_json.cpp
+	moex_intra_json.cpp
 	metastock.cpp
 )
 

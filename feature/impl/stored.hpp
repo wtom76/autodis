@@ -17,7 +17,7 @@ namespace feature::impl
 	public:
 		static constexpr type_id_t type_id_{1};
 	private:
-		long long const data_reg_id_;
+		std::int64_t const data_reg_id_;
 		std::shared_ptr<keeper::data_read> keeper_dr_;
 	private:
 		master_index const& _mi() const noexcept { return shop_.index(); }

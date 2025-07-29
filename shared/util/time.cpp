@@ -19,6 +19,11 @@ uint32_t shared::util::time::yyyymmdd(std::tm const& tm_val) noexcept
 	return (tm_val.tm_year + 1900) * 10000 + (tm_val.tm_mon + 1) * 100 + tm_val.tm_mday;
 }
 //---------------------------------------------------------------------------------------------------------
+uint32_t shared::util::time::yyyymmddhh(std::tm const& tm_val) noexcept
+{
+	return (tm_val.tm_year + 1900) * 1000000 + (tm_val.tm_mon + 1) * 10000 + tm_val.tm_mday * 100 + tm_val.tm_hour;
+}
+//---------------------------------------------------------------------------------------------------------
 uint32_t shared::util::time::yyyymmdd(std::chrono::year_month_day const& ymd) noexcept
 {
 	return static_cast<int>(ymd.year()) * 10000 + static_cast<unsigned int>(ymd.month()) * 100 + static_cast<unsigned int>(ymd.day());

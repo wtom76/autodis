@@ -43,7 +43,7 @@ namespace collector::feed
 		void start() override;
 		size_t read(std::span<const char> chunk) override;
 		void finish(std::span<const char> chunk) override;
-		int last_recvd_date() override { assert(false); return 0; }	// implement on demand
+		std::int64_t total_recvd_records() override { assert(false); return 0; }	// implement on demand
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

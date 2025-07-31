@@ -29,7 +29,7 @@ namespace collector::feed
 		shared::util::field_map				field_map_;					// maps file fields to dest fields by indexes. can contain row_idx_null_
 		std::unique_ptr<keeper::data_write>	dest_;
 		std::vector<char>					buffer_;
-		int									last_recvd_date_{0};
+		std::int64_t						total_recvd_records_{0};
 
 	private:
 		std::int64_t _parse_date(std::string const& dt_str);
@@ -46,7 +46,7 @@ namespace collector::feed
 		void start() override;
 		size_t read(std::span<const char> chunk) override;
 		void finish(std::span<const char> chunk) override;
-		int last_recvd_date() override { return last_recvd_date_; } 
+		std::int64_t total_recvd_records() override { return total_recvd_records_; }
 		//---------------------------------------------------------------------------------------------------------
 		//~source::feed impl		
 		//---------------------------------------------------------------------------------------------------------

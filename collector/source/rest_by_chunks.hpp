@@ -16,9 +16,8 @@ namespace collector::source
 		std::chrono::year_month_day from_arg_;
 
 	private:
-		static std::pair<std::string, std::chrono::year_month_day> _cut_from_arg(std::string const& url);
-		static std::chrono::year_month_day _parse_from_arg(std::span<char const> from_arg);
-		static std::string _print_from_arg(std::chrono::year_month_day const& ymd);
+		static std::pair<std::string, std::int64_t> _cut_start_arg(std::string const& url);
+		static std::string _print_start_arg(std::int64_t start);
 
 	public:
 		rest_by_chunks(std::string source_args);

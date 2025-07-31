@@ -43,6 +43,7 @@ void collector::feed::moex_intra_json::_parse_store()
 	for (auto const& r_j : data_j)
 	{
 		_send(_read_row(r_j));
+		++total_recvd_records_;
 	}
 }
 //---------------------------------------------------------------------------------------------------------
@@ -59,10 +60,6 @@ collector::feed::moex_intra_json::row collector::feed::moex_intra_json::_read_ro
 			if (result.date_ < 1900000000 || result.date_ > 3000000000)
 			{
 				throw std::runtime_error("can't parse date part"s);
-			}
-			if (last_recvd_date_ < result.date_)
-			{
-				last_recvd_date_ = result.date_;
 			}
 			++filled_num;
 		}
@@ -96,6 +93,8 @@ void collector::feed::moex_intra_json::start()
 {
 	assert(dest_);
 	assert(buffer_.empty());
+
+	total_recvd_records_ = 0;
 }
 //---------------------------------------------------------------------------------------------------------
 size_t collector::feed::moex_intra_json::read(std::span<const char> chunk)

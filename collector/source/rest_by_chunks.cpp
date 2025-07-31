@@ -5,72 +5,54 @@
 namespace
 {
 	//---------------------------------------------------------------------------------------------------------
-	class from_arg_failed : public std::runtime_error
+	class start_arg_failed : public std::runtime_error
 	{
 	public:
-		from_arg_failed()
-			: std::runtime_error{"rest_by_chunks can't parse url. last argument should be 'from' in format 'from=yyyy-mm-dd'"s}
+		start_arg_failed()
+			: std::runtime_error{"rest_by_chunks can't parse url. last argument should be integer 'start'"s}
 		{}
 	};
 }
 //---------------------------------------------------------------------------------------------------------
 collector::source::rest_by_chunks::rest_by_chunks(std::string source_args)
 	: url_{std::move(source_args)}
-{
-}
+{}
 //---------------------------------------------------------------------------------------------------------
-std::pair<std::string, std::chrono::year_month_day> collector::source::rest_by_chunks::_cut_from_arg(std::string const& url)
+std::pair<std::string, std::int64_t> collector::source::rest_by_chunks::_cut_start_arg(std::string const& url)
 {
 	auto subrange{std::ranges::find_last(url, '&')};
 	if (subrange.empty())
 	{
-		throw from_arg_failed{};
+		throw start_arg_failed{};
 	}
-	return {std::string{url.cbegin(), subrange.cbegin()}, _parse_from_arg({&*subrange.cbegin(), subrange.size()})};
+	std::int64_t param_value{0};
+	std::from_chars_result const res{std::from_chars(&*subrange.cbegin() + "&start="sv.size(), &*subrange.cbegin() + subrange.size(), param_value)};
+	if (res.ec != std::errc{} || param_value < 0)
+	{
+		throw start_arg_failed{};
+	}
+	return {std::string{url.cbegin(), subrange.cbegin()}, param_value};
 }
 //---------------------------------------------------------------------------------------------------------
-std::chrono::year_month_day collector::source::rest_by_chunks::_parse_from_arg(std::span<char const> from_arg)
-{
-	int y{0};
-	unsigned int m{0};
-	unsigned int d{0};
-	if (std::sscanf(from_arg.data(), "&from=%d-%u-%u", &y, &m, &d) != 3)
-	{
-		throw from_arg_failed{};
-	}
-	std::chrono::year_month_day ymd{std::chrono::year{y}, std::chrono::month(m), std::chrono::day{d}};
-	if (!ymd.year().ok() || !ymd.month().ok() || !ymd.day().ok())
-	{
-		throw from_arg_failed{};
-	}
-	return ymd;
-}
-//---------------------------------------------------------------------------------------------------------
-std::string collector::source::rest_by_chunks::_print_from_arg(std::chrono::year_month_day const& ymd)
+std::string collector::source::rest_by_chunks::_print_start_arg(std::int64_t start)
 {
 	std::array<char, 32> buf;
-	
-	int const len{std::snprintf(buf.data(), buf.size(), "&from=%04d-%02u-%02u",
-		ymd.year().operator int(),
-		ymd.month().operator unsigned(),
-		ymd.day().operator unsigned())};
-
+	int const len{std::snprintf(buf.data(), buf.size(), "&start=%ld", start)};
 	return {buf.data(), static_cast<std::size_t>(len)};
 }
 //---------------------------------------------------------------------------------------------------------
 void collector::source::rest_by_chunks::fetch_to(feed& dest)
 {
-	std::pair<std::string, std::chrono::year_month_day> url_pr{_cut_from_arg(url_)};
-	const std::chrono::year_month_day today{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())};
-	while (url_pr.second < today)
+	std::pair<std::string, std::int64_t> url_pr{_cut_start_arg(url_)};
+	while (true)
 	{
-		rest src{url_pr.first + _print_from_arg(url_pr.second)};
+		rest src{url_pr.first + _print_start_arg(url_pr.second)};
 		src.fetch_to(dest);
-		std::chrono::year_month_day const last_recvd{shared::util::time::ymd_from_yyyymmdd(dest.last_recvd_date())};
-		if (url_pr.second == last_recvd)
+		std::int64_t const recvd_total{dest.total_recvd_records()};
+		if (!recvd_total)
 		{
 			break;
 		}
-		url_pr.second = last_recvd;
+		url_pr.second += recvd_total;
 	}
 }
